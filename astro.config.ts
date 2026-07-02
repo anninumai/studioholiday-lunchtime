@@ -1,0 +1,12 @@
+import tailwindcss from "@tailwindcss/vite";
+import { defineConfig, passthroughImageService } from "astro/config";
+
+// https://astro.build/config
+export default defineConfig({
+  output: "static",
+  // Images are hand pre-optimized (webp) and the layout is fixed-pixel, so we
+  // skip Sharp entirely (also avoids the Bun + Sharp native-module conflict).
+  image: { service: passthroughImageService() },
+  // Tailwind CSS v4 via the official Vite plugin (not @astrojs/tailwind).
+  vite: { plugins: [tailwindcss()] },
+});

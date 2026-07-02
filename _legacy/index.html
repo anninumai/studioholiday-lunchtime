@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>みんなでごはん会 | STUDIO HOLIDAY</title>
+  <meta name="description" content="みんなでごはんを食べる会を開催中 — by HOLIDAY KITCHEN / K,D,C,,,">
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="page">
+
+    <!-- sticky hero: logo zooms as you scroll, content scrolls over it -->
+    <div class="hero">
+      <img class="logo-hero" src="./assets/logo_hero.webp" alt="みんなでごはん会 同釜共食 by HOLIDAY KITCHEN / K,D,C,,,">
+    </div>
+
+    <!-- background bands -->
+    <div class="band bg-green-light"></div>
+    <div class="band bg-green-dense"></div>
+    <div class="band pink-band"></div>
+
+    <!-- intro: video + chopsticks -->
+    <img class="abs chopstick one appear" src="./assets/chopstick1.webp" alt="">
+    <img class="abs chopstick two appear" src="./assets/chopstick2.webp" alt="">
+    <video class="abs video appear" src="./assets/logo_video.mp4" autoplay muted loop playsinline></video>
+
+    <!-- pink section -->
+    <img class="abs pink-photo appear" src="./assets/pink_photo.webp" alt="みんなでごはん会の様子">
+    <div class="abs copy c1 appear"><p>こんにちは、スタジオホリデーです。<br>詳細、メッセージは仮置きです。</p></div>
+    <div class="abs copy c2 appear"><p>みんなでごはんを食べる会を開催中</p></div>
+    <div class="abs copy c3 appear"><p>同じ釜の飯を食うという体験から<br>新しい体験や仕事をしようよと<br>コラボレーションが生まれることが僕たちは大好きです。</p></div>
+
+    <!-- access section -->
+    <p class="abs join appear">ご参加、興味のある方はお気軽に<br>スタホリメンバーにお声がけください。メッセージは仮置きです。</p>
+
+    <div class="abs card appear">
+      <div class="card-info">
+        <p class="name">株式会社STUDIO HOLIDAY</p>
+        <p>毎週木曜日12:00-13:00頃</p>
+        <p class="gap">東京都新宿区百人町1丁目10−15JR新大久保駅ビル4F</p>
+        <p>Kimchi, Durian, Cardamom,,,</p>
+        <p class="gap">JR新大久保駅から徒歩1分</p>
+        <p><a href="https://www.google.com/maps/search/?api=1&query=東京都新宿区百人町1丁目10-15" target="_blank" rel="noopener">Google maps</a></p>
+      </div>
+      <div class="carousel">
+        <div class="frame">
+          <div class="track">
+            <img src="./assets/station.webp" alt="JR新大久保駅">
+            <img src="./assets/station.webp" alt="JR新大久保駅">
+            <img src="./assets/station.webp" alt="JR新大久保駅">
+          </div>
+        </div>
+        <p class="cap">階段を降りて大久保通り出口(右)へすすむ</p>
+        <div class="controls">
+          <button class="nav prev" aria-label="前へ"><svg viewBox="0 0 20 20" fill="none"><path d="M13 4l-6 6 6 6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <button class="nav next" aria-label="次へ"><svg viewBox="0 0 20 20" fill="none"><path d="M7 4l6 6-6 6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <div class="dots"><span class="dot active"></span><span class="dot"></span><span class="dot"></span></div>
+        </div>
+      </div>
+    </div>
+
+    <img class="abs creature appear" src="./assets/creature.webp" alt="">
+
+    <!-- footer -->
+    <footer class="abs footer appear">
+      <img class="flogo" src="./assets/footer_logo.webp" alt="みんなでごはん会">
+      <img class="fword" src="./assets/footer_wordmark.webp" alt="by HOLIDAY KITCHEN / K,D,C,,,">
+    </footer>
+
+  </div>
+
+  <!-- message layer: fades in when the locked video finishes -->
+  <div id="msg-layer" aria-hidden="true">
+    <div class="msg-inner">
+      <p class="hello">こんにちは、スタジオホリデーです。</p>
+      <p class="lead">みんなでごはんを食べる会を開催中</p>
+      <p class="body">同じ釜の飯を食うという体験から<br>新しい体験や仕事をしようよと<br>コラボレーションが生まれることが僕たちは大好きです。</p>
+      <span class="hint">スクロールして続ける ▼</span>
+    </div>
+  </div>
+
+  <script>
+    // scale factor: the fixed 1440 design fills the full viewport width (no side margins)
+    function designScale() { return window.innerWidth / 1440; }
+
+    // 1) responsive: scale the design with `zoom` (keeps sticky/scroll math intact)
+    (function () {
+      var page = document.querySelector('.page');
+      function fit() { page.style.zoom = designScale(); }
+      window.addEventListener('resize', fit); fit();
+    })();
+
+    // 2) hero logo zoom driven by scroll (scale 1 -> 1.4 over the first ~25% of the hero)
+    (function () {
+      var logo = document.querySelector('.logo-hero');
+      var HERO = 1000; // design px
+      function onScroll() {
+        var s = designScale();
+        var p = Math.min(1, (window.scrollY / s) / HERO);   // 0..1 through the hero
+        var k = Math.min(1, p / 0.25);                        // reach full zoom at 25%
+        logo.style.transform = 'scale(' + (1 + 0.4 * k).toFixed(4) + ')';
+      }
+      window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('resize', onScroll); onScroll();
+    })();
+
+    // 3) appear-on-scroll (fade + slide up), like Studio's "appear"
+    (function () {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+      }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+      document.querySelectorAll('.appear').forEach(function (el) { io.observe(el); });
+    })();
+
+    // 4) scroll-lock at the video section -> play from start -> fade in message on end
+    (function () {
+      var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var video = document.querySelector('.video');
+      var layer = document.getElementById('msg-layer');
+      if (reduce || !video || !layer) return;
+
+      var phase = 'idle';          // idle -> playing -> message -> done
+      var lockedY = 0, fallback = null, autoHide = null, dismissArmed = false;
+      var SCROLL_KEYS = ['ArrowDown','ArrowUp','PageDown','PageUp','Home','End',' ','Spacebar'];
+
+      function noScroll(e) { e.preventDefault(); }
+      function keyBlock(e) { if (SCROLL_KEYS.indexOf(e.key) >= 0) e.preventDefault(); }
+      function reSnap() { window.scrollTo(0, lockedY); }
+      function lock() {
+        lockedY = window.scrollY;
+        window.addEventListener('wheel', noScroll, { passive: false });
+        window.addEventListener('touchmove', noScroll, { passive: false });
+        window.addEventListener('keydown', keyBlock, { passive: false });
+        window.addEventListener('scroll', reSnap, { passive: true });
+      }
+      function unlock() {
+        window.removeEventListener('wheel', noScroll, { passive: false });
+        window.removeEventListener('touchmove', noScroll, { passive: false });
+        window.removeEventListener('keydown', keyBlock, { passive: false });
+        window.removeEventListener('scroll', reSnap);
+      }
+
+      function start() {
+        phase = 'playing';
+        var r = video.getBoundingClientRect();
+        var target = Math.max(0, Math.round(window.scrollY + r.top + r.height / 2 - window.innerHeight / 2));
+        window.scrollTo(0, target);
+        lock();
+        video.loop = false;
+        try { video.currentTime = 0; } catch (e) {}
+        var p = video.play(); if (p && p.catch) p.catch(function () {});
+        var ms = (isFinite(video.duration) && video.duration ? video.duration * 1000 : 13000) + 1500;
+        fallback = setTimeout(showMessage, ms);
+      }
+
+      function showMessage() {
+        if (phase !== 'playing') return;
+        phase = 'message';
+        if (fallback) clearTimeout(fallback);
+        layer.classList.add('show');
+        layer.setAttribute('aria-hidden', 'false');
+        setTimeout(armDismiss, 900);                 // ignore the gesture that's still happening
+        autoHide = setTimeout(dismiss, 7000);         // auto-continue after a while
+      }
+      function armDismiss() {
+        dismissArmed = true;
+        window.addEventListener('wheel', onDismiss, { passive: true });
+        window.addEventListener('touchstart', onDismiss, { passive: true });
+        window.addEventListener('keydown', onDismiss);
+        window.addEventListener('click', onDismiss);
+      }
+      function onDismiss() { if (dismissArmed) dismiss(); }
+      function dismiss() {
+        if (phase !== 'message') return;
+        phase = 'done';
+        if (autoHide) clearTimeout(autoHide);
+        ['wheel','touchstart','keydown','click'].forEach(function (t) { window.removeEventListener(t, onDismiss); });
+        layer.classList.remove('show');
+        layer.setAttribute('aria-hidden', 'true');
+        unlock();
+      }
+
+      video.addEventListener('ended', showMessage);
+
+      window.addEventListener('scroll', function () {
+        if (phase !== 'idle') return;
+        var r = video.getBoundingClientRect();
+        var center = r.top + r.height / 2;
+        if (r.bottom > 0 && center <= window.innerHeight * 0.6) start();
+      }, { passive: true });
+    })();
+
+    // 5) carousel
+    (function () {
+      var track = document.querySelector('.carousel .track');
+      var dots = document.querySelectorAll('.carousel .dot');
+      var n = dots.length, i = 0;
+      function go(k) {
+        i = (k + n) % n;
+        track.style.transform = 'translateX(' + (-i * 100) + '%)';
+        dots.forEach(function (d, j) { d.classList.toggle('active', j === i); });
+      }
+      document.querySelector('.carousel .prev').addEventListener('click', function () { go(i - 1); });
+      document.querySelector('.carousel .next').addEventListener('click', function () { go(i + 1); });
+    })();
+  </script>
+</body>
+</html>

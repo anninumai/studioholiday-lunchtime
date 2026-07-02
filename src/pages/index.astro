@@ -1,0 +1,29 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import IntroStage from "../components/IntroStage.astro";
+import BackgroundBands from "../components/BackgroundBands.astro";
+import PinkSection from "../components/PinkSection.astro";
+import AccessSection from "../components/AccessSection.astro";
+import Creature from "../components/Creature.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+---
+
+<BaseLayout>
+  <IntroStage />
+
+  <zoom-fit>
+    <div class="page">
+      <BackgroundBands />
+      <PinkSection />
+      <AccessSection />
+      <Creature />
+      <SiteFooter />
+    </div>
+  </zoom-fit>
+
+  <appear-observer></appear-observer>
+
+  <script>
+    import "../scripts/index.ts";
+  </script>
+</BaseLayout>

@@ -1,0 +1,21 @@
+---
+import { content } from "../data/content";
+const { logo, wordmark } = content.footer;
+---
+
+<footer class="abs footer appear">
+  <img
+    class="flogo"
+    src={logo.src}
+    width={logo.width}
+    height={logo.height}
+    alt={logo.alt}
+  />
+  <img
+    class="fword"
+    src={wordmark.src}
+    width={wordmark.width}
+    height={wordmark.height}
+    alt={wordmark.alt}
+  />
+</footer>

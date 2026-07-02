@@ -1,0 +1,26 @@
+---
+import { content } from "../data/content";
+import "../styles/global.css";
+
+const { title, description } = content.meta;
+---
+
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+    {/* Self-hosted, pre-subset fonts (served as-is from public/). */}
+    <link rel="stylesheet" href="/fonts/zen-local.css" />
+
+    {/* LCP: the noren is the first meaningful paint. */}
+    <link rel="preload" as="image" href={content.noren.src} />
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

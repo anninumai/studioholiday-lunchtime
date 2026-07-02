@@ -1,0 +1,28 @@
+---
+import { content } from "../data/content";
+const { noren, video } = content;
+---
+
+<intro-sequence>
+  <section class="intro-stage" aria-label="オープニング">
+    <div class="intro-bg"></div>
+    <img
+      class="noren"
+      src={noren.src}
+      width={noren.width}
+      height={noren.height}
+      alt={noren.alt}
+    />
+    <video
+      class="intro-video"
+      src={video.src}
+      width={video.width}
+      height={video.height}
+      muted
+      playsinline
+      preload="metadata"></video>
+    <button class="intro-skip" type="button" aria-label="オープニングをスキップ"
+      >スキップ ▼</button
+    >
+  </section>
+</intro-sequence>

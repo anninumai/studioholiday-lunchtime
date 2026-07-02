@@ -1,0 +1,386 @@
+@import "tailwindcss";
+
+/* ---- design tokens (Tailwind v4 CSS-first). Emitted to :root as --color-* / --font-*. ---- */
+@theme {
+  --color-pink: #ef5b9f;
+  --color-green-arrow: #6ab31d;
+  --color-green-bright: #86da2c;
+  --color-ink: #333333;
+  --font-maru: "Zen Maru Gothic", "Hiragino Maru Gothic ProN", "Yu Gothic", sans-serif;
+}
+
+/* =====================================================================
+   Layout system (fixed 1440px design, responsive via JS `zoom`).
+   TOP is a fixed-overlay "curtain" intro (.intro-stage); the rest of the
+   page (.page) is the document that the intro fades out to reveal.
+   Fonts load via <link> to /fonts/zen-local.css in the <head>.
+   ===================================================================== */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  background: #fff;
+  font-family: var(--font-maru);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+}
+
+/* interaction-island wrappers: transparent so they never affect layout */
+intro-sequence,
+gohan-carousel,
+appear-observer {
+  display: contents;
+}
+
+/* scaling wrapper for the lower page: fills viewport width; height set by JS.
+   `.page` inside is transform:scale()'d to fill (see zoom-fit.ts). */
+zoom-fit {
+  display: block;
+  width: 100%;
+  overflow: clip;
+}
+
+/* ================= intro curtain stage =================
+   Default (no-JS / reduced-motion): normal in-flow block at the top so the
+   noren shows and the page stays scrollable/accessible.
+   JS (non-reduced-motion) adds `.is-active` to make it a locked fixed overlay. */
+.intro-stage {
+  position: relative;
+  height: 100svh;
+  overflow: hidden;
+  background: #dff3b4;
+  z-index: 100;
+}
+.intro-stage.is-active {
+  position: fixed;
+  inset: 0;
+  height: auto;
+}
+.intro-stage.fade-out {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.9s ease;
+}
+.intro-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: #dff3b4 url("/assets/pattern_light.webp") repeat;
+  background-size: 1440px auto;
+}
+.noren {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(1400px, 94vw);
+  height: auto;
+  z-index: 2;
+  will-change: transform;
+}
+.intro-video {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.97);
+  width: min(1147px, 88vw);
+  aspect-ratio: 1147 / 645;
+  height: auto;
+  object-fit: cover;
+  border-radius: 48px;
+  z-index: 3;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.18);
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.6s ease,
+    transform 0.6s ease;
+}
+.intro-video.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, -50%) scale(1);
+}
+.intro-skip {
+  position: absolute;
+  left: 50%;
+  bottom: 4vh;
+  transform: translateX(-50%);
+  z-index: 4;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-family: var(--font-maru);
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--color-pink);
+  opacity: 0.85;
+  animation: intro-bob 1.6s ease-in-out infinite;
+}
+@keyframes intro-bob {
+  0%,
+  100% {
+    transform: translateX(-50%) translateY(0);
+  }
+  50% {
+    transform: translateX(-50%) translateY(5px);
+  }
+}
+
+/* ================= lower page (revealed after the intro) ================= */
+.page {
+  position: relative;
+  width: 1440px;
+  height: 2734px;
+  transform-origin: top left;
+  background: #eaf7cf url("/assets/pattern_light.webp") repeat;
+  background-size: 1440px auto;
+}
+
+/* ---------- background bands ---------- */
+.band {
+  position: absolute;
+  left: 0;
+  width: 1440px;
+}
+.bg-green-dense {
+  top: 1400px;
+  height: 1334px;
+  z-index: 1;
+  background: var(--color-green-bright) url("/assets/pattern_dense.webp") repeat;
+  background-size: 760px auto;
+}
+.pink-band {
+  top: 0;
+  height: 1400px;
+  z-index: 1;
+  background: var(--color-pink);
+  overflow: hidden;
+}
+.pink-band::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("/assets/pattern_light.webp");
+  background-size: 1440px auto;
+  background-repeat: repeat-y;
+  mix-blend-mode: multiply;
+  opacity: 0.18;
+}
+
+/* ---------- content (absolute, document-Y) ---------- */
+.abs {
+  position: absolute;
+}
+
+.pink-photo {
+  top: 0;
+  left: 0;
+  width: 1440px;
+  z-index: 4;
+  display: block;
+}
+
+.copy {
+  z-index: 4;
+  color: #fff;
+  font-weight: 700;
+  line-height: 1.4;
+  text-align: center;
+  width: 100%;
+  left: 0;
+}
+.copy.c1 {
+  top: 1170px;
+}
+.copy.c2 {
+  top: 1231px;
+}
+.copy.c3 {
+  top: 1270px;
+}
+.copy p {
+  font-size: 16px;
+}
+
+.join {
+  top: 1480px;
+  left: 0;
+  width: 100%;
+  z-index: 4;
+  color: #fff;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.card {
+  top: 1580px;
+  left: 130px;
+  width: 1180px;
+  height: 324px;
+  z-index: 5;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.1);
+}
+.card-info {
+  position: absolute;
+  top: 49px;
+  left: 68px;
+  width: 460px;
+  color: var(--color-ink);
+}
+.card-info .name {
+  font-size: 20px;
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+.card-info p {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+.card-info .gap {
+  margin-top: 16px;
+}
+.card-info a {
+  color: var(--color-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.carousel {
+  position: absolute;
+  top: 22px;
+  left: 700px;
+  width: 400px;
+}
+.carousel .frame {
+  width: 400px;
+  height: 217px;
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+}
+.carousel .track {
+  display: flex;
+  height: 100%;
+  transition: transform 0.45s cubic-bezier(0.58, 0.21, 0.35, 1);
+}
+.carousel .track img {
+  flex: 0 0 100%;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.carousel .cap {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-ink);
+  margin-top: 14px;
+  line-height: 1.4;
+}
+.carousel .controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+.carousel .nav {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: none;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+.carousel .nav svg {
+  width: 12px;
+  height: 12px;
+  stroke: var(--color-green-arrow);
+}
+.carousel .dots {
+  display: flex;
+  gap: 6px;
+  margin-left: 6px;
+}
+.carousel .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #cfe6b0;
+  transition: background 0.3s;
+}
+.carousel .dot.active {
+  background: var(--color-green-arrow);
+}
+
+.creature {
+  top: 2020px;
+  left: 205px;
+  width: 1030px;
+  z-index: 3;
+}
+
+.footer {
+  top: 2480px;
+  left: 0;
+  width: 1440px;
+  height: 254px;
+  z-index: 6;
+  background: #fff;
+  border-radius: 80px 80px 0 0;
+}
+.footer .flogo {
+  position: absolute;
+  top: 64px;
+  left: 648px;
+  width: 144px;
+}
+.footer .fword {
+  position: absolute;
+  top: 173px;
+  left: 486px;
+  width: 468px;
+}
+
+/* ---------- appear-on-scroll animation ---------- */
+.appear {
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 0.5s ease-in-out,
+    transform 0.5s ease-in-out;
+}
+.appear.in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .appear {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  /* intro stays a static in-flow hero; noren centered, video/skip hidden */
+  .noren {
+    transform: translate(-50%, -50%) !important;
+  }
+  .intro-video,
+  .intro-skip {
+    display: none;
+  }
+}
