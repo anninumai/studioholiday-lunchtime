@@ -56,6 +56,8 @@
 
 ## 決定 5: レイアウト = 固定 1440px + JS `zoom` を踏襲
 
+> **[SUPERSEDED 2026-07-03]** 本決定は STUDIO 公開版への見た目一致化（決定 8）により破棄。固定 1440px + `transform: scale()` 方式は廃し、1280px 中央 + メディアクエリ(840/540)方式へ移行。`scale.ts`/`zoom-fit.ts` は削除。以下は歴史的記録。
+
 - 実測再現済みの proven な方式。座標・clip-path・sticky・scroll 計算がこの前提で成立。`transform: scale()` へ変えるとスクロール高さ計算が破綻するため方式は変えない。
 - 全幅フィット: `zoom = innerWidth/1440`(上限なし)で任意幅を埋める。検証で 390/1440/1920 とも左右余白 0。
 - **横スクロール対策**: hero の箸が 1440 を約 19px はみ出す(元デザイン由来)。`html, body { overflow-x: clip }` で非表示(`hidden` と違い scroll container を作らず sticky を壊さない)。
@@ -67,6 +69,8 @@
 
 ## 決定 7: TOP を「のれんカーテン」固定イントロに再構築（更新）
 
+> **[SUPERSEDED 2026-07-03]** 本決定は STUDIO 公開版への見た目一致化（決定 9）により破棄。のれんカーテン JS イントロは廃し、STUDIO 実装（固定緑パターン + sticky ヒーロー scroll ズーム + 200vh 動画 blur フェードイン）へ置換。`intro-sequence.ts`/`IntroStage.astro`/`PinkSection`/`BackgroundBands` は削除。以下は歴史的記録。
+
 旧 TOP（ロゴ拡大 sticky hero ＋ 下段の別動画セクション ＋ #msg-layer オーバーレイ）を廃止し、1 つの**固定オーバーレイのイントロ**に統合。
 - **メカニズム**: `<intro-sequence>`（素 TS Web Component, `src/scripts/intro-sequence.ts`）＋ `IntroStage.astro`。プログレッシブエンハンスメント: 既定（no-JS/reduced-motion）は **in-flow の静的ヒーロー**（`.intro-stage { position:relative; height:100svh }`、のれん中央・動画非表示・スクロール自由）。JS（非 reduced-motion）が `.is-active` を付け **`position:fixed` の固定オーバーレイ**にし、`document.body.overflow=hidden` でロック。旧「sticky トラック」案は空きスクロール領域が出るため採用せず、この固定オーバーレイ方式に変更。
 - **フロー**（状態機械 `rise→video→fading→done`）: 緑葉パターン背景は固定。wheel/touch/key の入力で `p` を増やし **のれんだけ translateY で上昇**（`p=Δ/rise`, `rise=(innerH+norenH)/2+40`）。`p>=1` で **動画を `.show` フェードイン＋`currentTime=0; play()`**。`ended`（＋フォールバックタイマー）で **動画フェードアウト** → `finish()` で **カーテンを `fade-out` で消して下の**ピンクセクション（＝メッセージ: ピンク帯＋破れ枠の集合写真＋白コピー）**を出現** → ロック解除 → 以降通常スクロール。**スキップ**: `.intro-skip` ボタン／動画中の入力で `endVideo` に早送り。
@@ -76,6 +80,29 @@
 - **reduced-motion**: イントロは静的ヒーロー、`.intro-video`/`.intro-skip` は `display:none`、のれんは中央固定、ロックなし。全要素スクロールで到達可（トラップなし）。
 - **削除**: `Hero.astro`/`VideoSection.astro`/`MessageLayer.astro`/`hero-zoom.ts`/`scroll-lock-video.ts`、`content.hero`/`content.message`、`#msg-layer` CSS。
 - **検証**: Puppeteer で **21/21 pass**（固定ロック→のれん上昇→動画フェードイン＆頭出し再生→`ended`でフェードアウト→ピンク出現→解除→フッター到達／reduced-motion 静的・非ロック／3 幅 full-bleed／コンソールエラー 0）。視覚: 4 状態（のれん/上昇/動画/メッセージ）を確認。
+
+## 決定 8: レイアウト = 1280px 中央 + メディアクエリ(840/540)【STUDIO 一致化, 2026-07-03】
+
+- 決定 5（固定 1440px + JS zoom）を破棄。STUDIO 公開版が 1280px 基準・中央寄せ + `max-width: 840px`(タブレット)/`max-width: 540px`(モバイル)の 2 段メディアクエリで組まれているため、これに一致させる。
+- セクションは `width:100%` 全幅、内側コンテンツのみ固定幅中央（カード 956px / フッター内側 1280px）。1280 超は中央寄せで左右に固定緑パターンが覗く。
+- `transform: scale()` 座標系（`scale.ts`/`zoom-fit.ts`）は削除し、座標系を素の CSS レイアウトへ一本化。
+- 根拠・実測値は `DESIGN.md`（規範）/ `studio-source/DESIGN-SPEC.md`（測定）。
+
+## 決定 9: イントロ = 固定緑パターン + sticky ヒーロー scroll ズーム + 200vh 動画 blur フェードイン【STUDIO 一致化, 2026-07-03】
+
+- 決定 7（のれんカーテン JS イントロ）を破棄。STUDIO 実装に一致させる:
+  - 緑葉パターンを `position:fixed` の全画面背景（`background-size:cover; repeat`）に敷く。
+  - ヒーロー画像は上端配置で**スクロールとともに流れ**（STUDIO の `sticky` は height=セクション高のため実質無効。実測で pin されないことを確認）、**純 CSS `animation-timeline: scroll()`** でセクションラッパーを `scale 1→1.4`(25% で 1.4 到達)。`@supports (animation-timeline: scroll())` + `prefers-reduced-motion: no-preference` でガードし、非対応(Firefox 安定版)/reduced は静止ヒーローに自然劣化。
+  - 200vh 区間で動画を `position:sticky` 中央配置し、`filter: blur(100px)` から 2000ms でフェードイン（`appear-observer.ts` の IntersectionObserver + `.in`）。
+- ブラウザ対応: Chromium 115+/Safari 26+ で本演出が動作、Firefox 安定版は既定 OFF で静止。JS フォールバックは費用対効果で不採用（将来必要なら `<hero-zoom>` Web Component を後付け）。
+- 配色は緑上=白文字/白面=`#333`、ピンクは不使用（`DESIGN.md` Do's/Don'ts）。
+
+## 決定 10: WCAG 2.2.2（Pause, Stop, Hide）は STUDIO 忠実性を優先し意図的に非対応【2026-07-03】
+
+- 自動送りカルーセルと自動再生動画（>5秒）は WCAG 2.2.2（Level A）の対象で、本来は一時停止/停止/非表示の**永続的な操作手段**が必要（hover/focus 停止は不十分、`prefers-reduced-motion` は代替にならない）。
+- レビュー対応で pause/play ボタンを一度実装したが、STUDIO 本家（デザイン基準）にこの操作 UI が無く、ボタン追加が視覚忠実性を損なうため**撤去**。本家と同じ 2.2.2 Level A の未対応ギャップを意図的に許容する。
+- 緩和策として `prefers-reduced-motion: reduce` では両方停止（カルーセル自動送り無効・動画は静止ポスター）を維持。厳密対応が必要になれば pause/play コントロールを再導入する。
+- 出典: [W3C WCAG 2.2.2 Understanding](https://www.w3.org/WAI/WCAG22/Understanding/pause-stop-hide.html)。
 
 ## パフォーマンス実測(preview ビルド)
 

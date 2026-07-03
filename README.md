@@ -26,29 +26,33 @@ bun run fmt        # Prettier (.astro)
 ```
 astro.config.ts       # output:static / passthroughImageService / @tailwindcss/vite
 src/
-  pages/index.astro    # 1 枚もの本体（各セクションを合成 + 島の読み込み）
+  pages/index.astro    # 1 枚もの本体（固定背景 + 各セクションを合成 + 島の読み込み）
   layouts/BaseLayout.astro
-  components/           # Hero / BackgroundBands / VideoSection / PinkSection /
-                        # AccessSection / Creature / SiteFooter / MessageLayer (.astro, 静的)
+  components/           # HeroZoom / VideoStage / MessageLead / InfoCard /
+                        # PhotoSection / SiteFooter (.astro, 静的)
   scripts/             # Web Components（素 TS・ランタイム 0）
-                        #   zoom-fit / hero-zoom / appear-observer / carousel / scroll-lock-video
+                        #   appear-observer / carousel
   data/content.ts      # 全 JP コピー・メタ（verbatim）
   styles/global.css    # @import "tailwindcss"; @theme{...}; + レイアウト CSS
 public/
-  assets/              # 画像・動画（事前最適化済み webp / mp4）
+  assets/studio/       # STUDIO 版アセット（最適化済み webp / mp4）
   fonts/               # Zen Maru Gothic サブセット（zen-local.css + 49 woff2）
   favicon.svg
 _legacy/               # 移植元の手組みモック（参照専用・ビルド対象外）
+studio-source/          # STUDIO 公開版の抽出物（DESIGN-SPEC.md / 生 CSS・HTML、参照専用）
 ```
 
-## 主な演出（島）
+## 主な演出
 
-- **TOP カーテンイントロ**（`intro-sequence`）: 画面を固定し、緑パターン背景はそのまま **のれん（白い暖簾）だけがスクロールで上昇** → 上がり切ると **動画がフェードイン＆頭(0)から再生** → 終了で **フェードアウト** → 下の **メッセージ（ピンクセクション）がフェードイン** → 解除して通常スクロール。控えめな「スキップ」あり。
-- **appear**: 各要素がビューポート進入でフェード＋スライドイン
-- **カルーセル**: 新大久保駅の写真を横スライド
-- すべて `prefers-reduced-motion: reduce` で無効化（イントロは静的ヒーロー、全体スクロール可）
+STUDIO 公開版に一致（設計規範は [`DESIGN.md`](./DESIGN.md)、実測仕様は `studio-source/DESIGN-SPEC.md`）。
+
+- **固定背景**: 緑の葉パターンを全画面 `position: fixed` で敷き、以降のコンテンツがその上をスクロール。
+- **ヒーロー ズーム**: sticky のヒーロー画像が **純 CSS `animation-timeline: scroll()`** でスクロール連動 `scale 1 → 1.4`（進捗 25% で 1.4 到達）。
+- **動画 フェードイン**: 200vh 区間で sticky の動画が `filter: blur(100px)` から 2 秒かけて鮮明化。
+- **appear**: 各要素がビューポート進入でフェード＋スライドイン（`appear-observer`）。
+- **カルーセル**: 新大久保駅の写真を横スライド（自動再生、prev/next）。
+- すべて `prefers-reduced-motion: reduce` で無効化（ヒーローは静止、全体スクロール可）。scroll ズームは `@supports` ガードで非対応ブラウザ（Firefox 安定版）も静止フォールバック。
 
 ## デザイン基盤
 
-横 1440px 固定デザインを JS の `zoom = innerWidth / 1440` で全幅フィット。ピクセル精密な絶対配置・破れエッジ（clip-path）は `global.css` の素 CSS、配色トークンは Tailwind `@theme`。
-# -
+基準 1280px 中央 + `max-width: 840px / 540px` の 2 段メディアクエリで全幅レスポンシブ。配色・フォント・角丸トークンは Tailwind `@theme`（`--color-*` / `--font-*` / `--radius-*`）で定義し、素 CSS から `var(...)` 参照。日本語テキストは字間 `0.15em`・行間 `1.4`。
