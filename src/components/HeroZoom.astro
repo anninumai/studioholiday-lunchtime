@@ -1,0 +1,14 @@
+---
+import { content } from "../data/content";
+const { hero } = content;
+---
+
+<section class="hero">
+  <img
+    class="hero-img"
+    src={hero.src}
+    width={hero.width}
+    height={hero.height}
+    alt={hero.alt}
+  />
+</section>

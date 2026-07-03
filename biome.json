@@ -5,6 +5,8 @@
     "includes": [
       "**",
       "!_legacy",
+      "!studio-source",
+      "!.claude",
       "!dist",
       "!.astro",
       "!public",

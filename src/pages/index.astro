@@ -1,25 +1,26 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import IntroStage from "../components/IntroStage.astro";
-import BackgroundBands from "../components/BackgroundBands.astro";
-import PinkSection from "../components/PinkSection.astro";
-import AccessSection from "../components/AccessSection.astro";
-import Creature from "../components/Creature.astro";
+import HeroZoom from "../components/HeroZoom.astro";
+import VideoStage from "../components/VideoStage.astro";
+import MessageLead from "../components/MessageLead.astro";
+import InfoCard from "../components/InfoCard.astro";
+import PhotoSection from "../components/PhotoSection.astro";
 import SiteFooter from "../components/SiteFooter.astro";
 ---
 
 <BaseLayout>
-  <IntroStage />
+  <div class="bg-fixed"></div>
 
-  <zoom-fit>
-    <div class="page">
-      <BackgroundBands />
-      <PinkSection />
-      <AccessSection />
-      <Creature />
-      <SiteFooter />
-    </div>
-  </zoom-fit>
+  <div class="page">
+    <HeroZoom />
+    <VideoStage />
+    <MessageLead />
+    <section class="message2">
+      <InfoCard />
+      <PhotoSection />
+    </section>
+    <SiteFooter />
+  </div>
 
   <appear-observer></appear-observer>
 

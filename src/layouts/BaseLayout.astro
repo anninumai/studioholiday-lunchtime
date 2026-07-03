@@ -3,6 +3,14 @@ import { content } from "../data/content";
 import "../styles/global.css";
 
 const { title, description } = content.meta;
+// Absolute URLs for OG/canonical require `site` in astro.config.ts. Guard so a
+// missing `site` (e.g. mid-config) degrades gracefully instead of throwing.
+const ogImage = Astro.site
+  ? new URL(content.hero.src, Astro.site).href
+  : content.hero.src;
+const canonical = Astro.site
+  ? new URL(Astro.url.pathname, Astro.site).href
+  : undefined;
 ---
 
 <!doctype html>
@@ -10,15 +18,37 @@ const { title, description } = content.meta;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {
+      /* Flag that JS is available: appear-animations only hide content when they
+        can reveal it, so nothing stays invisible if the script fails to run. */
+    }
+    <script is:inline>
+      document.documentElement.classList.add("js");
+    </script>
     <title>{title}</title>
     <meta name="description" content={description} />
+    <meta name="robots" content="index, follow" />
+    {canonical && <link rel="canonical" href={canonical} />}
+
+    {/* Open Graph */}
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary_large_image" />
+
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 
     {/* Self-hosted, pre-subset fonts (served as-is from public/). */}
     <link rel="stylesheet" href="/fonts/zen-local.css" />
 
-    {/* LCP: the noren is the first meaningful paint. */}
-    <link rel="preload" as="image" href={content.noren.src} />
+    {/* LCP: the hero image is the first meaningful paint. */}
+    <link
+      rel="preload"
+      as="image"
+      href={content.hero.src}
+      fetchpriority="high"
+    />
   </head>
   <body>
     <slot />

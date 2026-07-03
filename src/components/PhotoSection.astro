@@ -1,0 +1,16 @@
+---
+import { content } from "../data/content";
+const { photo } = content;
+---
+
+<section class="photo">
+  <img
+    class="appear"
+    src={photo.src}
+    width={photo.width}
+    height={photo.height}
+    alt={photo.alt}
+    loading="lazy"
+    decoding="async"
+  />
+</section>

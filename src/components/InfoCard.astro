@@ -1,0 +1,71 @@
+---
+import { content } from "../data/content";
+const { join, card, carousel } = content;
+---
+
+<section class="access">
+  <p class="join appear">{join[0]}<br />{join[1]}</p>
+
+  <div class="card appear">
+    <div class="card-info">
+      <p class="c-name">{card.name}</p>
+      <p>{card.time}</p>
+      <p>{card.addressLines[0]}<br />{card.addressLines[1]}</p>
+      <p>{card.access}</p>
+      <p>
+        <a href={card.mapUrl} target="_blank" rel="noopener">{card.mapLabel}</a>
+      </p>
+    </div>
+
+    <div class="card-carousel">
+      <gohan-carousel>
+        <div
+          class="carousel"
+          role="group"
+          aria-roledescription="カルーセル"
+          aria-label="新大久保駅からの道順"
+        >
+          <div class="viewport">
+            <div class="track">
+              {
+                carousel.map((s) => (
+                  <div class="slide">
+                    <img
+                      src={s.src}
+                      width={s.width}
+                      height={s.height}
+                      alt={s.alt}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                    <p class="cap">{s.caption}</p>
+                  </div>
+                ))
+              }
+            </div>
+          </div>
+          <div class="nav">
+            <button class="prev" type="button" aria-label="前へ">
+              <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <path
+                  d="M13 4l-6 6 6 6"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"></path>
+              </svg>
+            </button>
+            <button class="next" type="button" aria-label="次へ">
+              <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <path
+                  d="M7 4l6 6-6 6"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </gohan-carousel>
+    </div>
+  </div>
+</section>

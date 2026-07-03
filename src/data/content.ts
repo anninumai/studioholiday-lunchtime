@@ -1,32 +1,32 @@
 // All Japanese copy, verbatim. Single source of truth for the page content.
-// Do not "normalize" characters (full-width hyphen 「−」, commas, etc.).
+// Do not "normalize" characters (full-width hyphen 「−」, triple comma 「,,,」, etc.).
+// Assets are the optimized STUDIO originals under /assets/studio/.
 
 export const content = {
   meta: {
     title: "みんなでごはん会 | STUDIO HOLIDAY",
     description: "みんなでごはんを食べる会を開催中 — by HOLIDAY KITCHEN / K,D,C,,,",
   },
-  noren: {
-    src: "/assets/noren.webp",
-    width: 2560,
-    height: 1808,
+  // Section background images (bg pattern / message / access photos) are owned by
+  // global.css (fixed & ::before layers), not referenced here.
+  // Hero image (not pinned) that scroll-zooms 1 -> 1.4 as the section scrolls past.
+  hero: {
+    src: "/assets/studio/hero.webp",
+    width: 2400,
+    height: 1630,
     alt: "みんなでごはん会 同釜共食 by HOLIDAY KITCHEN / K,D,C,,,",
   },
-  pink: {
-    photo: {
-      src: "/assets/pink_photo_full.webp",
-      width: 2560,
-      height: 1984,
-      alt: "みんなでごはん会の様子",
-    },
-    c1: ["こんにちは、スタジオホリデーです。", "詳細、メッセージは仮置きです。"],
-    c2: "みんなでごはんを食べる会を開催中",
-    c3: [
-      "同じ釜の飯を食うという体験から",
-      "新しい体験や仕事をしようよと",
+  // Sticky logo video that blurs into focus.
+  video: { src: "/assets/studio/intro_video.mp4", width: 1920, height: 1080 },
+  // White message copy over the green background. 3rd line has a <br>.
+  message: [
+    "こんにちは、スタジオホリデーです。詳細、メッセージは仮置きです。",
+    "みんなでごはんを食べる会を開催中",
+    [
+      "同じ釜の飯を食うという体験から新しい体験や仕事をしようよと",
       "コラボレーションが生まれることが僕たちは大好きです。",
     ],
-  },
+  ],
   join: [
     "ご参加、興味のある方はお気軽に",
     "スタホリメンバーにお声がけください。メッセージは仮置きです。",
@@ -34,32 +34,57 @@ export const content = {
   card: {
     name: "株式会社STUDIO HOLIDAY",
     time: "毎週木曜日12:00-13:00頃",
-    address: "東京都新宿区百人町1丁目10−15JR新大久保駅ビル4F",
-    tagline: "Kimchi, Durian, Cardamom,,,",
+    addressLines: ["東京都新宿区百人町1丁目10−15JR新大久保駅ビル4F", "Kimchi, Durian, Cardamom,,,"],
     access: "JR新大久保駅から徒歩1分",
-    mapLabel: "Google maps",
-    mapUrl: "https://www.google.com/maps/search/?api=1&query=東京都新宿区百人町1丁目10-15",
+    mapLabel: "Google maps ",
+    mapUrl: "https://maps.app.goo.gl/DJeuMw5D5rwiaYx99",
   },
-  carousel: {
-    caption: "階段を降りて大久保通り出口(右)へすすむ",
-    slides: [
-      { src: "/assets/station.webp", alt: "JR新大久保駅" },
-      { src: "/assets/station.webp", alt: "JR新大久保駅" },
-      { src: "/assets/station.webp", alt: "JR新大久保駅" },
-    ],
-  },
-  video: { src: "/assets/logo_video.mp4", width: 1147, height: 645 },
-  chopsticks: [
-    { src: "/assets/chopstick1.webp", cls: "one", width: 364, height: 600 },
-    { src: "/assets/chopstick2.webp", cls: "two", width: 307, height: 600 },
+  // Carousel slides. Slide 1 is the real photo; slides 2-4 are mock placeholders
+  // to be swapped for real images later — drop files into public/assets/studio/
+  // and update src / width / height / alt / caption here (add or remove entries freely).
+  carousel: [
+    {
+      src: "/assets/studio/station.webp",
+      width: 1200,
+      height: 650,
+      alt: "JR新大久保駅",
+      caption: "階段を降りて大久保通り出口(右)へすすむ",
+    },
+    {
+      src: "/assets/studio/slide-placeholder-2.webp",
+      width: 1200,
+      height: 650,
+      alt: "",
+      caption: "（写真2・差し替え予定）",
+    },
+    {
+      src: "/assets/studio/slide-placeholder-3.webp",
+      width: 1200,
+      height: 650,
+      alt: "",
+      caption: "（写真3・差し替え予定）",
+    },
+    {
+      src: "/assets/studio/slide-placeholder-4.webp",
+      width: 1200,
+      height: 650,
+      alt: "",
+      caption: "（写真4・差し替え予定）",
+    },
   ],
-  creature: { src: "/assets/creature.webp", width: 1200, height: 705 },
+  // Wide feature photo, shown at 605px height, centered.
+  photo: { src: "/assets/studio/feature_photo.webp", width: 2400, height: 1410, alt: "" },
   footer: {
-    logo: { src: "/assets/footer_logo.webp", width: 235, height: 152, alt: "みんなでごはん会" },
+    logo: {
+      src: "/assets/studio/footer_logo.webp",
+      width: 235,
+      height: 152,
+      alt: "みんなでごはん会",
+    },
     wordmark: {
-      src: "/assets/footer_wordmark.webp",
-      width: 600,
-      height: 41,
+      src: "/assets/studio/footer_wordmark.webp",
+      width: 930,
+      height: 64,
       alt: "by HOLIDAY KITCHEN / K,D,C,,,",
     },
   },

@@ -1,0 +1,24 @@
+---
+import { content } from "../data/content";
+const { video } = content;
+---
+
+<video-stage>
+  <section class="video-stage">
+    <div class="video-pin">
+      {
+        /* Played from the top by <video-stage> on scroll-in (not autoplay, so it
+          isn't finished off-screen before the viewer arrives). #t=0.01 shows the
+          first frame as a poster before playback. */
+      }
+      <video
+        class="appear--video"
+        src={`${video.src}#t=0.01`}
+        width={video.width}
+        height={video.height}
+        muted
+        playsinline
+        preload="metadata"></video>
+    </div>
+  </section>
+</video-stage>
