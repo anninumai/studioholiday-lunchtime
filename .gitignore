@@ -9,3 +9,9 @@ node_modules/
 .DS_Store
 .env
 .env.production
+# tooling / local state
+.serena/
+.claude/
+.mcp.json
+# STUDIO design reference: keep spec + extracted text, exclude heavy originals
+studio-source/src/assets/
