@@ -2,3 +2,4 @@
 import "./appear-observer";
 import "./video-stage";
 import "./carousel";
+import "./noren-cloth";
