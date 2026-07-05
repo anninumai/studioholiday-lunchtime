@@ -1,7 +1,11 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import HeroZoom from "../components/HeroZoom.astro";
-import VideoStage from "../components/VideoStage.astro";
+import NorenHero from "../components/NorenHero.astro";
+// Redesign test: the noren curtain replaces the plain hero and now owns the
+// intro video (revealed as it lifts). The standalone hero/video are parked here
+// for easy rollback.
+// import HeroZoom from "../components/HeroZoom.astro";
+// import VideoStage from "../components/VideoStage.astro";
 import MessageLead from "../components/MessageLead.astro";
 import InfoCard from "../components/InfoCard.astro";
 import PhotoSection from "../components/PhotoSection.astro";
@@ -12,8 +16,9 @@ import SiteFooter from "../components/SiteFooter.astro";
   <div class="bg-fixed"></div>
 
   <div class="page">
-    <HeroZoom />
-    <VideoStage />
+    <NorenHero />
+    {/* <HeroZoom /> — parked; superseded by <NorenHero /> */}
+    {/* <VideoStage /> — moved into <NorenHero /> as the revealed background */}
     <MessageLead />
     <section class="message2">
       <InfoCard />

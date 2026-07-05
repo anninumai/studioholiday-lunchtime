@@ -1,0 +1,139 @@
+---
+import { content } from "../data/content";
+
+const { noren, video } = content;
+
+// A traditional noren drawn as a single SVG: one cloth joined across the top,
+// with 2 slits splitting the lower part into 3 equal-width flaps (their total is
+// wider than the viewport, so the outer ones overflow). One SVG avoids a seam and
+// stays crisp when zoomed. Only the flaps skew (independently) in <noren-cloth>;
+// the top band is fixed. All geometry is in percent with NO viewBox, so the SVG's
+// user space equals CSS pixels — the skew lean is then identical on every screen
+// (a stretched viewBox would make it vary with aspect ratio). White, no shadow.
+const SLIT = 1; // slit width, percent of width (~12px at 1280w)
+const BAND = 32; // connected top band height, percent (the slits start below this)
+const OVERLAP = 1; // flaps tuck this far (percent) under the band so the join can't gap
+const FLAP_W = 46; // every flap this wide; 3 of them overflow the viewport (±20%)
+const flapY = BAND - OVERLAP;
+const flapH = 100 - flapY;
+// 3 equal-width flaps split by 2 slits. Their total (3*FLAP_W + 2 slits = 140%)
+// exceeds the viewport, so the outer flaps run off both edges (centered); the
+// overflow is clipped at rest but their swing reads clearly when they sway.
+const flapStart = (100 - (3 * FLAP_W + 2 * SLIT)) / 2;
+const flaps = [0, 1, 2].map((i) => ({
+  x: flapStart + i * (FLAP_W + SLIT),
+  w: FLAP_W,
+}));
+// Center emblem box (percent). It sits below the band so it rides on the flaps
+// (mostly the wide middle panel); the shared pattern paints each flap's slice so
+// the logo skews with the cloth ("printed on"). Sized by height via meet.
+const logoY = 20;
+const logoH = 70;
+---
+
+<section class="noren-hero">
+  <div class="noren-pin">
+    {
+      /* Revealed payoff: the centered logo video (blur -> focus via the shared
+        <video-stage> island), uncovered as the cloth lifts. Sits behind it. */
+    }
+    <video-stage data-play-at="0.5">
+      <div class="noren-video">
+        <video
+          src={`${video.src}#t=0.01`}
+          width={video.width}
+          height={video.height}
+          muted
+          loop
+          playsinline
+          preload="metadata"></video>
+      </div>
+    </video-stage>
+
+    {
+      /* Foreground cloth. The wrapper scroll-zooms (approach) then lifts (reveal)
+        via pure CSS; each panel sways on pointer/tap via <noren-cloth> (JS). */
+    }
+    <noren-cloth>
+      <svg class="noren" role="img" aria-label={noren.alt}>
+        <defs>
+          {
+            /* The emblem lives in one pattern in shared user space (the whole svg
+              box, no repeat). Each flap paints its slice of it, so at rest the
+              slices line up into the whole logo and each slice skews with its own
+              flap — the logo is printed on the cloth and ripples with the sway. */
+          }
+          <pattern
+            id="noren-emblem"
+            patternUnits="userSpaceOnUse"
+            x="0"
+            y="0"
+            width="100%"
+            height="100%"
+          >
+            <image
+              href={noren.logo}
+              x="0"
+              y={`${logoY}%`}
+              width="100%"
+              height={`${logoH}%`}
+              preserveAspectRatio="xMidYMid meet"
+            />
+          </pattern>
+        </defs>
+        {
+          /* Each flap = a white cloth rect + an emblem rect (its slice of the
+            shared pattern). Both are the flap's shape, so the group's box is the
+            flap and <noren-cloth> skews it from its top. */
+        }
+        {
+          flaps.map((f) => (
+            <g class="noren-panel">
+              <rect
+                x={`${f.x}%`}
+                y={`${flapY}%`}
+                width={`${f.w}%`}
+                height={`${flapH}%`}
+              />
+              <rect
+                x={`${f.x}%`}
+                y={`${flapY}%`}
+                width={`${f.w}%`}
+                height={`${flapH}%`}
+                fill="url(#noren-emblem)"
+              />
+            </g>
+          ))
+        }
+        {
+          /* Connected top band (static). White + the logo's upper slice from the
+            same shared pattern, so the emblem reads continuously across the band
+            and the swaying flaps below; the band itself never moves. */
+        }
+        <g class="noren-band">
+          <rect x="0" y="0" width="100%" height={`${BAND}%`}></rect>
+          <rect
+            x="0"
+            y="0"
+            width="100%"
+            height={`${BAND}%`}
+            fill="url(#noren-emblem)"></rect>
+        </g>
+        {
+          /* Rod tabs (チチ) at the very top, as one hand-drawn strip. Static — the
+            top is fixed to the rod, so these never sway. Full width, top-aligned,
+            aspect kept (meet). */
+        }
+        <image
+          class="noren-tabs"
+          href={noren.tabs}
+          x="0"
+          y="0"
+          width="100%"
+          height="10%"
+          preserveAspectRatio="xMidYMin meet"
+        />
+      </svg>
+    </noren-cloth>
+  </div>
+</section>

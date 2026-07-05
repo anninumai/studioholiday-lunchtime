@@ -16,6 +16,13 @@ export const content = {
     height: 1630,
     alt: "みんなでごはん会 同釜共食 by HOLIDAY KITCHEN / K,D,C,,,",
   },
+  // Noren: the cloth itself is drawn in the SVG (NorenHero); this is the center
+  // emblem printed on it (its #f2f2f2 background was keyed to transparent).
+  noren: {
+    logo: "/assets/noren-logo.webp",
+    tabs: "/assets/noren-tabs.webp", // hand-drawn tab strip threaded on the rod
+    alt: "みんなでごはん会ののれん",
+  },
   // Sticky logo video that blurs into focus.
   video: { src: "/assets/studio/intro_video.mp4", width: 1920, height: 1080 },
   // White message copy over the green background. 3rd line has a <br>.

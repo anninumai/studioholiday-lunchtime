@@ -1,37 +1,35 @@
-/** Owns the intro video: reveals it (blur -> focus) and plays it from the top
- *  when scrolled into view — STUDIO starts it on appear, not on load, so it
- *  isn't already finished off-screen by the time the viewer arrives. Under
- *  reduced-motion it stays paused on its poster frame. Cleaned up on disconnect. */
+/** Starts the noren-hero's revealed video once the pinned scroll passes a
+ *  threshold (`data-play-at`, a fraction of viewport height). Playback therefore
+ *  begins as the video fades in — the fade itself is CSS scroll-driven. Under
+ *  reduced-motion the video is left on its poster frame (CSS keeps it visible).
+ *  The scroll listener is removed after it fires, and on disconnect. */
 class VideoStage extends HTMLElement {
-  #io?: IntersectionObserver;
+  #onScroll?: () => void;
 
   connectedCallback(): void {
     const video = this.querySelector<HTMLVideoElement>("video");
     if (!video) return;
+    // Reduced motion: don't play; the poster frame stays (shown by CSS).
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      video.classList.add("in"); // static, sharp poster frame; no playback
-      return;
-    }
-
-    this.#io = new IntersectionObserver(
-      (entries) => {
-        for (const e of entries) {
-          if (!e.isIntersecting) continue;
-          video.classList.add("in");
-          video.currentTime = 0;
-          void video.play().catch(() => {});
-          this.#io?.unobserve(e.target);
-        }
-      },
-      { threshold: 0.12, rootMargin: "0px 0px -8% 0px" },
-    );
-    this.#io.observe(video);
+    const playAt = Number.parseFloat(this.dataset.playAt ?? "0.5");
+    const onScroll = (): void => {
+      // The noren hero is the first section, so scrollY maps directly to how far
+      // into the pinned reveal we are; play once we pass playAt * viewport height.
+      if (window.scrollY < playAt * window.innerHeight) return;
+      video.currentTime = 0;
+      void video.play().catch(() => {});
+      window.removeEventListener("scroll", onScroll);
+      this.#onScroll = undefined;
+    };
+    this.#onScroll = onScroll;
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll(); // in case the page is loaded already scrolled past the threshold
   }
 
   disconnectedCallback(): void {
-    this.#io?.disconnect();
-    this.#io = undefined;
+    if (this.#onScroll) window.removeEventListener("scroll", this.#onScroll);
+    this.#onScroll = undefined;
   }
 }
 

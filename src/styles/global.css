@@ -49,7 +49,8 @@ body,
 /* interaction-island wrappers: transparent so they never affect layout */
 gohan-carousel,
 appear-observer,
-video-stage {
+video-stage,
+noren-cloth {
   display: contents;
 }
 
@@ -111,6 +112,134 @@ video-stage {
     .hero {
       animation: hero-zoom linear both;
       animation-timeline: scroll(root block) !important;
+    }
+  }
+}
+
+/* ================= noren hero (redesign test: curtain reveal) =================
+   A tall section pins a 100vh stage. Behind the cloth sits the centered logo
+   video (revealed as the cloth lifts). The cloth is a single SVG noren: joined
+   across the top, with 2 slits splitting the lower part into 3 flaps that swing
+   independently in <noren-cloth> (JS); the top band is fixed. One SVG (not
+   abutting DOM boxes) avoids a sub-pixel seam at the join under the scroll
+   transform and stays crisp when zoomed. (White, no shadow — the hero photo is
+   intentionally unused.) The approach (scale) + lift (translateY) is pure CSS
+   scroll-driven. Base state = cloth raised (video visible), so browsers without
+   scroll-timeline support and reduced-motion users get the content, not a stuck
+   curtain. */
+.noren-hero {
+  position: relative;
+  height: 100vh; /* fallback: no pin */
+}
+.noren-pin {
+  position: static; /* fallback: no pin */
+  height: 100vh;
+  overflow: hidden; /* clip the cloth as it lifts above the stage */
+}
+/* Revealed logo video, centered over the show-through green pattern. */
+.noren-video {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Base (reduced-motion / no scroll-timeline): visible. The scroll animation
+     below fades it in from ~halfway; <video-stage> starts playback to match. */
+  opacity: 1;
+}
+.noren-video video {
+  height: 100%;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+}
+/* The video fades in over the back half of the reveal (50–100% of 0 100vh); `both`
+   fill then HOLDS it at full opacity for the rest of the pin (it stays centered).
+   Before it fades in it is transparent, so the fixed green pattern (.bg-fixed) is
+   the background — seen through the noren slits and below the cloth. */
+@keyframes noren-video-in {
+  0%,
+  50% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .noren-video {
+      animation: noren-video-in linear both;
+      animation-timeline: scroll(root block) !important;
+      animation-range: 0 100vh; /* reveal over the 1st viewport; fill:both holds the rest */
+    }
+  }
+}
+/* The cloth layer. Base (unenhanced) state: raised out of view so the video
+   shows; the scroll animation below re-seats it to cover, then lifts it. */
+.noren {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 83.333%; /* the noren covers ~5/6 of the pin; bg pattern shows below */
+  translate: 0 -125%;
+  will-change: transform;
+  transform-box: border-box; /* scroll scale/translate reference the svg box */
+}
+/* Connected top band, drawn over the flap tops — the top never separates. */
+.noren-band {
+  fill: var(--color-surface);
+}
+/* Each flap is joined to the band along its top edge; <noren-cloth> leans it with
+   skewX anchored at that edge, so only the hem sways (the top never tears away).
+   The gaps between the flaps are the slits, showing the video behind. */
+.noren-panel {
+  fill: var(--color-surface);
+  transform-box: fill-box; /* skew + origin are relative to the flap's own box */
+  transform-origin: top; /* the fixed top edge is the skew anchor */
+  will-change: transform;
+}
+/* The reveal plays over the first viewport of the pin (animation-range 0 100vh):
+   the noren approaches (0–25%) then lifts away (25–100%). `both` fill then HOLDS
+   the lifted state for the rest of the (much longer) pin, so the revealed video
+   sits still while you keep scrolling — the hold length is set purely by
+   .noren-hero's height, independent of this reveal. */
+@keyframes noren-reveal {
+  0% {
+    scale: 1;
+    translate: 0 0;
+  }
+  25% {
+    scale: 1.06;
+    translate: 0 0;
+  }
+  100% {
+    scale: 1.12;
+    translate: 0 -125%;
+  }
+}
+/* Enhanced path: pin the stage and drive approach+lift by scroll. @supports
+   keeps this off non-supporting browsers (Firefox stable) and reduced-motion —
+   they keep the base raised state. `animation-timeline` carries !important so
+   Lightning CSS can't fold it into the `animation` shorthand (which browsers
+   reject, dropping the whole rule). */
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .noren-hero {
+      height: 300vh; /* pin holds for 2 viewports of scroll before releasing */
+    }
+    .noren-pin {
+      position: sticky;
+      top: 0;
+    }
+    .noren {
+      animation: noren-reveal linear both;
+      animation-timeline: scroll(root block) !important;
+      animation-range: 0 100vh; /* reveal over the 1st viewport; fill:both holds the rest */
     }
   }
 }

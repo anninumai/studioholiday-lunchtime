@@ -42,13 +42,16 @@ const canonical = Astro.site
     {/* Self-hosted, pre-subset fonts (served as-is from public/). */}
     <link rel="stylesheet" href="/fonts/zen-local.css" />
 
-    {/* LCP: the hero image is the first meaningful paint. */}
-    <link
-      rel="preload"
-      as="image"
-      href={content.hero.src}
-      fetchpriority="high"
-    />
+    {
+      /* LCP preload parked with <HeroZoom /> (see index.astro): the noren-hero
+      test renders CSS panels + a <video>, so hero.webp is no longer above the
+      fold. Restore this if reverting to HeroZoom. */
+    }
+    {
+      /*
+    <link rel="preload" as="image" href={content.hero.src} fetchpriority="high" />
+    */
+    }
   </head>
   <body>
     <slot />
