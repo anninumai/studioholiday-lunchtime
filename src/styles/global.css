@@ -562,6 +562,20 @@ noren-cloth {
     height: 560px;
     padding: 20px;
   }
+  /* On mobile the section is short and the photo is scaled up (cover), so the
+     white message text rides up over the busy centre of the photo. A bottom
+     readability scrim (behind the text) keeps it legible without changing the
+     desktop layout. */
+  .message::before {
+    background:
+      linear-gradient(to top, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0) 75%),
+      url("/assets/studio/message_bg.webp") 50% 50% / cover no-repeat;
+  }
+  /* Belt-and-suspenders for readability over the photo's brighter/busier upper
+     lines (also robust to longer copy). */
+  .msg {
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+  }
   .join {
     width: 343px;
     max-width: 100%;
