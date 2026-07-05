@@ -3,10 +3,11 @@ version: alpha
 name: Minna de Gohankai / STUDIO HOLIDAY
 description: >
   Design system for the STUDIO HOLIDAY "みんなでごはん会" (communal-meal) site: a single
-  long vertical page where a fixed green leaf-pattern background stays put while the hero
-  scroll-zooms and a logo video blurs into focus. Warm, plain, hand-made tone built on a
-  rounded gothic typeface and generous whitespace. Distilled from real values extracted
-  from the published STUDIO version; raw measurements live in studio-source/DESIGN-SPEC.md.
+  long vertical page where a fixed green leaf-pattern background stays put while a
+  scroll-lifted noren (fabric curtain) hero reveals a logo video. Warm, plain, hand-made
+  tone built on a rounded gothic typeface and generous whitespace. Layout, colour and type
+  are distilled from the published STUDIO version (raw measurements in
+  studio-source/DESIGN-SPEC.md); the hero is a deliberate brush-up beyond it.
 
 colors:
   brand-green: "#6ab31d"    # signature: leaf pattern, carousel nav border/arrows, icons
@@ -83,10 +84,12 @@ components:
 
 A plain, warm site introducing a weekly communal meal held in a small kitchen in
 Shin-Ōkubo. The mood is the friendliness of "sharing one pot" (同釜共食). A green leaf
-pattern covers the whole background; as you scroll down the single page, the hero slowly
-zooms and the logo video bleeds into focus — a quiet, hand-made sequence. Comfort comes
-from whitespace, rounded shapes, and a soft rounded typeface rather than flashiness. One
-page, vertical scroll.
+pattern covers the whole background; as you scroll down the single page, a noren (fabric
+curtain) hero is approached and lifts to reveal a logo video, then holds — a quiet,
+tactile sequence you can even nudge with the cursor. Comfort comes from whitespace, rounded
+shapes, and a soft rounded typeface rather than flashiness. One page, vertical scroll. (The
+hero is a brush-up beyond the STUDIO original; the rest still follows the extracted STUDIO
+values.)
 
 ## Colors
 
@@ -122,10 +125,12 @@ from the old design; the pink here is photographic.
 - Single long page. Main blocks in DOM order (top → bottom):
   1. **Fixed background** — green leaf pattern, `background-size: cover; repeat`, full-screen
      `position: fixed`. The base for everything below.
-  2. **Hero** — 1524px tall. The image scrolls away normally (it is NOT pinned — STUDIO's
-     `sticky` there is inert because its height equals the section) while the section scroll-zooms (see Motion).
-  3. **Video** — 200vh tall. The video is sticky, centered, `object-fit: contain; height: 100vh`,
-     and blurs into focus.
+  2. **Noren hero** — a pinned stage (`.noren-hero`, ~300vh so it holds ~2 viewports). A
+     single-SVG noren (connected top band + 3 flaps split by 2 slits; logo and rod tabs
+     painted on) is approached (scale) and lifts (translateY) on scroll to reveal the
+     video; the flaps sway to pointer/tap (see Motion).
+  3. **Intro video** — centered behind the noren over the fixed pattern; fades in mid-scroll
+     and plays. Not a separate section anymore — it lives inside the hero reveal.
   4. **Message 1** — full-cover **pink background photo** (torn frame + kitchen group shot);
      three centered white lines sit in the lower half (greeting / "now running" / intent).
   5. **Message 2 + info card** — full-cover **green-pattern background photo** behind a white
@@ -170,22 +175,28 @@ contrast**:
 
 ## Motion
 
-Keep motion quiet and slow; avoid flashy effects.
+Keep motion quiet and slow; avoid flashy effects. The one playful, tactile note is the
+noren sway.
 
 - **appear (shared)** — elements start at `opacity: 0; translateY(20px)` and settle into
   place/opacity over `500ms ease-in-out` when they enter the viewport.
-- **hero zoom** — `animation-timeline: scroll()` (scroll-driven, linear). `scale` goes
-  `1 → 1.4` (reaches 1.4 at ~25% progress, then holds). The hero image slowly advances.
-- **video fade-in** — the video starts at `filter: blur(100px); opacity: 0` and clears over
-  **`2000ms ease-in-out`** on entry. The slow bleed-in is the point.
+- **noren reveal** — pure CSS scroll-driven (`animation-timeline: scroll()`). Over the first
+  viewport the noren approaches (`scale 1 → 1.12`) then lifts (`translateY 0 → -125%`);
+  `fill: both` holds it lifted for the rest of the pin, whose length is set only by
+  `.noren-hero` height (~2 viewports).
+- **noren sway** — `<noren-cloth>` (plain-TS Web Component) leans the flaps with a coupled
+  damped spring on pointer sweep / tap (top-anchored `skewX`); still when untouched.
+- **video reveal** — the centered video goes `opacity 0 → 1` mid-scroll while it starts
+  playing (no blur).
 - **carousel** — slide transition `cubic-bezier(0.58, 0.21, 0.41, 0.96)`; nav
   `cubic-bezier(0.4, 0.4, 0.05, 1)`. Auto-play enabled.
 - **body background** — `transition: background 0.5s cubic-bezier(0.4, 0.4, 0, 1)`.
-- Under `prefers-reduced-motion: reduce`, disable the scroll zoom, blur, and appear
-  animations; the page must remain statically reachable.
+- Under `prefers-reduced-motion: reduce`, disable the noren reveal + sway, the video fade,
+  and the appear animations; the base state shows the raised noren (video visible) and the
+  page must remain statically reachable.
 
-> Full choreography spec (nested sticky/fixed, the 200vh region, keyframe values) is the
-> primary source in `studio-source/DESIGN-SPEC.md`. This file keeps only the essentials.
+> The noren hero's full spec lives in `DECISIONS.md` (決定 11). The STUDIO-derived sections'
+> raw measurements are in `studio-source/DESIGN-SPEC.md`. This file keeps only the essentials.
 
 ## Do's and Don'ts
 
@@ -201,8 +212,9 @@ Keep motion quiet and slow; avoid flashy effects.
 
 - **Don't add the flat `#ef5b9f` pink color band** from the old design. (The pink in Message 1 is a
   background *photo*, `message_bg.webp`, not a CSS color.)
-- Don't bring back the "rising noren JS intro" or the "chopsticks" images (old repo structure,
-  absent from the STUDIO version).
+- Don't bring back the old "chopsticks" images (absent from this design). The noren hero IS
+  the current design — a deliberate brush-up (a new single-SVG noren + CSS scroll reveal),
+  not the old JS `intro-sequence` (which is gone).
 - Don't use accent-orange in the resting state (hover only).
 - Don't lean on shadows; build depth from layering, rounded corners, and faint borders.
 - Don't use pure black `#000` or generic fonts like Arial/Inter.

@@ -90,6 +90,8 @@
 
 ## 決定 9: イントロ = 固定緑パターン + sticky ヒーロー scroll ズーム + 200vh 動画 blur フェードイン【STUDIO 一致化, 2026-07-03】
 
+> **[SUPERSEDED 2026-07-06]** ヒーローを「のれんカーテン」に置換（決定 11）。sticky ヒーロー scroll ズームと 200vh 動画 blur フェードインは廃止し、動画はのれんヒーローのリビール内へ統合。固定緑パターン背景（`.bg-fixed`）は継続。以下は歴史的記録。
+
 - 決定 7（のれんカーテン JS イントロ）を破棄。STUDIO 実装に一致させる:
   - 緑葉パターンを `position:fixed` の全画面背景（`background-size:cover; repeat`）に敷く。
   - ヒーロー画像は上端配置で**スクロールとともに流れ**（STUDIO の `sticky` は height=セクション高のため実質無効。実測で pin されないことを確認）、**純 CSS `animation-timeline: scroll()`** でセクションラッパーを `scale 1→1.4`(25% で 1.4 到達)。`@supports (animation-timeline: scroll())` + `prefers-reduced-motion: no-preference` でガードし、非対応(Firefox 安定版)/reduced は静止ヒーローに自然劣化。
@@ -103,6 +105,21 @@
 - レビュー対応で pause/play ボタンを一度実装したが、STUDIO 本家（デザイン基準）にこの操作 UI が無く、ボタン追加が視覚忠実性を損なうため**撤去**。本家と同じ 2.2.2 Level A の未対応ギャップを意図的に許容する。
 - 緩和策として `prefers-reduced-motion: reduce` では両方停止（カルーセル自動送り無効・動画は静止ポスター）を維持。厳密対応が必要になれば pause/play コントロールを再導入する。
 - 出典: [W3C WCAG 2.2.2 Understanding](https://www.w3.org/WAI/WCAG22/Understanding/pause-stop-hide.html)。
+
+## 決定 11: ヒーロー = 「のれんカーテン」＋スクロール固定リビール【ブラッシュアップ移行, 2026-07-06】
+
+- **方針転換**: これまでの目標「STUDIO 公開版への忠実一致」から、以降は「サイトとしてのブラッシュアップ」へ移行。STUDIO 非準拠を許容し体験を良くする独自演出を加える。第一弾がこののれんヒーロー（決定 9 のヒーロー scroll ズーム + 200vh 動画 blur を破棄）。決定 7 の「のれん JS イントロを復活させない」は本決定で意図的に覆す（旧実装＝状態機械 + `position:fixed` ロックとは別物）。
+- **のれん本体（`NorenHero.astro`）**: 単一 SVG。上部 32% は連続した帯、下部は 2 本の切れ目で 3 枚の垂れ（各 46%・合計 140% で viewport を超え左右がはみ出す＝揺れが端で見える）。ロゴ（`noren-logo.webp`）と吊りタブ（`noren-tabs.webp`, いずれも背景 `#f2f2f2` を透過キーイング）を共有 SVG `<pattern>`/`<image>` で布に印刷。白・影なし。viewBox 無し＋% 座標で SVG のユーザー単位＝CSS px（skew の傾きが全画面一定）。
+- **リビール（純 CSS scroll-driven）**: `animation-timeline: scroll(root block)`。最初の 1 viewport（`animation-range: 0 100vh`）で「近づく(scale 1→1.12)→上がる(translateY 0→-125%)」、`fill: both` で以降は上げ切ったまま静止保持。**固定（ピン）時間は `.noren-hero` の高さのみで制御**（現 300vh = sticky 走行 200vh = 2 viewport ホールド）。`animation-timeline` は `!important` で Lightning CSS の shorthand 畳み込みから保護。
+- **動画リビール**: 背後に中央配置。初期 opacity 0＝背景は固定緑パターン（`.bg-fixed`）が切れ目・裾から見える。スクロール中盤で opacity 0→1 フェードイン、`<video-stage>`（`data-play-at`）が同時に頭出し再生（旧 blur-on-appear から転用）。旧 200vh 動画セクションは廃し、動画はヒーローのリビール内へ統合。
+- **揺れ（決定 1 の素 TS + Web Component 方針を踏襲）**: 依存ゼロの `<noren-cloth>` が 3 枚の垂れを上端固定 `skewX` で揺らす（連成バネ物理・パネル毎に固有振動数・カーソル速度/タップ駆動・入力平滑化・`prefers-reduced-motion` で無効・idle で rAF 停止）。
+- **フォールバック**: `@supports (animation-timeline: scroll())` + `prefers-reduced-motion: no-preference` の外（Firefox 安定版 / reduced-motion）は base 状態（のれん上げ済み＝動画表示）へ自然劣化・ピンなし。
+- **温存**: 旧 `<HeroZoom>`/`<VideoStage>`（＋ `hero.webp` の preload）はロールバック用にコメントアウトで残置。未参照になった `noren.webp`（旧・白のれん生地画像, 決定 7 由来）はリポジトリ非追跡で手元に保持。
+- 参照: MDN Scroll-driven animations / `preserveAspectRatio`、`DESIGN.md`。
+
+## 決定 12: モバイルのメッセージ写真上テキストに可読性 scrim【2026-07-06】
+
+- Message 1（全面ピンク写真＋白コピー）は狭幅（≤540px）でセクションが低くなる一方コピーが折返して縦に伸び、写真の賑やかな中央部へ競り上がって読めなくなる（＝画像にテキストが被って見える）。`≤540px` のみ `.message::before` に下方向グラデーション（scrim）を写真の上へ重ね、`.msg` に text-shadow を付与して可読化。デスクトップのレイアウト・配色は不変。設計＝「白文字を写真に載せる」方針は維持。
 
 ## パフォーマンス実測(preview ビルド)
 
