@@ -75,7 +75,7 @@ noren-cloth {
   position: absolute;
   inset: 0;
   /* `cover` fills the viewport; no-repeat because it never tiles under cover. */
-  background: url("/assets/studio/bg_pattern.webp") 50% 50% / cover no-repeat;
+  background: var(--bg-pattern) 50% 50% / cover no-repeat;
 }
 
 /* the scrolling document that rides over the fixed pattern */
@@ -351,7 +351,7 @@ noren-cloth {
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: url("/assets/studio/message_bg.webp") 50% 50% / cover no-repeat;
+  background: var(--bg-message) 50% 50% / cover no-repeat;
 }
 .message-inner {
   display: flex;
@@ -463,7 +463,7 @@ noren-cloth {
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: url("/assets/studio/access_bg.webp") 50% 50% / cover no-repeat;
+  background: var(--bg-access) 50% 50% / cover no-repeat;
 }
 
 /* ================= access (join copy + info card + carousel) ================= */
@@ -755,7 +755,7 @@ noren-cloth {
   .message::before {
     background:
       linear-gradient(to top, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0) 75%),
-      url("/assets/studio/message_bg.webp") 50% 50% / cover no-repeat;
+      var(--bg-message) 50% 50% / cover no-repeat;
   }
   .card {
     gap: 20px;

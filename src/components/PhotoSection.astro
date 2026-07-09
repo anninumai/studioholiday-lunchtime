@@ -1,12 +1,13 @@
 ---
 import { content } from "../data/content";
+import { withBase } from "../lib/withBase";
 const { photo } = content;
 ---
 
 <section class="photo">
   <img
     class="appear"
-    src={photo.src}
+    src={withBase(photo.src)}
     width={photo.width}
     height={photo.height}
     alt={photo.alt}

@@ -1,16 +1,23 @@
 ---
 import { content } from "../data/content";
+import { withBase } from "../lib/withBase";
 import "../styles/global.css";
 
 const { title, description } = content.meta;
 // Absolute URLs for OG/canonical require `site` in astro.config.ts. Guard so a
 // missing `site` (e.g. mid-config) degrades gracefully instead of throwing.
-const ogImage = Astro.site
-  ? new URL(content.hero.src, Astro.site).href
-  : content.hero.src;
+const heroSrc = withBase(content.hero.src);
+const ogImage = Astro.site ? new URL(heroSrc, Astro.site).href : heroSrc;
 const canonical = Astro.site
   ? new URL(Astro.url.pathname, Astro.site).href
   : undefined;
+// Section background images live in global.css via url(); pass them through the
+// base as :root custom properties so they resolve under a project subpath too.
+const bgVars = `:root{
+  --bg-pattern:url("${withBase("/assets/studio/bg_pattern.webp")}");
+  --bg-message:url("${withBase("/assets/studio/message_bg.webp")}");
+  --bg-access:url("${withBase("/assets/studio/access_bg.webp")}");
+}`;
 ---
 
 <!doctype html>
@@ -37,10 +44,13 @@ const canonical = Astro.site
     <meta property="og:image" content={ogImage} />
     <meta name="twitter:card" content="summary_large_image" />
 
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href={withBase("/favicon.svg")} type="image/svg+xml" />
 
     {/* Self-hosted, pre-subset fonts (served as-is from public/). */}
-    <link rel="stylesheet" href="/fonts/zen-local.css" />
+    <link rel="stylesheet" href={withBase("/fonts/zen-local.css")} />
+
+    {/* Base-aware background-image URLs for global.css (see bgVars above). */}
+    <style is:inline set:html={bgVars}></style>
 
     {
       /* LCP preload parked with <HeroZoom /> (see index.astro): the noren-hero

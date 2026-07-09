@@ -1,5 +1,6 @@
 ---
 import { content } from "../data/content";
+import { withBase } from "../lib/withBase";
 const { join, card, carousel } = content;
 // The card is titled with the みんなでごはん会 brand logo (same mark as the footer).
 const logo = content.footer.logo;
@@ -11,7 +12,7 @@ const logo = content.footer.logo;
       <div class="card-info">
         <img
           class="c-logo"
-          src={logo.src}
+          src={withBase(logo.src)}
           width={logo.width}
           height={logo.height}
           alt="みんなでごはん会"
@@ -19,11 +20,11 @@ const logo = content.footer.logo;
           decoding="async"
         />
         <p class="c-line">
-          <img class="c-icon" src="/assets/icons/clock-4.png" alt="" width="20" height="20" loading="lazy" decoding="async" />
+          <img class="c-icon" src={withBase("/assets/icons/clock-4.png")} alt="" width="20" height="20" loading="lazy" decoding="async" />
           <span>{card.time}</span>
         </p>
         <p class="c-line">
-          <img class="c-icon" src="/assets/icons/map-pin-house.png" alt="" width="20" height="20" loading="lazy" decoding="async" />
+          <img class="c-icon" src={withBase("/assets/icons/map-pin-house.png")} alt="" width="20" height="20" loading="lazy" decoding="async" />
           <span>{card.addressLines[0]}<br />{card.addressLines[1]}<br />{card.addressLines[2]}</span>
         </p>
         <p class="c-line">
@@ -50,7 +51,7 @@ const logo = content.footer.logo;
                   carousel.map((s) => (
                     <div class="slide">
                       <img
-                        src={s.src}
+                        src={withBase(s.src)}
                         width={s.width}
                         height={s.height}
                         alt={s.alt}

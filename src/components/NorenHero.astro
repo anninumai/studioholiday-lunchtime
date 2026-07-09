@@ -1,5 +1,6 @@
 ---
 import { content } from "../data/content";
+import { withBase } from "../lib/withBase";
 
 const { noren, video } = content;
 
@@ -40,7 +41,7 @@ const logoH = 70;
     <video-stage data-play-at="0.5">
       <div class="noren-video">
         <video
-          src={`${video.src}#t=0.01`}
+          src={`${withBase(video.src)}#t=0.01`}
           width={video.width}
           height={video.height}
           muted
@@ -80,7 +81,7 @@ const logoH = 70;
             height="100%"
           >
             <image
-              href={noren.logo}
+              href={withBase(noren.logo)}
               x="0"
               y={`${logoY}%`}
               width="100%"
@@ -134,7 +135,7 @@ const logoH = 70;
         }
         <image
           class="noren-tabs"
-          href={noren.tabs}
+          href={withBase(noren.tabs)}
           x="0"
           y="0"
           width="100%"
