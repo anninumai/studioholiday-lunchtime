@@ -1,32 +1,16 @@
 ---
 import { content } from "../data/content";
-const { logo, wordmark } = content.footer;
+// The footer is the STUDIO HOLIDAY logo followed by the "/ K,D,C,,," credit.
+// The logo is inlined as raw SVG so it can be recolored via CSS `color` (it
+// defaults to its own gray). This replaces the old みんなでごはん会 logo + the
+// "by HOLIDAY KITCHEN / K,D,C,,," wordmark image (KDC is now the credit text).
+import logoSvg from "../assets/studio-holiday-logo.svg?raw";
+const { credit } = content.footer;
 ---
 
 <footer class="footer">
   <div class="footer-inner">
-    <div class="footer-row">
-      <div class="footer-logos">
-        <img
-          class="flogo"
-          src={logo.src}
-          width={logo.width}
-          height={logo.height}
-          alt={logo.alt}
-          loading="lazy"
-          decoding="async"
-        />
-        <img
-          class="fword"
-          src={wordmark.src}
-          width={wordmark.width}
-          height={wordmark.height}
-          alt={wordmark.alt}
-          loading="lazy"
-          decoding="async"
-        />
-      </div>
-    </div>
-    <div class="footer-divider"></div>
+    <span class="sh-logo" set:html={logoSvg}></span>
+    <span class="sh-kdc">{credit}</span>
   </div>
 </footer>

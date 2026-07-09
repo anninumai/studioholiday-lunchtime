@@ -48,6 +48,14 @@ const logoH = 70;
           playsinline
           preload="metadata"></video>
       </div>
+
+      {/* Scroll cue — revealed by <video-stage> once the video loops (2nd play). */}
+      <div class="scroll-hint" aria-hidden="true">
+        <span class="scroll-hint-label">スクロール</span>
+        <svg class="scroll-hint-arrow" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M6 9l6 6 6-6"></path>
+        </svg>
+      </div>
     </video-stage>
 
     {
@@ -133,6 +141,12 @@ const logoH = 70;
           height="10%"
           preserveAspectRatio="xMidYMin meet"
         />
+        {
+          /* A clean rod across the top, drawn over the tab tops. It caps their
+            ragged/clipped top edge so the "cloth hangs on a rod" reads as
+            finished rather than rough. Static, like the band and tabs. */
+        }
+        <rect class="noren-rod" x="0" y="0" width="100%" height="2.2%" rx="6"></rect>
       </svg>
     </noren-cloth>
   </div>
