@@ -28,6 +28,7 @@ jobs:
         # Absolute URLs (canonical / OG) resolve against the Pages domain.
         env:
           SITE_URL: https://anninumai.github.io
+          BASE_PATH: /studioholiday-lunchtime
 
   deploy:
     needs: build
