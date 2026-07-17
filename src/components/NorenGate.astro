@@ -1,0 +1,26 @@
+---
+import { content } from "../data/content";
+// Scroll-linked intro: the brand noren (the transparent logo art) covers the top
+// and lifts as you scroll, fading the intro video in. noren = the same art shown
+// at the top of the site; video = the existing intro clip.
+const { video } = content;
+const noren = "/assets/studio/noren.png";
+---
+
+<noren-gate>
+  <section class="noren-gate">
+    <div class="ng-pin">
+      <video
+        class="ng-video"
+        src={`${video.src}#t=0.01`}
+        width={video.width}
+        height={video.height}
+        muted
+        playsinline
+        preload="metadata"></video>
+      <div class="ng-noren">
+        <img class="ng-noren-img" src={noren} alt="みんなでごはん会 のれん" />
+      </div>
+    </div>
+  </section>
+</noren-gate>

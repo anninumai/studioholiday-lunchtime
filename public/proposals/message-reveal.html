@@ -1,0 +1,624 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>メッセージ登場演出 比較 | みんなでごはん会</title>
+  <meta name="description" content="サイト一番の見せ場「メッセージセクション」が画面に入った瞬間の登場演出を、実際に再生・比較できるラボ。" />
+  <link rel="stylesheet" href="/fonts/zen-local.css" />
+  <style>
+    :root {
+      --green: #6ab31d;
+      --orange: #ff5035;
+      --ink: #333333;
+      --surface: #ffffff;
+      --hairline: #e6e6e6;
+      --paper: #f6f7f1;
+      --maru: "Zen Maru Gothic", "Hiragino Maru Gothic ProN", sans-serif;
+      --r-card: 20px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { background: var(--paper); color: var(--ink); font-family: var(--maru); -webkit-font-smoothing: antialiased; }
+    body { line-height: 1.4; letter-spacing: 0.06em; }
+    .jp { letter-spacing: 0.12em; }
+    a { color: var(--green); text-decoration: none; }
+    a:hover { color: var(--orange); text-decoration: underline; }
+    .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px 96px; }
+
+    header.top {
+      background: radial-gradient(120% 140% at 90% -20%, rgba(106,179,29,.14), transparent 60%), var(--surface);
+      border-bottom: 1px solid var(--hairline);
+    }
+    .top-inner { max-width: 1120px; margin: 0 auto; padding: 40px 24px 34px; }
+    .eyebrow { display: inline-block; font-size: 12px; font-weight: 700; color: var(--green);
+      border: 1px solid var(--green); border-radius: 999px; padding: 5px 14px; letter-spacing: .18em; }
+    h1 { font-size: clamp(24px, 4vw, 36px); font-weight: 700; margin: 18px 0 10px; letter-spacing: .1em; }
+    .lede { max-width: 760px; color: #555; font-size: 15px; }
+    .lede b { color: var(--ink); }
+
+    section { margin-top: 56px; }
+    .sec-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 18px; flex-wrap: wrap; }
+    .sec-head h2 { font-size: 20px; font-weight: 700; letter-spacing: .1em; }
+    .sec-head .num { color: var(--green); font-weight: 700; }
+    .sec-head p { color: #777; font-size: 13px; }
+
+    .stage-card { background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--r-card);
+      padding: 20px; display: grid; grid-template-columns: 1fr 300px; gap: 22px; }
+    @media (max-width: 900px) { .stage-card { grid-template-columns: 1fr; } }
+    .stage-hold { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+
+    /* ---- stage (mimics the real message section) ---- */
+    .stage { position: relative; width: 100%; aspect-ratio: 16 / 10; margin: 0 auto;
+      border-radius: 14px; overflow: hidden; background: #fff; box-shadow: inset 0 0 0 1px rgba(0,0,0,.06); }
+    .stage.sp { aspect-ratio: 10 / 16; max-width: 340px; }
+    .msg-scene { position: absolute; inset: 0; transform-origin: 50% 60%; }
+    .msg-photo { position: absolute; inset: 0; overflow: hidden; will-change: opacity, filter, clip-path; }
+    .msg-photo-kb { position: absolute; inset: 0; }
+    .msg-photo-img { position: absolute; inset: -4%; background: url("/assets/studio/message_bg.webp") 50% 50% / cover no-repeat;
+      will-change: transform; }
+    .msg-vignette { position: absolute; inset: 0; z-index: 1; pointer-events: none; opacity: 0;
+      background: radial-gradient(115% 80% at 50% 42%, transparent 45%, rgba(0,0,0,.5) 100%); }
+    .msg-grain { position: absolute; inset: 0; z-index: 2; pointer-events: none; opacity: 0; mix-blend-mode: overlay;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/></svg>"); }
+    .msg-inner { position: absolute; left: 0; right: 0; bottom: 6%; z-index: 3;
+      display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 0 24px; text-align: center; }
+    .msg-line { color: #fff; font-weight: 700; letter-spacing: .14em; line-height: 1.5;
+      font-size: clamp(11px, 1.5vw, 15px); text-shadow: 0 1px 6px rgba(0,0,0,.28); will-change: opacity, transform; }
+    .stage.sp .msg-line { font-size: 13px; }
+
+    .phase-tag { position: absolute; left: 12px; top: 12px; z-index: 5; font-size: 11px; font-weight: 700;
+      letter-spacing: .12em; color: #fff; background: rgba(0,0,0,.42); padding: 4px 10px; border-radius: 999px; }
+
+    .stage-meta { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 12px; color: #888; }
+    .stage-meta b { color: var(--ink); }
+    .desc { background: #fcfdfa; border: 1px solid var(--hairline); border-left: 3px solid var(--green);
+      border-radius: 10px; padding: 12px 14px; font-size: 13px; color: #555; }
+    .desc b { color: var(--ink); }
+
+    .controls { display: flex; flex-direction: column; gap: 16px; }
+    .ctl-group { border: 1px solid var(--hairline); border-radius: 14px; padding: 14px; background: #fcfdfa; }
+    .ctl-group h4 { font-size: 12px; color: #888; font-weight: 700; letter-spacing: .12em; margin-bottom: 10px; }
+    .seg { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .seg button, .pill { font-family: var(--maru); font-size: 12px; font-weight: 700; letter-spacing: .04em;
+      border: 1px solid var(--hairline); background: #fff; color: var(--ink); border-radius: 999px; padding: 9px 6px;
+      cursor: pointer; transition: background .2s, color .2s, border-color .2s; }
+    .seg button:hover, .pill:hover { border-color: var(--green); color: var(--green); }
+    .seg button.active, .pill.active { background: var(--green); border-color: var(--green); color: #fff; }
+    .replay { grid-column: 1 / -1; background: var(--green); color: #fff; border-color: var(--green); padding: 12px; font-size: 13px; }
+    .replay:hover { background: var(--orange); border-color: var(--orange); color: #fff; }
+    .row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 10px 0; }
+    .row label { font-size: 12px; color: #666; }
+    .row output { font-size: 12px; color: var(--ink); font-weight: 700; min-width: 62px; text-align: right; }
+    input[type=range] { width: 100%; accent-color: var(--green); }
+    select { font-family: var(--maru); font-size: 12px; padding: 7px 8px; border-radius: 8px; border: 1px solid var(--hairline);
+      background: #fff; color: var(--ink); width: 100%; }
+    .toggles { display: flex; flex-direction: column; gap: 8px; }
+    .tg { display: flex; align-items: center; gap: 9px; font-size: 12px; color: #555; cursor: pointer; }
+    .tg input { accent-color: var(--green); width: 15px; height: 15px; }
+
+    .grid4 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    @media (max-width: 720px) { .grid4 { grid-template-columns: 1fr; } }
+    .mini { background: var(--surface); border: 1px solid var(--hairline); border-radius: 14px; padding: 12px; }
+    .mini .stage { aspect-ratio: 16/10; border-radius: 10px; }
+    .mini h3 { font-size: 13px; font-weight: 700; margin: 10px 2px 2px; letter-spacing: .08em; }
+    .mini p { font-size: 12px; color: #888; margin: 0 2px; }
+
+    .cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+    @media (max-width: 760px) { .cards { grid-template-columns: 1fr; } }
+    .card { background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--r-card); padding: 18px; }
+    .card .badge { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; letter-spacing: .1em; color: var(--green); }
+    .card h3 { font-size: 15px; font-weight: 700; margin: 8px 0 8px; letter-spacing: .06em; }
+    .card p { font-size: 13px; color: #555; margin-bottom: 8px; }
+    .card ul { list-style: none; font-size: 12px; color: #555; }
+    .card li { padding-left: 16px; position: relative; margin: 3px 0; }
+    .card li.pro::before { content: "＋"; position: absolute; left: 0; color: var(--green); font-weight: 700; }
+    .card li.con::before { content: "−"; position: absolute; left: 0; color: var(--orange); font-weight: 700; }
+    .meta-row { display: flex; gap: 10px; flex-wrap: wrap; margin: 10px 0 6px; }
+    .chip { font-size: 11px; padding: 3px 9px; border-radius: 999px; background: #f1f4ea; color: #5a7a1f; font-weight: 700; letter-spacing: .06em; }
+    .chip.diff { background: #fdeeea; color: #c0402a; }
+    .src { font-size: 11px; color: #999; }
+    .src a { font-size: 11px; }
+    .info { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    @media (max-width: 760px) { .info { grid-template-columns: 1fr; } }
+
+    .reco { background: radial-gradient(120% 130% at 100% 0%, rgba(106,179,29,.10), transparent 55%), var(--surface);
+      border: 1px solid var(--hairline); border-radius: var(--r-card); padding: 26px; }
+    .reco h2 { font-size: 20px; font-weight: 700; letter-spacing: .1em; margin-bottom: 6px; }
+    .rank { display: grid; gap: 12px; margin-top: 16px; }
+    .rank-item { display: grid; grid-template-columns: 40px 1fr; gap: 14px; align-items: start; padding: 14px;
+      border: 1px solid var(--hairline); border-radius: 14px; background: #fcfdfa; }
+    .rank-item.best { border-color: var(--green); background: #f6fbee; }
+    .rank-item .medal { font-size: 22px; font-weight: 700; color: var(--green); text-align: center; }
+    .rank-item h4 { font-size: 15px; margin-bottom: 5px; letter-spacing: .06em; }
+    .rank-item p { font-size: 13px; color: #555; }
+    .spec { margin-top: 10px; font-size: 12px; color: #6a7a4a; }
+    .spec code { background: #eef3e2; border-radius: 5px; padding: 1px 6px; font-size: 11.5px; color: #46610f; }
+    .steps { counter-reset: s; margin-top: 18px; display: grid; gap: 10px; }
+    .steps li { list-style: none; position: relative; padding: 12px 14px 12px 44px; background: #fff;
+      border: 1px solid var(--hairline); border-radius: 12px; font-size: 13px; color: #555; }
+    .steps li::before { counter-increment: s; content: counter(s); position: absolute; left: 12px; top: 12px;
+      width: 22px; height: 22px; border-radius: 50%; background: var(--green); color: #fff; font-size: 12px; font-weight: 700; text-align: center; line-height: 22px; }
+    .steps b { color: var(--ink); }
+    .note { font-size: 12px; color: #999; margin-top: 10px; }
+    footer.foot { margin-top: 72px; border-top: 1px solid var(--hairline); padding: 24px 0; text-align: center; color: #aaa; font-size: 12px; }
+
+    @keyframes ni-kenburns { from { transform: scale(1) translate(0, 0); } to { transform: scale(1.08) translate(-1.5%, -2%); } }
+    .msg-photo-kb.kb { animation: ni-kenburns 22s ease-in-out infinite alternate; }
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div class="top-inner">
+      <span class="eyebrow jp">UI COMPARISON</span>
+      <h1 class="jp">メッセージ登場演出 くらべ</h1>
+      <p class="lede jp">
+        サイト<b>一番の見せ場</b>「メッセージセクション」が画面に入った瞬間の<b>登場演出</b>を、
+        実際に再生して比べられます。今は普通にスクロールインするだけ——ここに“特別な一瞬”を。
+        ブランドの「静かでゆっくり」に合う案を選んでください。
+      </p>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <!-- ========== STAGE ========== -->
+    <section id="lab">
+      <div class="sec-head">
+        <h2><span class="num">01</span> 登場演出ラボ</h2>
+        <p class="jp">▶再生（または下スクロールで自動発火）。右で手法・尺・イージング・行stagger・アンビエントを調整。</p>
+      </div>
+      <div class="stage-card">
+        <div class="stage-hold">
+          <div class="stage" id="mainStage"></div>
+          <div class="stage-meta">
+            <span class="jp">現在：<b id="curName">③ Blur+Fade+Scale</b></span>
+            <span class="jp">写真 <b id="curDur">900ms</b> ／ トリガー：スクロールで一度</span>
+          </div>
+          <div class="desc jp" id="curDesc"></div>
+        </div>
+        <div class="controls">
+          <div class="ctl-group">
+            <h4 class="jp">手法（写真の登場）</h4>
+            <div class="seg" id="motionSeg">
+              <button data-m="fadeup" class="jp">① Fade-up</button>
+              <button data-m="blurfade" class="jp">② Blur+Fade</button>
+              <button data-m="blurscale" class="active jp">③ Blur+Fade+Scale</button>
+              <button data-m="clip" class="jp">④ Clip wipe</button>
+              <button data-m="scale" class="jp">⑤ Scale settle</button>
+              <button data-m="parallax" class="jp">⑥ Parallax</button>
+              <button data-m="reco" class="jp">⑦ 推奨コンボ</button>
+              <button class="replay jp" id="replayBtn">▶ 再生 / Replay</button>
+            </div>
+          </div>
+          <div class="ctl-group">
+            <h4 class="jp">タイミング</h4>
+            <div class="row"><label class="jp">写真の尺</label><output id="durOut">900ms</output></div>
+            <input type="range" id="dur" min="400" max="1600" step="50" value="900" />
+            <div class="row"><label class="jp">イージング</label></div>
+            <select id="ease">
+              <option value="expo">ease-out-expo (0.16,1,0.3,1)（推奨）</option>
+              <option value="quint">ease-out-quint (0.22,1,0.36,1)</option>
+              <option value="material">material (0.4,0,0.2,1)</option>
+              <option value="linear">linear</option>
+            </select>
+          </div>
+          <div class="ctl-group">
+            <h4 class="jp">テキスト</h4>
+            <label class="tg jp"><input type="checkbox" id="tgStagger" checked /> 3行を1行ずつ stagger 表示</label>
+            <div class="row"><label class="jp">行間ディレイ</label><output id="stagOut">130ms</output></div>
+            <input type="range" id="stag" min="0" max="320" step="10" value="130" />
+          </div>
+          <div class="ctl-group">
+            <h4 class="jp">アンビエント（重ねがけ）</h4>
+            <div class="toggles">
+              <label class="tg jp"><input type="checkbox" id="tgVig" /> ビネット（周辺を落とす）</label>
+              <label class="tg jp"><input type="checkbox" id="tgKb" /> Ken Burns（ゆっくり寄り）</label>
+              <label class="tg jp"><input type="checkbox" id="tgBreath" /> セクションの“ひと呼吸”拡大</label>
+              <label class="tg jp"><input type="checkbox" id="tgGrain" /> フィルムグレイン</label>
+              <label class="tg jp"><input type="checkbox" id="tgRm" /> prefers-reduced-motion をシミュレート</label>
+            </div>
+          </div>
+          <div class="ctl-group">
+            <h4 class="jp">画面</h4>
+            <div class="seg" style="grid-template-columns:1fr 1fr;">
+              <button class="pill active" data-dev="pc">PC 16:10</button>
+              <button class="pill" data-dev="sp">SP 9:16</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="note jp">※ 実際の <code>message_bg.webp</code> と Zen Maru Gothic・本番コピーで再現したモック。演出は写真/テキスト/アンビエントの重ねがけ。</p>
+    </section>
+
+    <!-- ========== COMPARISON ========== -->
+    <section id="compare">
+      <div class="sec-head">
+        <h2><span class="num">02</span> 主要案 横並び</h2>
+        <p class="jp">各パネルは自動ループ。“見せ場らしさ”の違いを一目で。</p>
+      </div>
+      <div class="grid4" id="grid4"></div>
+    </section>
+
+    <!-- ========== RESEARCH ========== -->
+    <section id="research">
+      <div class="sec-head">
+        <h2><span class="num">03</span> リサーチ：セクション登場演出 8手法</h2>
+        <p class="jp">「見せ場が画面に入る瞬間」を演出する手法。派手すぎず“静かに立ち上がる”ものが本命。</p>
+      </div>
+      <div class="cards">
+        <div class="card">
+          <span class="badge">① 実装：IO＋CSS（軽量）</span>
+          <h3 class="jp">Fade / Fade-up</h3>
+          <p class="jp">opacity 0→1＋わずかな translateY。既存 <code>.appear</code> と同系。見せ場では尺を長め（800–1100ms）＋深いease-outで“上質化”。</p>
+          <ul><li class="pro jp">最軽量・全対応・アクセシブル</li><li class="con jp">単体だと“普通のカード出現”に見えがち</li></ul>
+          <div class="meta-row"><span class="chip">難易度：低</span><span class="chip">GPU◎</span></div>
+          <p class="src"><a href="https://dev.to/jslim/fading-up-sections-using-intersection-observer-3fhj" target="_blank" rel="noopener">IO fade-up</a></p>
+        </div>
+        <div class="card">
+          <span class="badge">② 実装：IO＋CSS filter</span>
+          <h3 class="jp">Blur-in（ボケ→シャープ）</h3>
+          <p class="jp"><code>filter: blur(10px)→0</code>＋fade。レンズがピントを合わせるような“高級・シネマ感”。食＆温かみの写真に好相性。</p>
+          <ul><li class="pro jp">安価な工数で一気に上質</li><li class="con jp">blurは塗り負荷大。半径≤12px・大面積はモバイル注意</li></ul>
+          <div class="meta-row"><span class="chip">難易度：低〜中</span><span class="chip">塗り負荷△</span></div>
+          <p class="src"><a href="https://css-tricks.com/almanac/functions/b/blur/" target="_blank" rel="noopener">blur() 性能</a></p>
+        </div>
+        <div class="card">
+          <span class="badge">③ 実装：IO＋CSS clip-path</span>
+          <h3 class="jp">Clip-path ワイプ</h3>
+          <p class="jp"><code>inset(100% 0 0 0)→inset(0)</code> で下から現れる“めくり”。<b>レイアウトシフト無し・GPU加速</b>。</p>
+          <ul><li class="pro jp">「シーンが現れる」編集的な一手</li><li class="con jp">硬いワイプは“静か”に反する→遅いeaseとfade併用</li></ul>
+          <div class="meta-row"><span class="chip">難易度：中</span><span class="chip">GPU◎</span></div>
+          <p class="src"><a href="https://emilkowal.ski/ui/the-magic-of-clip-path" target="_blank" rel="noopener">Emil: clip-path</a></p>
+        </div>
+        <div class="card">
+          <span class="badge">④ 実装：CSS transform</span>
+          <h3 class="jp">Scale settle / Ken Burns</h3>
+          <p class="jp">登場：<code>scale(1.06→1)</code>＋fadeで“収まる”高級ヒーローの定番。Ken Burns：15–25sの緩い寄りで“生きた写真”。</p>
+          <ul><li class="pro jp">transformのみで軽い／温度感UP</li><li class="con jp">寄せ過ぎは写真（のれん/提灯）が切れる。振幅≤8%</li></ul>
+          <div class="meta-row"><span class="chip">難易度：低</span><span class="chip">GPU◎</span></div>
+          <p class="src"><a href="https://www.kirupa.com/html5/ken_burns_effect_css.htm" target="_blank" rel="noopener">Ken Burns CSS</a></p>
+        </div>
+        <div class="card">
+          <span class="badge">⑤ 実装：scroll()／JS</span>
+          <h3 class="jp">Parallax（写真だけ遅く）</h3>
+          <p class="jp">スクロールで写真がテキストより遅く動き“奥行き”。<code>transform: translate</code> で。</p>
+          <ul><li class="pro jp">控えめなら上品な立体感</li><li class="con jp">前庭系の酔い要因。<b>reduced-motionで必ず停止</b>。やり過ぎは“静か”に反する</li></ul>
+          <div class="meta-row"><span class="chip diff">難易度：中</span><span class="chip">a11y注意</span></div>
+          <p class="src"><a href="https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions.html" target="_blank" rel="noopener">WCAG 2.3.3</a></p>
+        </div>
+        <div class="card">
+          <span class="badge">⑥ 実装：IO ／ scroll()</span>
+          <h3 class="jp">On-enter（一度きり）vs Scrub</h3>
+          <p class="jp">見せ場は<b>IntersectionObserverで一度きり</b>が最適。scrubはスクロール速度依存・逆再生・半端停止で“モーメント”が壊れる。</p>
+          <ul><li class="pro jp">IO＝最軽量・自前クロックで確実に着地</li><li class="con jp">CSS scroll-drivenはFirefox既定オフ→退行対策必須</li></ul>
+          <div class="meta-row"><span class="chip">難易度：低（IO）</span></div>
+          <p class="src"><a href="https://www.joshwcomeau.com/animation/scroll-driven-animations/" target="_blank" rel="noopener">Comeau</a> ／ <a href="https://developer.chrome.com/blog/scroll-triggered-animations" target="_blank" rel="noopener">animation-trigger(’26)</a></p>
+        </div>
+        <div class="card">
+          <span class="badge">⑦ 実装：per-line delay</span>
+          <h3 class="jp">テキスト 行ごと stagger</h3>
+          <p class="jp">3行を少し遅らせて順に fade＋上昇。視線を下（メッセージ）へ誘導＝コピー主役の見せ場に最適。<code>transition-delay</code> だけ（ライブラリ不要）。</p>
+          <ul><li class="pro jp">コピーが立つ／安価</li><li class="con jp">遅延を盛り過ぎると“もたつく”。合計~1.0–1.3s</li></ul>
+          <div class="meta-row"><span class="chip">難易度：低</span><span class="chip">GPU◎</span></div>
+          <p class="src"><a href="https://gsap.com/docs/v3/Plugins/SplitText/" target="_blank" rel="noopener">SplitText（無料）</a></p>
+        </div>
+        <div class="card">
+          <span class="badge">⑧ 実装：overlay/filter</span>
+          <h3 class="jp">アンビエント（特別感の隠し味）</h3>
+          <p class="jp">ビネット open／brightness ランプ（照明が灯る）／微グレイン／全体を <code>scale .985→1</code> の“ひと呼吸”。</p>
+          <ul><li class="pro jp">静かに“特別”を足せる</li><li class="con jp">アニメ・グレインと大blurは塗り負荷。控えめに</li></ul>
+          <div class="meta-row"><span class="chip">難易度：低〜中</span></div>
+          <p class="src"><a href="https://css-tricks.com/grainy-gradients/" target="_blank" rel="noopener">Grain(SVG)</a></p>
+        </div>
+      </div>
+
+      <div class="sec-head" style="margin-top:36px;"><h2 style="font-size:16px;"><span class="num">＋</span> イージング・尺・トリガー</h2></div>
+      <div class="info">
+        <div class="card"><h3 class="jp">イージング</h3><p class="jp">到着して“収まる”減速カーブ。<b>ease-out-expo <code>cubic-bezier(0.16,1,0.3,1)</code></b>（本命）／quint <code>(0.22,1,0.36,1)</code>／テキストは material <code>(0.4,0,0.2,1)</code>。bounce/linearは避ける。</p></div>
+        <div class="card"><h3 class="jp">尺</h3><p class="jp">写真の登場 <b>800–1100ms</b>。各行 600–800ms＋行間 <b>100–160ms</b>（合計~1.0–1.3s）。Ken Burns 15–25s。~1200ms超は“もたつき”。</p></div>
+        <div class="card"><h3 class="jp">トリガー & a11y</h3><p class="jp"><b>IObserverで一度きり</b>（threshold~0.3、発火後 <code>unobserve</code>）。<code>prefers-reduced-motion</code> では隠し状態を作らず即表示。parallax/大ズームを最優先で無効化。</p></div>
+      </div>
+    </section>
+
+    <!-- ========== RECOMMENDATION ========== -->
+    <section id="reco">
+      <div class="reco">
+        <h2 class="jp">推奨案</h2>
+        <p class="lede jp" style="color:#555;">「静かでゆっくり」な見せ場に、最小工数で最大の“特別感”。すべて transform/opacity/filter＝軽量・依存ゼロ・退行安全。</p>
+        <div class="rank">
+          <div class="rank-item best">
+            <div class="medal">1</div>
+            <div>
+              <h4 class="jp">写真：Blur-in＋Fade＋micro-Scale（IOで一度） ＋ テキスト：3行 stagger</h4>
+              <p class="jp">写真が“ピントを結ぶ”ように立ち上がり（<code>opacity0→1 / blur10→0 / scale1.06→1</code>）、少し遅れて3行が順に浮かぶ。コピーが主役の見せ場に最適。任意で <b>ビネット</b>＋<b>緩いKen Burns</b>で温度感を追加。</p>
+              <p class="spec">尺：写真 <code>~900ms</code> ease-out-expo ／ 各行 <code>~700ms</code>・行間 <code>~130ms</code>（写真の~180ms後から）</p>
+            </div>
+          </div>
+          <div class="rank-item">
+            <div class="medal">2</div>
+            <div><h4 class="jp">Clip-path ワイプ（下→上）＋ Fade ＋ テキスト stagger</h4>
+            <p class="jp">“シーンがめくれて現れる”編集的な見せ方。よりデザイン主張が強い。硬さを遅いeaseとfadeで和らげる。</p></div>
+          </div>
+          <div class="rank-item">
+            <div class="medal">3</div>
+            <div><h4 class="jp">Fade-up（尺長め）＋ テキスト stagger</h4>
+            <p class="jp">最も安全・最小。既存 <code>.appear</code> の延長で確実。まず入れるならこれ。</p></div>
+          </div>
+        </div>
+        <p class="note jp" style="margin-top:16px;">※ Parallax／scroll-scrub は見せ場には不向き（逆再生・半端停止でモーメントが崩れる／酔い要因）。アンビエント用途に限定。</p>
+
+        <div class="sec-head" style="margin:26px 0 4px;"><h2 style="font-size:16px;"><span class="num">→</span> 本体（Astro）への落とし込み</h2></div>
+        <ol class="steps">
+          <li class="jp"><b><code>.appear--hero</code> 変種</b>を <code>global.css</code> に定義（<code>opacity/filter/transform</code> の隠し状態→<code>.in</code>で解除、ease-out-expo・~900ms）。既存の <code>.appear</code>/<code>appear-observer.ts</code> をそのまま再利用。</li>
+          <li class="jp"><b>MessageLead.astro</b> の各行を <code>&lt;span class="msg-line"&gt;</code> 化し、<code>transition-delay</code> を 0/130/260ms（または <code>--i</code> 変数）で stagger。</li>
+          <li class="jp"><b>写真レイヤー</b>を <code>.message::before</code> から要素化 or 疑似要素に <code>.appear--hero</code> を適用（blur/scale/opacity）。<code>appear-observer</code> の threshold を ~0.3 に。</li>
+          <li class="jp"><b>reduced-motion</b>：既存ブロックで <code>.appear--hero</code> も即表示（隠し状態を無効）。blur/scaleを切る。</li>
+          <li class="jp"><b>任意アンビエント</b>：ビネットのpseudo＋<code>@keyframes</code> Ken Burns（<code>@media (prefers-reduced-motion: no-preference)</code> 内）。</li>
+        </ol>
+      </div>
+    </section>
+  </div>
+
+  <footer class="foot jp">みんなでごはん会 — Message Reveal Lab（提案用モック）／ public/proposals/message-reveal.html</footer>
+
+  <script>
+  (() => {
+    "use strict";
+    const cubicBezier = (x1, y1, x2, y2) => {
+      const cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx;
+      const cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by;
+      const fx = t => ((ax * t + bx) * t + cx) * t;
+      const dfx = t => (3 * ax * t + 2 * bx) * t + cx;
+      const fy = t => ((ay * t + by) * t + cy) * t;
+      return x => {
+        let t = x;
+        for (let i = 0; i < 6; i++) { const e = fx(t) - x, d = dfx(t); if (Math.abs(e) < 1e-4 || d === 0) break; t -= e / d; }
+        return fy(Math.min(1, Math.max(0, t)));
+      };
+    };
+    const clamp01 = v => v < 0 ? 0 : v > 1 ? 1 : v;
+    const lerp = (a, b, t) => a + (b - a) * t;
+    const EASE = {
+      expo: cubicBezier(0.16, 1, 0.3, 1),
+      quint: cubicBezier(0.22, 1, 0.36, 1),
+      material: cubicBezier(0.4, 0, 0.2, 1),
+      linear: t => t,
+    };
+
+    const INFO = {
+      fadeup: { name: "① Fade-up", desc: "<b>opacity＋わずかな上昇。</b> 最も安全で軽い。見せ場では尺長め＋深いease-outで上質に。" },
+      blurfade: { name: "② Blur+Fade", desc: "<b>ボケ→シャープ＋fade。</b> レンズがピントを結ぶ“シネマ感”。食＆温かみの写真に好相性。" },
+      blurscale: { name: "③ Blur+Fade+Scale", desc: "<b>ボケ→シャープ＋fade＋微ズーム収束。</b> “ピントを結んで収まる”高級ヒーローの決定版（本命写真演出）。" },
+      clip: { name: "④ Clip wipe", desc: "<b>下→上へめくれて出現。</b> レイアウトシフト無し・GPU加速。編集的で強め。遅いeaseで和らげる。" },
+      scale: { name: "⑤ Scale settle", desc: "<b>1.08→1へ収まる＋fade。</b> シンプルな“定位置に収まる”上質感。blur無し。" },
+      parallax: { name: "⑥ Parallax", desc: "<b>写真がテキストより遅れて動く。</b> 奥行き。本来スクロール連動＝ここでは簡易再現。見せ場には非推奨。" },
+      reco: { name: "⑦ 推奨コンボ", desc: "<b>③＋3行stagger＋ビネット＋緩いKen Burns。</b> 静かに立ち上がり、コピーが順に灯る本命。" },
+    };
+
+    const L = [
+      "こんにちは、スタジオホリデーです。詳細、メッセージは仮置きです。",
+      "みんなでごはんを食べる会を開催中",
+      "同じ釜の飯を食うという体験から新しい体験や仕事をしようよと<br>コラボレーションが生まれることが僕たちは大好きです。",
+    ];
+
+    function createStage(root) {
+      root.innerHTML = `
+        <div class="phase-tag jp" data-tag>準備</div>
+        <div class="msg-scene" data-scene>
+          <div class="msg-photo" data-photo><div class="msg-photo-kb" data-kb><div class="msg-photo-img"></div></div></div>
+          <div class="msg-vignette" data-vig></div>
+          <div class="msg-grain" data-grain></div>
+          <div class="msg-inner" data-inner>
+            <p class="msg-line">${L[0]}</p>
+            <p class="msg-line">${L[1]}</p>
+            <p class="msg-line">${L[2]}</p>
+          </div>
+        </div>`;
+      const el = {
+        scene: root.querySelector("[data-scene]"),
+        photo: root.querySelector("[data-photo]"),
+        kb: root.querySelector("[data-kb]"),
+        img: root.querySelector(".msg-photo-img"),
+        vig: root.querySelector("[data-vig]"),
+        grain: root.querySelector("[data-grain]"),
+        lines: Array.from(root.querySelectorAll(".msg-line")),
+        tag: root.querySelector("[data-tag]"),
+      };
+      let raf = 0;
+
+      const stop = () => { if (raf) cancelAnimationFrame(raf); raf = 0; };
+
+      const setPhoto = (m, pp) => {
+        // reset
+        el.photo.style.opacity = "1";
+        el.photo.style.filter = "none";
+        el.photo.style.clipPath = "none";
+        el.img.style.transform = "none";
+        if (m === "fadeup") {
+          el.photo.style.opacity = pp.toFixed(3);
+          el.img.style.transform = `translateY(${lerp(3, 0, pp).toFixed(2)}%)`;
+        } else if (m === "blurfade") {
+          el.photo.style.opacity = pp.toFixed(3);
+          el.photo.style.filter = `blur(${lerp(10, 0, pp).toFixed(2)}px) brightness(${lerp(0.9, 1, pp).toFixed(3)})`;
+        } else if (m === "blurscale" || m === "reco") {
+          el.photo.style.opacity = pp.toFixed(3);
+          el.photo.style.filter = `blur(${lerp(10, 0, pp).toFixed(2)}px) brightness(${lerp(0.9, 1, pp).toFixed(3)})`;
+          el.img.style.transform = `scale(${lerp(1.06, 1, pp).toFixed(4)})`;
+        } else if (m === "clip") {
+          el.photo.style.opacity = lerp(0.4, 1, clamp01(pp * 2)).toFixed(3);
+          el.photo.style.clipPath = `inset(${lerp(100, 0, pp).toFixed(2)}% 0 0 0)`;
+        } else if (m === "scale") {
+          el.photo.style.opacity = pp.toFixed(3);
+          el.img.style.transform = `scale(${lerp(1.08, 1, pp).toFixed(4)})`;
+        } else if (m === "parallax") {
+          el.photo.style.opacity = clamp01(pp * 1.4).toFixed(3);
+          el.img.style.transform = `translateY(${lerp(8, 0, pp).toFixed(2)}%)`;
+        }
+      };
+
+      const setLine = (i, pt) => {
+        el.lines[i].style.opacity = pt.toFixed(3);
+        el.lines[i].style.transform = `translateY(${lerp(16, 0, pt).toFixed(2)}px)`;
+      };
+
+      const setAmbient = (pp, cfg) => {
+        el.vig.style.opacity = cfg.vignette ? (pp * 0.55).toFixed(3) : "0";
+        el.grain.style.opacity = cfg.grain ? "0.5" : "0";
+        el.scene.style.transform = cfg.breath ? `scale(${lerp(0.985, 1, pp).toFixed(4)})` : "none";
+        el.kb.classList.toggle("kb", !!cfg.kb);
+      };
+
+      const applyStatic = (cfg) => {
+        stop();
+        setPhoto(cfg.motion === "reco" ? "reco" : cfg.motion, 1);
+        el.lines.forEach((_, i) => setLine(i, 1));
+        el.vig.style.opacity = cfg.vignette ? "0.2" : "0";
+        el.grain.style.opacity = cfg.grain ? "0.5" : "0";
+        el.scene.style.transform = "none";
+        el.kb.classList.remove("kb");
+        el.tag.textContent = "静的（reduced-motion）";
+      };
+
+      const play = (cfg) => {
+        stop();
+        if (cfg.reduced) { applyStatic(cfg); return; }
+        const m = cfg.motion;
+        const stagger = cfg.stagger || m === "reco";
+        const photoDur = cfg.dur;
+        const lead = stagger ? 180 : 0;
+        const lineDur = stagger ? 700 : photoDur;
+        const stag = stagger ? cfg.stag : 0;
+        const lastLine = lead + 2 * stag;
+        const total = Math.max(photoDur, lastLine + lineDur) + 120;
+        const eP = EASE[cfg.ease] || EASE.expo;
+        const eT = EASE.material;
+
+        // initial
+        setPhoto(m, 0);
+        el.lines.forEach((_, i) => setLine(i, 0));
+        setAmbient(0, cfg);
+        el.tag.textContent = "登場中";
+
+        const t0 = performance.now();
+        const frame = (now) => {
+          const e = now - t0;
+          const pp = eP(clamp01(e / photoDur));
+          setPhoto(m, pp);
+          setAmbient(pp, cfg);
+          for (let i = 0; i < 3; i++) {
+            const start = lead + i * stag;
+            const pt = eT(clamp01((e - start) / lineDur));
+            setLine(i, pt);
+          }
+          if (e < total) { raf = requestAnimationFrame(frame); }
+          else { raf = 0; el.tag.textContent = "完了"; }
+        };
+        raf = requestAnimationFrame(frame);
+        return total;
+      };
+
+      const idle = (cfg) => {
+        stop();
+        setPhoto(cfg ? (cfg.motion) : "blurscale", 0);
+        el.lines.forEach((_, i) => setLine(i, 0));
+        el.vig.style.opacity = "0";
+        el.grain.style.opacity = (cfg && cfg.grain) ? "0.5" : "0";
+        el.scene.style.transform = "none";
+        el.kb.classList.remove("kb");
+        el.tag.textContent = "準備";
+      };
+
+      return { root, play, idle, applyStatic, stop };
+    }
+
+    // ---------- main stage ----------
+    const main = createStage(document.getElementById("mainStage"));
+    const state = { motion: "blurscale", dur: 900, ease: "expo", stagger: true, stag: 130,
+      vignette: false, kb: false, breath: false, grain: false, reduced: false };
+    const $ = id => document.getElementById(id);
+    const syncInfo = () => {
+      $("curName").textContent = INFO[state.motion].name;
+      $("curDesc").innerHTML = INFO[state.motion].desc;
+      $("curDur").textContent = state.reduced ? "静的" : state.dur + "ms";
+    };
+    const play = () => { main.play({ ...state }); syncInfo(); };
+
+    document.querySelectorAll("#motionSeg [data-m]").forEach(b => {
+      b.addEventListener("click", () => {
+        document.querySelectorAll("#motionSeg [data-m]").forEach(x => x.classList.remove("active"));
+        b.classList.add("active");
+        state.motion = b.dataset.m;
+        // reco preset reflects toggles visually
+        if (state.motion === "reco") { state.vignette = true; state.kb = true; $("tgVig").checked = true; $("tgKb").checked = true; }
+        play();
+      });
+    });
+    $("replayBtn").addEventListener("click", play);
+    $("dur").addEventListener("input", e => { state.dur = +e.target.value; $("durOut").textContent = state.dur + "ms"; syncInfo(); });
+    $("dur").addEventListener("change", play);
+    $("ease").addEventListener("change", e => { state.ease = e.target.value; play(); });
+    $("tgStagger").addEventListener("change", e => { state.stagger = e.target.checked; play(); });
+    $("stag").addEventListener("input", e => { state.stag = +e.target.value; $("stagOut").textContent = state.stag + "ms"; });
+    $("stag").addEventListener("change", play);
+    $("tgVig").addEventListener("change", e => { state.vignette = e.target.checked; play(); });
+    $("tgKb").addEventListener("change", e => { state.kb = e.target.checked; play(); });
+    $("tgBreath").addEventListener("change", e => { state.breath = e.target.checked; play(); });
+    $("tgGrain").addEventListener("change", e => { state.grain = e.target.checked; play(); });
+    $("tgRm").addEventListener("change", e => { state.reduced = e.target.checked; if (state.reduced) { main.applyStatic({ ...state }); syncInfo(); } else play(); });
+    document.querySelectorAll("[data-dev]").forEach(b => {
+      b.addEventListener("click", () => {
+        document.querySelectorAll("[data-dev]").forEach(x => x.classList.remove("active"));
+        b.classList.add("active");
+        document.getElementById("mainStage").classList.toggle("sp", b.dataset.dev === "sp");
+        play();
+      });
+    });
+
+    $("durOut").textContent = state.dur + "ms";
+    $("stagOut").textContent = state.stag + "ms";
+    main.idle(state);
+    // auto-play once when the stage scrolls into view (demonstrates the real trigger)
+    let mainFired = false;
+    const mainIO = new IntersectionObserver((ents) => {
+      ents.forEach(en => { if (en.isIntersecting && !mainFired) { mainFired = true; play(); } });
+    }, { threshold: 0.4 });
+    mainIO.observe(document.getElementById("mainStage"));
+
+    // ---------- comparison grid ----------
+    const MINI = [
+      { motion: "fadeup", title: "① Fade-up", sub: "最小・安全" },
+      { motion: "blurfade", title: "② Blur+Fade", sub: "ピントを結ぶ" },
+      { motion: "reco", title: "③ 推奨コンボ", sub: "Blur+Scale＋行stagger＋amb" },
+      { motion: "clip", title: "④ Clip wipe", sub: "下→上にめくる" },
+    ];
+    const grid = document.getElementById("grid4");
+    const minis = [];
+    MINI.forEach((m, i) => {
+      const card = document.createElement("div"); card.className = "mini";
+      const stg = document.createElement("div"); stg.className = "stage"; card.appendChild(stg);
+      const h = document.createElement("h3"); h.className = "jp"; h.textContent = m.title;
+      const p = document.createElement("p"); p.className = "jp"; p.textContent = m.sub;
+      card.appendChild(h); card.appendChild(p); grid.appendChild(card);
+      const c = createStage(stg);
+      const cfg = { motion: m.motion, dur: 900, ease: "expo", stagger: true, stag: 130,
+        vignette: m.motion === "reco", kb: m.motion === "reco", breath: false, grain: false, reduced: false };
+      c.idle(cfg);
+      minis.push({ c, cfg, timer: 0, delay: 400 + i * 300 });
+    });
+    let running = false;
+    const runMinis = () => {
+      if (running) return; running = true;
+      const loop = (mc) => {
+        const total = mc.c.play(mc.cfg) || 2200;
+        mc.timer = setTimeout(() => { mc.c.idle(mc.cfg); mc.timer = setTimeout(() => loop(mc), 700); }, total + 900);
+      };
+      minis.forEach(mc => { mc.timer = setTimeout(() => loop(mc), mc.delay); });
+    };
+    const stopMinis = () => { running = false; minis.forEach(mc => { clearTimeout(mc.timer); mc.c.stop(); mc.c.idle(mc.cfg); }); };
+    const io = new IntersectionObserver((ents) => {
+      ents.forEach(en => { if (en.isIntersecting) runMinis(); else stopMinis(); });
+    }, { threshold: 0.25 });
+    io.observe(grid);
+  })();
+  </script>
+</body>
+</html>

@@ -36,18 +36,30 @@ body {
   overflow-x: clip;
 }
 
-/* Gentle scroll-snap so the message centerpiece eases itself fully into view when
-   you scroll near it. `proximity` (not mandatory) only snaps when you settle near
-   the one snap point (`.message`) — the rest of the page scrolls freely. Disabled
-   under reduced-motion (see that block). */
-html {
-  scroll-snap-type: y proximity;
-  scroll-behavior: smooth;
+/* Smooth momentum scrolling is handled by Lenis (see src/scripts/smooth-scroll.ts),
+   which drives the real scroll position (so the scroll-driven reveals still track).
+   Lenis adds .lenis/.lenis-smooth to <html>; these are its required styles. CSS
+   scroll-snap is intentionally NOT used — it fights Lenis's momentum. */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
 }
 
 /* Japanese text baseline: relaxed tracking + line-height everywhere. */
 body,
-.msg,
+.msg-body,
 .card-info,
 .card-note,
 .cap {
@@ -245,18 +257,20 @@ noren-cloth {
   z-index: 1;
   display: block;
   width: 100%;
-  height: 83.333%; /* the noren covers ~5/6 of the pin; bg pattern shows below */
+  height: 100%; /* fill the first viewport so no bg shows below the cloth */
   translate: 0 -125%;
   will-change: transform;
   transform-box: border-box; /* scroll scale/translate reference the svg box */
+  /* Soft shadow so the noren reads as hanging in front of the backdrop. */
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.16));
 }
 /* Connected top band, drawn over the flap tops — the top never separates. */
 .noren-band {
   fill: var(--color-surface);
 }
-/* The rod the noren hangs from: a clean bar capping the ragged tab tops. */
-.noren-rod {
-  fill: #6f4a2a;
+/* チチ: small green tabs along the noren's top edge. */
+.noren-chichi {
+  fill: #a1d648;
 }
 /* Each flap is joined to the band along its top edge; <noren-cloth> leans it with
    skewX anchored at that edge, so only the hem sways (the top never tears away).
@@ -265,6 +279,15 @@ noren-cloth {
   fill: var(--color-surface);
   transform-box: fill-box; /* skew + origin are relative to the flap's own box */
   transform-origin: top; /* the fixed top edge is the skew anchor */
+  will-change: transform;
+}
+/* Single emblem overlay: one continuous piece so it never tears at the join.
+   <noren-cloth> leans it as ONE unit (matching the middle flap) so it still sways
+   with the cloth. Pointer events pass through so the sway still fires. */
+.noren-emblem {
+  pointer-events: none;
+  transform-box: fill-box;
+  transform-origin: top;
   will-change: transform;
 }
 /* The reveal plays over the first viewport of the pin (animation-range 0 100vh):
@@ -330,140 +353,283 @@ noren-cloth {
   object-fit: contain;
 }
 
-/* ================= message 1 (white copy over the pink photo) =================
-   Full-cover background photo; the text group sits in the lower portion
-   (STUDIO bottom-aligns the 385px text block within the 1280px section). */
+/* ================= message (pink-halftone "poster") =================
+   Pink halftone field: the gathering photo up top (flanked by vertical brush
+   labels 毎週木曜 / 参加無料), then a white cloud-edged panel with the 同釜共飲
+   brush title, the body copy (live text) and two brush underlines. Brush + cloud
+   art are PNGs under /assets/msg; pink cloud overlays carve the organic edges. */
 .message {
   position: relative;
   isolation: isolate;
-  /* Fill one screen. svh (not vh) so the bottom-aligned copy is never hidden
-     behind mobile browser chrome. */
-  height: 100svh;
-  /* The one snap point: settle its top to the viewport top (fills the screen). */
-  scroll-snap-align: start;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-end;
-}
-.message::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background: var(--bg-message) 50% 50% / cover no-repeat;
+  padding: clamp(48px, 6vw, 96px) clamp(8px, 0.8vw, 18px) clamp(72px, 10vw, 140px);
+  background-color: #ef4d8b;
+  background-image: var(--bg-pink);
+  background-size: cover;
+  background-position: center;
 }
 .message-inner {
+  width: 100%;
+  /* Poster designed at 1440px: near full-width up to ~1440, then capped so it doesn't
+     balloon on large monitors. */
+  max-width: min(100% - 16px, 1500px);
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-end;
-  gap: clamp(1.1rem, 0.7rem + 1.3vw, 1.6rem);
+}
+/* photo block */
+.msg-photo-wrap {
+  position: relative;
   width: 100%;
-  max-width: 42rem;
-  padding: 0 24px clamp(2.5rem, 6svh, 4.5rem);
+  /* px/vw padding (not % of container) so the flex item never sizes wider than the
+     column — a %-padding here overflowed and clipped the side labels. */
+  padding: 0 clamp(28px, 3.5vw, 58px); /* small side gutter; the big labels overlap the photo edge */
 }
-/* Message typography (see DESIGN + JP web-type research): calm body (500 / 1.9
-   leading / 0.08em) with a larger, airier lead tagline (700 / 0.2em). Overrides
-   the global 0.15em/1.4 baseline. Constrained measure so the long line wraps to
-   ~2 balanced lines. */
-.msg {
-  color: var(--color-on-brand);
-  font-size: clamp(1rem, 0.96rem + 0.2vw, 1.0625rem);
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  line-height: 1.8;
-  max-width: 30rem;
+.msg-photo {
+  display: block;
+  width: 100%;
+  height: auto;
+  /* the new photo has its own organic (transparent) edges baked in — no radius */
+}
+.msg-side {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: clamp(48px, 7.2%, 84px); /* bigger — overlaps the photo edge slightly */
+  height: auto;
+  z-index: 2;
+}
+.msg-side--l {
+  left: clamp(16px, 2vw, 34px); /* inset so the label never clips at the viewport edge */
+}
+.msg-side--r {
+  right: clamp(16px, 2vw, 34px);
+}
+/* pink cloud overlays that carve the organic edges (blend into the pink field) */
+.msg-cloud {
+  position: absolute;
+  pointer-events: none;
+  z-index: 1;
+}
+.msg-cloud--photo {
+  display: none; /* the new photo has its own organic edges — overlay not needed */
+}
+/* Zabuton cushion: one image (white panel + pink cloud edges + 同釜共飲 title).
+   Kept at the image's own 4:3 ratio so the clouds never distort; the body text is
+   absolutely placed in the clear white centre, below the baked-in title. */
+.msg-panel {
+  position: relative;
+  z-index: 1; /* the cushion sits over the photo where they overlap */
+  width: 100%;
+  /* Pull the cushion up so it tucks under the photo — the photo + labels + cushion
+     read as one poster, not three elements floating apart. */
+  margin-top: clamp(8px, 1.5vw, 32px); /* pink band between the photo and the box */
+  aspect-ratio: 3 / 2; /* balanced box, a little shorter than 4:3 */
+  background: var(--color-surface); /* plain white rectangle */
+  border-radius: 20px;
+  container-type: inline-size; /* so .msg-body can scale in cqw with the panel */
+}
+/* Pink cloud clusters straddling the white rectangle's edges — they overlap the
+   corners/sides so the white reads as an organic cushion. Behind the title/body. */
+.msg-cloud {
+  position: absolute;
+  z-index: 1;
+  height: auto;
+  pointer-events: none;
+}
+/* The clouds are large and overlap their neighbours so they wrap the white box in a
+   continuous frilly outline (no straight edges show between them).
+   Left side: top-left, left-middle, bottom-left. */
+.msg-cloud--tl {
+  left: -9%;
+  top: -15%;
+  width: 44%;
+}
+.msg-cloud--lm {
+  left: -25%;
+  top: 30%;
+  width: 40%;
+}
+.msg-cloud--bl {
+  left: -8%;
+  bottom: -24%;
+  width: 40%;
+}
+/* Right side: top-right, center-right, bottom-right. */
+.msg-cloud--tr {
+  right: -9%;
+  top: -15%;
+  width: 44%;
+}
+.msg-cloud--cr {
+  right: -24%;
+  top: 14%;
+  width: 44%;
+}
+/* Bottom-right: the two identical clouds placed side by side (overlapping), small.
+   The right one sits higher, the left one lower. */
+.msg-cloud--br1 {
+  right: 13%;
+  bottom: -20%;
+  width: 34%;
+}
+.msg-cloud--br2 {
+  right: -12%;
+  bottom: -16%;
+  width: 34%;
+}
+/* Standalone 同釜共飲 title, straddling the cushion's top edge. Anchored by its
+   BOTTOM to the white top edge (~33% from the panel top) so it sits correctly on
+   both the 4:3 desktop cushion and the taller (stretched) mobile one. */
+.msg-title {
+  position: absolute;
+  bottom: 90%; /* raised to straddle the photo/box boundary (title sits on the photo's lower edge) */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 44%;
+  height: auto;
+  z-index: 2;
+  pointer-events: none;
+}
+/* Body copy sits in the clear white zone (clouds are at the corners, title on top).
+   font-size in cqw scales the line count-fixed block with the panel width, so it
+   keeps the same fit at every viewport. */
+.msg-body {
+  position: absolute;
+  z-index: 2; /* above the cloud clusters */
+  top: 22%;
+  bottom: 12%;
+  left: 16%;
+  right: 16%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  color: #3c7a0e; /* darker/deeper green than the brand green for stronger legibility */
   text-align: center;
-  text-wrap: pretty;
-  line-break: strict;
-  overflow-wrap: anywhere;
-  word-break: normal;
-}
-/* lead tagline (line 1) — larger, heavier, intentionally airy */
-.msg--lead {
-  font-size: clamp(1.25rem, 1.05rem + 1vw, 1.625rem);
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  line-height: 1.6;
-  margin-bottom: 0.5em;
-  padding-inline-start: 0.2em; /* re-center: tracking adds trailing space */
-  text-wrap: balance;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  line-height: 1.9;
+  /* Break Japanese at phrase boundaries (not mid-word) when a line wraps on mobile.
+     Unsupported browsers fall back to normal wrapping. */
   word-break: auto-phrase;
+  /* Scales with the box width but capped so it never gets oversized on big screens. */
+  font-size: clamp(18px, 2.2cqw, 24px);
 }
-/* the long emotional line (line 4) — break near natural phrase boundaries */
-.msg--long {
-  text-wrap: balance;
-  word-break: auto-phrase;
+.msg-body p {
+  margin: 0;
+}
+.msg-body p + p {
+  margin-top: 1.4em;
+}
+/* ================= MessageLead — mobile (<=767) =================
+   The panel is a plain white rectangle framed by separate cloud images. On narrow
+   screens: keep the whole photo visible with smaller side labels that fit its short
+   height (so the box can't cover them), sit the box just under the photo with only a
+   hair of overlap, and fit the wrapped copy without a big gap. */
+@media (max-width: 767px) {
+  /* photo + side labels: smaller labels that stay within the short photo's height */
+  .msg-photo-wrap {
+    padding: 0 clamp(30px, 9vw, 48px);
+  }
+  .msg-side {
+    width: clamp(34px, 9vw, 44px);
+  }
+  .msg-side--l {
+    left: clamp(6px, 2vw, 16px);
+  }
+  .msg-side--r {
+    right: clamp(6px, 2vw, 16px);
+  }
+  /* white box: only a hair of overlap so it never covers the (now shorter) labels.
+     Height kept close to the copy so there's no big empty gap under the title. */
+  .msg-panel {
+    aspect-ratio: 1 / 1.1;
+    margin-top: clamp(-12px, -1.5vw, -4px);
+  }
+  .msg-title {
+    width: 48%;
+  }
+  .msg-body {
+    top: 18%;
+    bottom: 11%;
+    left: 13%;
+    right: 13%;
+    font-size: clamp(12px, 3.2vw, 15px);
+    line-height: 1.7;
+    letter-spacing: 0.02em;
+  }
+  .msg-body p + p {
+    margin-top: 1em;
+  }
+  /* Bottom clouds: raise them so they frame the white box's bottom edge (the desktop
+     offsets pushed them below the short mobile panel, out of view). */
+  .msg-cloud--bl {
+    bottom: -10%;
+  }
+  .msg-cloud--br1 {
+    bottom: -8%;
+  }
+  .msg-cloud--br2 {
+    bottom: -8%;
+  }
+  /* Top & side clouds: nudge down a bit for the mobile proportions. */
+  .msg-cloud--tl {
+    top: -9%;
+  }
+  .msg-cloud--tr {
+    top: -9%;
+  }
+  .msg-cloud--lm {
+    top: 36%;
+  }
+  .msg-cloud--cr {
+    top: 39%;
+  }
 }
 
 /* ================= message reveal (hero) =================
-   The message is the emotional centerpiece: when the section scrolls into view
-   the photo focuses in (blur -> sharp) with a fade + micro-scale settle and the
-   lines rise in sequence. Driven once by <appear-observer> adding `.in` (a
-   dedicated, settle-timed observer). All hidden states are gated on `.js` AND
-   no-preference, so no-JS and reduced-motion users get the final composition
-   immediately (nothing stays hidden). */
+   The photo focuses in (blur -> sharp + fade + micro-scale) and the panel rises.
+   Driven once by <appear-observer> adding `.in`. Gated on `.js` AND no-preference
+   so no-JS / reduced-motion users get the final composition immediately. */
 @media (prefers-reduced-motion: no-preference) {
-  /* photo: blur -> sharp + fade + micro-scale settle */
-  .js .appear--hero::before {
+  .js .appear--hero .msg-photo-wrap {
     opacity: 0;
-    transform: scale(1.06);
-    filter: blur(10px) brightness(0.92);
+    transform: scale(1.05);
+    filter: blur(8px);
     transition:
       opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
       transform 0.9s cubic-bezier(0.16, 1, 0.3, 1),
       filter 0.9s cubic-bezier(0.16, 1, 0.3, 1);
   }
-  .js .appear--hero.in::before {
+  .js .appear--hero .msg-panel {
+    opacity: 0;
+    transform: translateY(18px);
+    transition:
+      opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.15s,
+      transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.15s;
+  }
+  .js .appear--hero.in .msg-photo-wrap,
+  .js .appear--hero.in .msg-panel {
     opacity: 1;
     transform: none;
     filter: none;
   }
-  /* 3 message lines rise + fade in sequence (photo first, then lines) */
-  .js .appear--hero .msg {
-    opacity: 0;
-    transform: translateY(14px);
-    transition:
-      opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1),
-      transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  .js .appear--hero.in .msg {
-    opacity: 1;
-    transform: none;
-  }
-  .js .appear--hero .msg:nth-child(1) {
-    transition-delay: 0.18s;
-  }
-  .js .appear--hero .msg:nth-child(2) {
-    transition-delay: 0.3s;
-  }
-  .js .appear--hero .msg:nth-child(3) {
-    transition-delay: 0.42s;
-  }
-  .js .appear--hero .msg:nth-child(4) {
-    transition-delay: 0.54s;
-  }
-  .js .appear--hero .msg:nth-child(5) {
-    transition-delay: 0.66s;
-  }
 }
 
 /* ================= message 2 region (join + card + feature photo) =================
-   One full-cover background photo sits behind the join copy, the info card and
-   the feature image (STUDIO nests all three over section 5929934b's bg). */
+   One green canvas-texture background covers the whole lower green region — behind
+   the join copy, the info card AND the character/photo section — so the green reads
+   as one continuous cloth (no seam between the card area and the photo area). */
 .message2 {
   position: relative;
   isolation: isolate;
-  /* Second snap point: the green section eases into view after the message. */
-  scroll-snap-align: start;
 }
 .message2::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: var(--bg-access) 50% 50% / cover no-repeat;
+  background: var(--bg-canvas) 50% 50% / cover no-repeat;
 }
 
 /* ================= access (join copy + info card + carousel) ================= */
@@ -616,7 +782,10 @@ noren-cloth {
   outline-offset: 2px;
 }
 
-/* ================= feature photo ================= */
+/* ================= feature photo (green section) =================
+   No own background: the green canvas texture comes from .message2::before (one
+   continuous cloth for the whole lower region). The white character (transparent
+   feature photo) and the speech bubble sit on top. */
 .photo {
   position: relative;
   height: 780px;
@@ -746,17 +915,6 @@ noren-cloth {
 
 /* ================= responsive: mobile (<=540) ================= */
 @media (max-width: 540px) {
-  .message {
-    padding: 20px;
-  }
-  /* On mobile the photo is scaled up (cover), so the white message text can ride
-     over the busy centre of the photo. A bottom readability scrim (behind the
-     text) keeps it legible without changing the desktop layout. */
-  .message::before {
-    background:
-      linear-gradient(to top, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0) 75%),
-      var(--bg-message) 50% 50% / cover no-repeat;
-  }
   .card {
     gap: 20px;
     width: calc(100% - 40px);
@@ -819,11 +977,7 @@ noren-cloth {
 
 /* ================= reduced motion ================= */
 @media (prefers-reduced-motion: reduce) {
-  /* No auto scroll movement (vestibular safety): free manual scroll instead. */
-  html {
-    scroll-snap-type: none;
-    scroll-behavior: auto;
-  }
+  /* Lenis is skipped under reduced-motion (see smooth-scroll.ts) → native scroll. */
   .js .appear {
     opacity: 1;
     transform: none;

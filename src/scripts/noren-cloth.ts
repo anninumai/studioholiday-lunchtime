@@ -10,6 +10,7 @@
 class NorenCloth extends HTMLElement {
   #cloth: HTMLElement | null = null;
   #panels: HTMLElement[] = [];
+  #emblem: HTMLElement | null = null; // single overlay; leans as one with the middle flap
   #angle: number[] = []; // current swing angle (deg) per panel
   #vel: number[] = []; // angular velocity (deg/s) per panel
   #stiff: number[] = []; // per-panel spring stiffness (varied → different frequencies)
@@ -43,6 +44,7 @@ class NorenCloth extends HTMLElement {
     if (!this.#cloth) return;
     this.#panels = Array.from(this.#cloth.querySelectorAll<HTMLElement>(".noren-panel"));
     if (this.#panels.length === 0) return;
+    this.#emblem = this.#cloth.querySelector<HTMLElement>(".noren-emblem");
 
     this.#angle = new Array(this.#panels.length).fill(0);
     this.#vel = new Array(this.#panels.length).fill(0);
@@ -168,12 +170,20 @@ class NorenCloth extends HTMLElement {
       }
     }
 
+    // The emblem is one continuous piece: lean it as a unit by the middle flap's
+    // angle so it sways with the cloth without ever tearing at the band/flap join.
+    if (this.#emblem) {
+      const mid = this.#angle[this.#angle.length >> 1] ?? 0;
+      this.#emblem.style.transform = `skewX(${mid.toFixed(3)}deg)`;
+    }
+
     if (moving) {
       this.#raf = requestAnimationFrame(this.#step);
       return;
     }
     // Fully settled: snap to rest, drop inline transforms, and stop the loop.
     for (const p of this.#panels) p.style.transform = "";
+    if (this.#emblem) this.#emblem.style.transform = "";
     this.#running = false;
     this.#raf = 0;
     // NB: do NOT clear #lastX here. Pointermoves arrive one per frame and the

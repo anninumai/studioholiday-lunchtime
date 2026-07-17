@@ -1,26 +1,62 @@
 ---
 import { content } from "../data/content";
-// 5 paragraphs. Line 1 = lead tagline, line 4 = long emotional line (see the
-// message typography in global.css). Modifiers are assigned by index. A line may
-// contain "\n" for controlled breaks (line 4), rendered as <br> below.
-const lines = content.message;
-const modifier = (i: number): string =>
-  i === 0 ? " msg--lead" : i === 3 ? " msg--long" : "";
+import { withBase } from "../lib/withBase";
+const m = content.message;
 ---
 
 <section class="message appear--hero">
   <div class="message-inner">
-    {
-      lines.map((line, i) => (
-        <p class={`msg${modifier(i)}`}>
-          {line.split("\n").map((seg, j) => (
-            <Fragment>
-              {j > 0 && <br />}
-              {seg}
-            </Fragment>
-          ))}
-        </p>
-      ))
-    }
+    {/* Photo block: gathering photo flanked by the vertical brush labels. */}
+    <div class="msg-photo-wrap">
+      <img
+        class="msg-photo"
+        src={withBase(m.photo)}
+        alt="みんなでごはん会の様子"
+        loading="lazy"
+        decoding="async"
+      />
+      <img
+        class="msg-cloud msg-cloud--photo"
+        src={withBase("/assets/msg/cloud-solid.webp")}
+        alt=""
+        aria-hidden="true"
+      />
+      <img class="msg-side msg-side--l" src={withBase(m.sideLeft)} alt="毎週木曜" />
+      <img class="msg-side msg-side--r" src={withBase(m.sideRight)} alt="参加無料" />
+    </div>
+
+    {/* Zabuton: a plain white rectangle with pink cloud clusters straddling its
+        edges (they bite into the white to make the organic cushion outline). The
+        standalone 同釜共飲 title sits over the top edge; body copy fills the centre. */}
+    <div class="msg-panel">
+      <img class="msg-cloud msg-cloud--tl" src={withBase("/assets/msg/clouds/cloud-topleft.webp")} alt="" aria-hidden="true" loading="lazy" decoding="async" />
+      <img class="msg-cloud msg-cloud--lm" src={withBase("/assets/msg/clouds/cloud-leftmid.webp")} alt="" aria-hidden="true" loading="lazy" decoding="async" />
+      <img class="msg-cloud msg-cloud--bl" src={withBase("/assets/msg/clouds/cloud-bottomleft.webp")} alt="" aria-hidden="true" loading="lazy" decoding="async" />
+      <img class="msg-cloud msg-cloud--cr" src={withBase("/assets/msg/clouds/cloud-centerright.webp")} alt="" aria-hidden="true" loading="lazy" decoding="async" />
+      <img class="msg-cloud msg-cloud--tr" src={withBase("/assets/msg/clouds/cloud-topright.webp")} alt="" aria-hidden="true" loading="lazy" decoding="async" />
+      <img class="msg-cloud msg-cloud--br1" src={withBase("/assets/msg/clouds/cloud-bottomright.webp")} alt="" aria-hidden="true" loading="lazy" decoding="async" />
+      <img class="msg-cloud msg-cloud--br2" src={withBase("/assets/msg/clouds/cloud-bottomright.webp")} alt="" aria-hidden="true" loading="lazy" decoding="async" />
+      <img
+        class="msg-title"
+        src={withBase("/assets/msg/title-doufu.webp")}
+        alt="同釜共飲"
+        loading="lazy"
+        decoding="async"
+      />
+      <div class="msg-body">
+        {
+          m.body.map((para) => (
+            <p>
+              {para.map((line, i) => (
+                <Fragment>
+                  {i > 0 && <br />}
+                  {line}
+                </Fragment>
+              ))}
+            </p>
+          ))
+        }
+      </div>
+    </div>
   </div>
 </section>

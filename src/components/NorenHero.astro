@@ -13,23 +13,33 @@ const { noren, video } = content;
 // (a stretched viewBox would make it vary with aspect ratio). White, no shadow.
 const SLIT = 1; // slit width, percent of width (~12px at 1280w)
 const BAND = 32; // connected top band height, percent (the slits start below this)
+const BAND_TOP = 3; // cloth top; the small チチ marks stick up from here
+// チチ: a row of small tabs along the top edge — the subtle dashed top of a hung noren.
+const DASH_N = 14;
+const DASH_W = 1.4; // each mark's width, percent
+const dashes = Array.from({ length: DASH_N }, (_, i) => ({
+  x: ((i + 0.5) / DASH_N) * 100 - DASH_W / 2,
+}));
 const OVERLAP = 1; // flaps tuck this far (percent) under the band so the join can't gap
-const FLAP_W = 46; // every flap this wide; 3 of them overflow the viewport (±20%)
+// Three EQUAL-width flaps, each as wide as the former centre panel (50%). Their total
+// is wider than the viewport, so the outer flaps bleed off the left/right edges. The
+// centre flap stays at 25–75% (unchanged), so the emblem still fits within it.
+const FLAP_W = 50; // each flap, percent of width
+const CLOTH_W = 3 * FLAP_W + 2 * SLIT; // 152 — wider than the viewport (outer flaps overflow)
+const flapStart = (100 - CLOTH_W) / 2; // -26 (cloth is centred, outer flaps off-screen)
 const flapY = BAND - OVERLAP;
 const flapH = 100 - flapY;
-// 3 equal-width flaps split by 2 slits. Their total (3*FLAP_W + 2 slits = 140%)
-// exceeds the viewport, so the outer flaps run off both edges (centered); the
-// overflow is clipped at rest but their swing reads clearly when they sway.
-const flapStart = (100 - (3 * FLAP_W + 2 * SLIT)) / 2;
 const flaps = [0, 1, 2].map((i) => ({
   x: flapStart + i * (FLAP_W + SLIT),
   w: FLAP_W,
 }));
-// Center emblem box (percent). It sits below the band so it rides on the flaps
-// (mostly the wide middle panel); the shared pattern paints each flap's slice so
-// the logo skews with the cloth ("printed on"). Sized by height via meet.
-const logoY = 20;
-const logoH = 70;
+// Emblem box (percent). Sized by WIDTH (a fixed fraction of the viewport width, the
+// same basis as the slits), so it stays a consistent size across aspect ratios and
+// fits within the wide centre panel. Centred via meet.
+const logoX = 30; // left edge (centres a 40%-wide box)
+const logoW = 40; // width — stays within the centre flap (25–75%) so it never reaches a slit
+const logoY = 5;
+const logoH = 86;
 ---
 
 <section class="noren-hero">
@@ -67,33 +77,84 @@ const logoH = 70;
       <svg class="noren" role="img" aria-label={noren.alt}>
         <defs>
           {
-            /* The emblem lives in one pattern in shared user space (the whole svg
-              box, no repeat). Each flap paints its slice of it, so at rest the
-              slices line up into the whole logo and each slice skews with its own
-              flap — the logo is printed on the cloth and ripples with the sway. */
+            /* "ラフ" — a soft paper/fabric grain baked onto the white cloth only
+              (not the emblem). One shared filter, deterministic per user-space
+              coordinate, so the texture reads continuously across the band and the
+              flaps and rides each flap when it skews. Two scales: broad cloudy
+              mottle + fine grain, laid over the white at low opacity. */
           }
-          <pattern
-            id="noren-emblem"
-            patternUnits="userSpaceOnUse"
-            x="0"
-            y="0"
-            width="100%"
-            height="100%"
+          <filter
+            id="noren-rough"
+            filterUnits="objectBoundingBox"
+            x="-14%"
+            y="-14%"
+            width="128%"
+            height="128%"
+            primitiveUnits="userSpaceOnUse"
           >
-            <image
-              href={withBase(noren.logo)}
-              x="0"
-              y={`${logoY}%`}
-              width="100%"
-              height={`${logoH}%`}
-              preserveAspectRatio="xMidYMid meet"
+            {
+              /* Rough the OUTLINE: warp the straight cloth edges with low-frequency
+                noise so the silhouette reads hand-drawn/organic. Shared seed +
+                userSpaceOnUse → the warp is one continuous field, so neighbouring
+                flap edges (and the band/flap join) move together. */
+            }
+            <feTurbulence
+              type="fractalNoise"
+              baseFrequency="0.008"
+              numOctaves="2"
+              seed="5"
+              result="warp"
             />
-          </pattern>
+            <feDisplacementMap
+              in="SourceGraphic"
+              in2="warp"
+              scale="26"
+              xChannelSelector="R"
+              yChannelSelector="G"
+              result="rough"
+            />
+            {/* Surface ラフ: broad cloudy mottle + fine grain, clipped to the shape. */}
+            <feTurbulence
+              type="fractalNoise"
+              baseFrequency="0.012"
+              numOctaves="3"
+              seed="7"
+              result="cloud"
+            />
+            <feColorMatrix
+              in="cloud"
+              type="matrix"
+              values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.16 0"
+              result="cloudGrain"
+            />
+            <feTurbulence
+              type="fractalNoise"
+              baseFrequency="0.5"
+              numOctaves="2"
+              seed="4"
+              result="fine"
+            />
+            <feColorMatrix
+              in="fine"
+              type="matrix"
+              values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.10 0"
+              result="fineGrain"
+            />
+            <feMerge result="grain">
+              <feMergeNode in="cloudGrain" />
+              <feMergeNode in="fineGrain" />
+            </feMerge>
+            <feComposite in="grain" in2="rough" operator="in" result="grainClip" />
+            <feMerge>
+              <feMergeNode in="rough" />
+              <feMergeNode in="grainClip" />
+            </feMerge>
+          </filter>
         </defs>
         {
-          /* Each flap = a white cloth rect + an emblem rect (its slice of the
-            shared pattern). Both are the flap's shape, so the group's box is the
-            flap and <noren-cloth> skews it from its top. */
+          /* Each flap = one white cloth rect (rough-filtered). <noren-cloth> skews
+            the group from its top; the emblem is a single overlay (below), not
+            split across flaps, so it never tears when the flaps sway. */
         }
         {
           flaps.map((f) => (
@@ -103,51 +164,41 @@ const logoH = 70;
                 y={`${flapY}%`}
                 width={`${f.w}%`}
                 height={`${flapH}%`}
-              />
-              <rect
-                x={`${f.x}%`}
-                y={`${flapY}%`}
-                width={`${f.w}%`}
-                height={`${flapH}%`}
-                fill="url(#noren-emblem)"
+                filter="url(#noren-rough)"
               />
             </g>
           ))
         }
-        {
-          /* Connected top band (static). White + the logo's upper slice from the
-            same shared pattern, so the emblem reads continuously across the band
-            and the swaying flaps below; the band itself never moves. */
-        }
+        {/* Connected top band (static). Its top sits below the rod (BAND_TOP) so the
+          cloth reads as hanging in front of the rod. */}
         <g class="noren-band">
-          <rect x="0" y="0" width="100%" height={`${BAND}%`}></rect>
           <rect
-            x="0"
-            y="0"
-            width="100%"
-            height={`${BAND}%`}
-            fill="url(#noren-emblem)"></rect>
+            x={`${flapStart}%`}
+            y={`${BAND_TOP}%`}
+            width={`${CLOTH_W}%`}
+            height={`${BAND - BAND_TOP}%`}
+            filter="url(#noren-rough)"></rect>
+        </g>
+        {/* チチ: small tabs along the top edge (the noren's hanging marks). */}
+        <g class="noren-chichi">
+          {dashes.map((d) => (
+            <rect x={`${d.x}%`} y="0" width={`${DASH_W}%`} height="4%" rx="2"></rect>
+          ))}
         </g>
         {
-          /* Rod tabs (チチ) at the very top, as one hand-drawn strip. Static — the
-            top is fixed to the rod, so these never sway. Full width, top-aligned,
-            aspect kept (meet). */
+          /* Emblem printed once as a single static overlay spanning the whole
+            cloth — kept out of the swaying flap/band groups so it stays continuous
+            (no tear at the band/flap join) while the cloth ripples beneath it. */
         }
         <image
-          class="noren-tabs"
-          href={withBase(noren.tabs)}
-          x="0"
-          y="0"
-          width="100%"
-          height="10%"
-          preserveAspectRatio="xMidYMin meet"
+          class="noren-emblem"
+          href={withBase(noren.logo)}
+          x={`${logoX}%`}
+          y={`${logoY}%`}
+          width={`${logoW}%`}
+          height={`${logoH}%`}
+          preserveAspectRatio="xMidYMid meet"
         />
-        {
-          /* A clean rod across the top, drawn over the tab tops. It caps their
-            ragged/clipped top edge so the "cloth hangs on a rod" reads as
-            finished rather than rough. Static, like the band and tabs. */
-        }
-        <rect class="noren-rod" x="0" y="0" width="100%" height="2.2%" rx="6"></rect>
       </svg>
     </noren-cloth>
   </div>

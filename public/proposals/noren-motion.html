@@ -1,0 +1,916 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>のれん演出 モーション提案 | みんなでごはん会</title>
+  <meta name="description" content="のれんが上がり切った瞬間に、店の奥へ進んでいくように見せる演出案を、実際に再生・比較できるモーション・ラボ。" />
+  <link rel="stylesheet" href="/fonts/zen-local.css" />
+  <style>
+    :root {
+      --green: #6ab31d;
+      --orange: #ff5035;
+      --ink: #333333;
+      --surface: #ffffff;
+      --hairline: #e6e6e6;
+      --paper: #f6f7f1;
+      --maru: "Zen Maru Gothic", "Hiragino Maru Gothic ProN", sans-serif;
+      --r-sm: 8px;
+      --r-card: 20px;
+      --r-hero: 80px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { background: var(--paper); color: var(--ink); font-family: var(--maru); -webkit-font-smoothing: antialiased; }
+    body { line-height: 1.4; letter-spacing: 0.06em; }
+    body, .jp { letter-spacing: 0.12em; }
+    a { color: var(--green); text-decoration: none; }
+    a:hover { color: var(--orange); text-decoration: underline; }
+
+    .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px 96px; }
+
+    /* ---- header ---- */
+    header.top {
+      background:
+        radial-gradient(120% 140% at 90% -20%, rgba(106,179,29,.14), transparent 60%),
+        var(--surface);
+      border-bottom: 1px solid var(--hairline);
+    }
+    .top-inner { max-width: 1120px; margin: 0 auto; padding: 40px 24px 34px; }
+    .eyebrow { display: inline-block; font-size: 12px; font-weight: 700; color: var(--green);
+      border: 1px solid var(--green); border-radius: 999px; padding: 5px 14px; letter-spacing: .18em; }
+    h1 { font-size: clamp(24px, 4vw, 38px); font-weight: 700; margin: 18px 0 10px; letter-spacing: .1em; }
+    .lede { max-width: 720px; color: #555; font-size: 15px; }
+    .lede b { color: var(--ink); }
+
+    section { margin-top: 56px; }
+    .sec-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 18px; flex-wrap: wrap; }
+    .sec-head h2 { font-size: 20px; font-weight: 700; letter-spacing: .1em; }
+    .sec-head .num { color: var(--green); font-weight: 700; }
+    .sec-head p { color: #777; font-size: 13px; }
+
+    /* ---- stage ---- */
+    .stage-card {
+      background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--r-card);
+      padding: 20px; display: grid; grid-template-columns: 1fr 300px; gap: 22px;
+    }
+    @media (max-width: 900px) { .stage-card { grid-template-columns: 1fr; } }
+
+    .stage-hold { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+    .stage {
+      position: relative; width: 100%; aspect-ratio: 16 / 9; margin: 0 auto;
+      border-radius: 14px; overflow: hidden; background: #10120e;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,.06);
+    }
+    .stage.sp { aspect-ratio: 10 / 16; max-width: 340px; }
+
+    .scene { position: absolute; inset: 0; }
+    .layers { position: absolute; inset: 0; }
+    .layer {
+      position: absolute; left: 50%; top: 50%;
+      transform: translate(-50%, -50%);
+      will-change: transform, filter, opacity;
+      backface-visibility: hidden;
+    }
+    .layer.far  { width: 116%; height: 116%; }
+    .layer.mid  { width: 38%;  height: 27%; top: 71%; }
+    .layer.near { width: 100%; height: 100%; }
+
+    /* real faces */
+    .face { position: absolute; inset: 0; background-size: cover; background-position: center; }
+    .face.abstract { display: none; }
+    .scene.mode-abstract .face.real { display: none; }
+    .scene.mode-abstract .face.abstract { display: flex; }
+
+    .far  .face.real { background-image: url("/assets/studio/hero.webp"); }
+    .mid  .face.real {
+      background-image: url("/assets/studio/station.webp");
+      border-radius: 8px; box-shadow: 0 12px 28px rgba(0,0,0,.4);
+      outline: 6px solid #fbfbf7;
+    }
+    /* near = doorway frame (drawn), transparent centre */
+    .near .face.real {
+      background: none;
+      box-shadow: inset 0 0 0 34px #2b2016, inset 0 0 0 40px rgba(0,0,0,.35);
+      border-radius: 6px;
+    }
+    .near .face.real::after {
+      content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 20%;
+      background: linear-gradient(to top, rgba(20,14,8,.85), transparent);
+    }
+
+    /* abstract faces */
+    .face.abstract { align-items: center; justify-content: center; color: #fff;
+      font-size: 13px; font-weight: 700; letter-spacing: .16em; border-radius: 10px; }
+    .far  .face.abstract { background: linear-gradient(160deg, #7cbf3a, #4f8a17); }
+    .mid  .face.abstract { background: linear-gradient(160deg, #eaf3d8, #cfe3a8); color: #3d5b12;
+      box-shadow: 0 10px 30px rgba(0,0,0,.3); }
+    .near .face.abstract { background: transparent; box-shadow: inset 0 0 0 34px rgba(43,32,22,.94);
+      color: #ffd9a0; align-items: flex-start; padding-top: 10px; }
+
+    /* vignette + brightness overlay */
+    .vignette { position: absolute; inset: 0; pointer-events: none; opacity: 0;
+      background: radial-gradient(120% 90% at 50% 45%, transparent 40%, rgba(0,0,0,.72) 100%);
+      transition: none; }
+
+    /* foreground passing element (lantern) */
+    .fg-pass { position: absolute; left: 50%; bottom: 6%; width: 22%; aspect-ratio: 3/4;
+      transform: translateX(-50%) scale(1); transform-origin: 50% 100%;
+      display: none; pointer-events: none; }
+    .fg-pass.on { display: block; }
+    .fg-pass i {
+      position: absolute; inset: 0; border-radius: 46% / 40%;
+      background:
+        repeating-linear-gradient(90deg, rgba(0,0,0,.10) 0 6%, transparent 6% 12%),
+        radial-gradient(70% 60% at 50% 40%, #ff7a5c, #d8341c);
+      box-shadow: 0 0 30px rgba(255,90,50,.5), inset 0 -8px 18px rgba(0,0,0,.35);
+    }
+    .fg-pass::before, .fg-pass::after { content: ""; position: absolute; left: 50%; width: 6px;
+      transform: translateX(-50%); background: #2b2016; }
+    .fg-pass::before { top: -14%; height: 16%; }
+    .fg-pass::after { bottom: -12%; height: 14%; }
+
+    /* ---- noren ---- */
+    .noren { position: absolute; left: 0; top: 0; width: 100%; height: 80%;
+      transform-origin: top center; transform: translateY(0); z-index: 6;
+      will-change: transform; filter: drop-shadow(0 12px 18px rgba(0,0,0,.28)); }
+    .noren-rod { position: absolute; top: 0; left: -2%; width: 104%; height: 12px;
+      border-radius: 6px; background: linear-gradient(#5a4126, #3a2a1a); background-color: #4a361f; }
+    .noren-cloth { position: absolute; top: 8px; left: 0; width: 100%; height: calc(100% - 8px);
+      background:
+        linear-gradient(90deg, rgba(0,0,0,.05), transparent 12%, transparent 88%, rgba(0,0,0,.06)),
+        #fbfbf7;
+      overflow: hidden; }
+    /* vertical slits in the lower ~62% (top band stays sewn) */
+    .noren-slits { position: absolute; left: 0; right: 0; top: 38%; bottom: 0;
+      background: repeating-linear-gradient(90deg,
+        #fbfbf7 0 calc(20% - 3px), rgba(0,0,0,.28) calc(20% - 3px) 20%); }
+    .noren-fold { position: absolute; inset: 0;
+      background: repeating-linear-gradient(90deg, transparent 0 9.9%, rgba(0,0,0,.035) 10% 10.1%); }
+    .noren-label { position: absolute; top: 12%; left: 0; right: 0; text-align: center;
+      color: var(--green); font-weight: 700; font-size: clamp(15px, 2.4vw, 26px);
+      letter-spacing: .22em; text-shadow: 0 1px 0 rgba(255,255,255,.6); }
+    .noren-seal { display: block; width: 46px; height: 46px; margin: 0 auto 8px;
+      border: 2px solid var(--green); border-radius: 50%; color: var(--green);
+      font-size: 12px; line-height: 42px; letter-spacing: .05em; }
+    .stage.sp .noren-seal { width: 38px; height: 38px; line-height: 34px; }
+
+    .noren.idle .noren-cloth { animation: sway 4.5s ease-in-out infinite; }
+    @keyframes sway {
+      0%,100% { transform: skewX(0deg); } 50% { transform: skewX(.6deg); }
+    }
+
+    .phase-tag { position: absolute; left: 12px; top: 12px; z-index: 7;
+      font-size: 11px; font-weight: 700; letter-spacing: .12em; color: #fff;
+      background: rgba(0,0,0,.42); padding: 4px 10px; border-radius: 999px; backdrop-filter: blur(3px); }
+
+    .stage-meta { display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      font-size: 12px; color: #888; }
+    .stage-meta b { color: var(--ink); }
+
+    /* ---- controls ---- */
+    .controls { display: flex; flex-direction: column; gap: 16px; }
+    .ctl-group { border: 1px solid var(--hairline); border-radius: 14px; padding: 14px; background: #fcfdfa; }
+    .ctl-group h4 { font-size: 12px; color: #888; font-weight: 700; letter-spacing: .12em; margin-bottom: 10px; }
+
+    .seg { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .seg button, .pill {
+      font-family: var(--maru); font-size: 12px; font-weight: 700; letter-spacing: .06em;
+      border: 1px solid var(--hairline); background: #fff; color: var(--ink);
+      border-radius: 999px; padding: 9px 8px; cursor: pointer; transition: background .2s, color .2s, border-color .2s; }
+    .seg button:hover, .pill:hover { border-color: var(--green); color: var(--green); }
+    .seg button.active, .pill.active { background: var(--green); border-color: var(--green); color: #fff; }
+
+    .replay { grid-column: 1 / -1; background: var(--green); color: #fff; border-color: var(--green);
+      padding: 12px; font-size: 13px; }
+    .replay:hover { background: var(--orange); border-color: var(--orange); color: #fff; }
+
+    .row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 10px 0; }
+    .row label { font-size: 12px; color: #666; }
+    .row output { font-size: 12px; color: var(--ink); font-weight: 700; min-width: 62px; text-align: right; }
+    input[type=range] { width: 100%; accent-color: var(--green); }
+    select { font-family: var(--maru); font-size: 12px; padding: 7px 8px; border-radius: 8px;
+      border: 1px solid var(--hairline); background: #fff; color: var(--ink); width: 100%; }
+
+    .toggles { display: flex; flex-direction: column; gap: 8px; }
+    .tg { display: flex; align-items: center; gap: 9px; font-size: 12px; color: #555; cursor: pointer; }
+    .tg input { accent-color: var(--green); width: 15px; height: 15px; }
+
+    .desc {
+      background: #fcfdfa; border: 1px solid var(--hairline); border-left: 3px solid var(--green);
+      border-radius: 10px; padding: 12px 14px; font-size: 13px; color: #555; }
+    .desc b { color: var(--ink); }
+
+    /* ---- comparison grid ---- */
+    .grid4 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    @media (max-width: 720px) { .grid4 { grid-template-columns: 1fr; } }
+    .mini {
+      background: var(--surface); border: 1px solid var(--hairline); border-radius: 14px;
+      padding: 12px; }
+    .mini .stage { aspect-ratio: 16/10; border-radius: 10px; }
+    .mini h3 { font-size: 13px; font-weight: 700; margin: 10px 2px 2px; letter-spacing: .08em; }
+    .mini p { font-size: 12px; color: #888; margin: 0 2px; }
+
+    /* ---- research cards ---- */
+    .cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+    @media (max-width: 760px) { .cards { grid-template-columns: 1fr; } }
+    .card {
+      background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--r-card);
+      padding: 18px; }
+    .card .badge { display: inline-flex; align-items: center; gap: 6px; font-size: 11px;
+      font-weight: 700; letter-spacing: .1em; color: var(--green); }
+    .card h3 { font-size: 15px; font-weight: 700; margin: 8px 0 8px; letter-spacing: .06em; }
+    .card p { font-size: 13px; color: #555; margin-bottom: 8px; }
+    .card ul { list-style: none; font-size: 12px; color: #555; }
+    .card li { padding-left: 16px; position: relative; margin: 3px 0; }
+    .card li.pro::before { content: "＋"; position: absolute; left: 0; color: var(--green); font-weight: 700; }
+    .card li.con::before { content: "−"; position: absolute; left: 0; color: var(--orange); font-weight: 700; }
+    .meta-row { display: flex; gap: 10px; flex-wrap: wrap; margin: 10px 0 6px; }
+    .chip { font-size: 11px; padding: 3px 9px; border-radius: 999px; background: #f1f4ea; color: #5a7a1f; font-weight: 700; letter-spacing: .06em; }
+    .chip.diff { background: #fdeeea; color: #c0402a; }
+    .src { font-size: 11px; color: #999; }
+    .src a { font-size: 11px; }
+
+    .info { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    @media (max-width: 760px) { .info { grid-template-columns: 1fr; } }
+    .info .card h3 { font-size: 14px; }
+    .info .card p { font-size: 12.5px; }
+
+    /* ---- recommendation ---- */
+    .reco {
+      background:
+        radial-gradient(120% 130% at 100% 0%, rgba(106,179,29,.10), transparent 55%),
+        var(--surface);
+      border: 1px solid var(--hairline); border-radius: var(--r-card); padding: 26px; }
+    .reco h2 { font-size: 20px; font-weight: 700; letter-spacing: .1em; margin-bottom: 6px; }
+    .reco .rank { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 16px; }
+    .rank-item { display: grid; grid-template-columns: 40px 1fr; gap: 14px; align-items: start;
+      padding: 14px; border: 1px solid var(--hairline); border-radius: 14px; background: #fcfdfa; }
+    .rank-item.best { border-color: var(--green); background: #f6fbee; }
+    .rank-item .medal { font-size: 22px; font-weight: 700; color: var(--green); text-align: center; }
+    .rank-item h4 { font-size: 15px; margin-bottom: 5px; letter-spacing: .06em; }
+    .rank-item p { font-size: 13px; color: #555; }
+    .spec { margin-top: 10px; font-size: 12px; color: #6a7a4a; }
+    .spec code { background: #eef3e2; border-radius: 5px; padding: 1px 6px; font-size: 11.5px; color: #46610f; }
+
+    .steps { counter-reset: s; margin-top: 18px; display: grid; gap: 10px; }
+    .steps li { list-style: none; position: relative; padding: 12px 14px 12px 44px;
+      background: #fff; border: 1px solid var(--hairline); border-radius: 12px; font-size: 13px; color: #555; }
+    .steps li::before { counter-increment: s; content: counter(s); position: absolute; left: 12px; top: 12px;
+      width: 22px; height: 22px; border-radius: 50%; background: var(--green); color: #fff;
+      font-size: 12px; font-weight: 700; text-align: center; line-height: 22px; }
+    .steps b { color: var(--ink); }
+
+    footer.foot { margin-top: 72px; border-top: 1px solid var(--hairline); padding: 24px 0; text-align: center;
+      color: #aaa; font-size: 12px; }
+
+    .note { font-size: 12px; color: #999; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div class="top-inner">
+      <span class="eyebrow jp">MOTION PROPOSAL</span>
+      <h1 class="jp">のれん演出 モーション提案</h1>
+      <p class="lede jp">
+        <b>「のれんが上がり切った瞬間に、店の奥へ進んでいく」</b>——
+        その入りの体験を、実際に<b>再生・調整・比較</b>できるラボにまとめました。
+        4つの手法を切り替えて、みんなでごはん会の“店に入る”一瞬を選んでください。
+      </p>
+    </div>
+  </header>
+
+  <div class="wrap">
+
+    <!-- ===================== STAGE ===================== -->
+    <section id="lab">
+      <div class="sec-head">
+        <h2><span class="num">01</span> モーション・ラボ</h2>
+        <p class="jp">再生ボタンで「のれん上昇 → 進入」を再生。右のコントロールで手法・速さ・イージング・奥行き表現を調整。</p>
+      </div>
+
+      <div class="stage-card">
+        <div class="stage-hold">
+          <div class="stage" id="mainStage"></div>
+          <div class="stage-meta">
+            <span class="jp">現在：<b id="curMotion">① Perspective ドリー</b></span>
+            <span class="jp">合計 <b id="curTotal">—</b> / のれん上昇 800ms</span>
+          </div>
+          <div class="desc jp" id="motionDesc"></div>
+        </div>
+
+        <div class="controls">
+          <div class="ctl-group">
+            <h4 class="jp">手法（進入モーション）</h4>
+            <div class="seg" id="motionSeg">
+              <button data-m="perspective" class="active jp">① Perspective</button>
+              <button data-m="scaleclip" class="jp">② Scale+Clip</button>
+              <button data-m="parallax" class="jp">③ パララックス</button>
+              <button data-m="layered" class="jp">④ Layered Zoom</button>
+              <button class="replay jp" id="replayBtn">▶ 再生 / Replay</button>
+            </div>
+          </div>
+
+          <div class="ctl-group">
+            <h4 class="jp">タイミング</h4>
+            <div class="row">
+              <label class="jp">進入の長さ</label>
+              <output id="durOut">1300ms</output>
+            </div>
+            <input type="range" id="dur" min="600" max="2600" step="50" value="1300" />
+            <div class="row">
+              <label class="jp">オーバーラップ（早出し）</label>
+              <output id="ovOut">220ms</output>
+            </div>
+            <input type="range" id="ov" min="0" max="600" step="20" value="220" />
+            <div class="row">
+              <label class="jp">イージング</label>
+            </div>
+            <select id="ease">
+              <option value="power2.inOut">power2.inOut（推奨・進入）</option>
+              <option value="material">Material cubic-bezier(0.4,0,0.2,1)</option>
+              <option value="ease-out">ease-out（減速・到着感）</option>
+              <option value="linear">linear</option>
+            </select>
+          </div>
+
+          <div class="ctl-group">
+            <h4 class="jp">シーン / 表示</h4>
+            <div class="seg" style="grid-template-columns:1fr 1fr;">
+              <button class="pill active" data-scene="real">実写</button>
+              <button class="pill" data-scene="abstract">抽象レイヤー</button>
+              <button class="pill active" data-dev="pc">PC 16:9</button>
+              <button class="pill" data-dev="sp">SP 9:16</button>
+            </div>
+          </div>
+
+          <div class="ctl-group">
+            <h4 class="jp">奥行き表現（重ねがけ）</h4>
+            <div class="toggles">
+              <label class="tg jp"><input type="checkbox" id="tgDof" checked /> blur → sharp（被写界深度）</label>
+              <label class="tg jp"><input type="checkbox" id="tgVig" checked /> ビネット＋明るさUP（暗い戸口→明るい店内）</label>
+              <label class="tg jp"><input type="checkbox" id="tgFg" /> 前景要素がカメラ脇を通過（提灯）</label>
+              <label class="tg jp"><input type="checkbox" id="tgRm" /> prefers-reduced-motion をシミュレート</label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="note jp">※ のれんは素材が無いためCSSで描画したモック。実装時は本番デザインに差し替え。実写シーンは <code>hero.webp</code> / <code>feature_photo.webp</code> を使用。</p>
+    </section>
+
+    <!-- ===================== COMPARISON ===================== -->
+    <section id="compare">
+      <div class="sec-head">
+        <h2><span class="num">02</span> 4手法 横並び比較</h2>
+        <p class="jp">各パネルは自動でループ再生。“奥へ進む”感じの違いを一目で。</p>
+      </div>
+      <div class="grid4" id="grid4"></div>
+    </section>
+
+    <!-- ===================== RESEARCH ===================== -->
+    <section id="research">
+      <div class="sec-head">
+        <h2><span class="num">03</span> リサーチ：奥へ進む演出 7手法</h2>
+        <p class="jp">Web上の実装手法を調査。「のれん＝カーテンリビール」「奥へ進む＝ドリーイン」は既に解かれた問題。</p>
+      </div>
+      <div class="cards">
+
+        <div class="card">
+          <span class="badge">① 実装：CSS（軽量）</span>
+          <h3 class="jp">Perspective + translateZ ドリーイン</h3>
+          <p class="jp">親に <code>perspective</code>、レイヤーを <code>translateZ</code> で手前へ。近い物ほど速く脇を通過し、本物の遠近が出る“カメラ前進”。</p>
+          <ul>
+            <li class="pro jp">ライブラリ不要・GPU合成で60fps</li>
+            <li class="pro jp">遠近の歪みが自動で出る</li>
+            <li class="con jp">平面レイヤーを手作業で用意</li>
+          </ul>
+          <div class="meta-row"><span class="chip">難易度：低〜中</span></div>
+          <p class="src">出典：<a href="https://css-tricks.com/how-css-perspective-works/" target="_blank" rel="noopener">CSS-Tricks: How CSS Perspective Works</a> ／ <a href="https://codepen.io/oliverds/pen/MKoGOK" target="_blank" rel="noopener">CodePen: Move Camera Forward</a></p>
+        </div>
+
+        <div class="card">
+          <span class="badge">② 実装：CSS（最軽量）</span>
+          <h3 class="jp">Scale 拡大 + clip-path ズーム</h3>
+          <p class="jp">のれんが抜けた背後を <code>scale(1→1.3)</code>、<code>clip-path: inset()</code> を戸口から開く。blur→sharp・fadeと合わせて“のみ込まれる”入り。</p>
+          <ul>
+            <li class="pro jp">最も簡単・全ブラウザ対応</li>
+            <li class="pro jp">“入っていく”読み取りが明快</li>
+            <li class="con jp">単体だと望遠ズーム風。パララックス/blur併用推奨</li>
+          </ul>
+          <div class="meta-row"><span class="chip">難易度：低</span></div>
+          <p class="src">出典：<a href="https://motion.dev/tutorials/react-scroll-zoom-hero" target="_blank" rel="noopener">Motion.dev: Scroll Zoom Hero</a> ／ <a href="https://ishadeed.com/article/clip-path/" target="_blank" rel="noopener">ishadeed: clip-path</a></p>
+        </div>
+
+        <div class="card">
+          <span class="badge">③ 実装：CSS/JS</span>
+          <h3 class="jp">多層パララックス（前景速く / 奥遅く）</h3>
+          <p class="jp">シーンを奥行きレイヤーに分割し、前景を速く・奥を遅く。“空間を進む”最も確実な手がかり。係数は0.2〜0.5が自然。</p>
+          <ul>
+            <li class="pro jp">労力対効果で最強の奥行き感</li>
+            <li class="con jp">レイヤー素材が必要</li>
+            <li class="con jp">差を付けすぎると酔う（>0.7注意）</li>
+          </ul>
+          <div class="meta-row"><span class="chip">難易度：中</span></div>
+          <p class="src">出典：<a href="https://www.builder.io/blog/parallax-scrolling-effect" target="_blank" rel="noopener">Builder.io: Parallax in 2026</a> ／ <a href="https://webflow.com/blog/parallax-scrolling" target="_blank" rel="noopener">Webflow: Parallax</a></p>
+        </div>
+
+        <div class="card">
+          <span class="badge">④ 実装：GSAP</span>
+          <h3 class="jp">レイヤードズーム + blur（奥行き collapse）</h3>
+          <p class="jp">縮小(→0.15)した重ね層を <code>scale:1</code> へ戻し、<code>blur</code> を段階解消。奥行きが手前へ“畳まれる”＝歩いて入る感。最もシネマティック。</p>
+          <ul>
+            <li class="pro jp">非3Dで最も上質な入り</li>
+            <li class="con jp">GSAP依存・多素材・pin計算</li>
+          </ul>
+          <div class="meta-row"><span class="chip diff">難易度：中〜高</span></div>
+          <p class="src">出典：<a href="https://tympanus.net/codrops/2025/10/29/building-a-layered-zoom-scroll-effect-with-gsap-scrollsmoother-and-scrolltrigger/" target="_blank" rel="noopener">Codrops: Layered Zoom Scroll (2025)</a></p>
+        </div>
+
+        <div class="card">
+          <span class="badge">⑤ 実装：Three.js</span>
+          <h3 class="jp">WebGL 実3Dカメラ・フライスルー</h3>
+          <p class="jp">本物の3D空間でカメラをZ方向にドリー。正しい遠近・遮蔽・ライティングで“店に入る”を完全再現。</p>
+          <ul>
+            <li class="pro jp">最も説得力のある結果</li>
+            <li class="con jp">最重量・GPU負荷・素材/学習コスト大</li>
+          </ul>
+          <div class="meta-row"><span class="chip diff">難易度：高</span></div>
+          <p class="src">出典：<a href="https://tympanus.net/codrops/2023/02/14/animate-a-camera-fly-through-on-scroll-using-theatre-js-and-react-three-fiber/" target="_blank" rel="noopener">Codrops: Camera fly-through (Theatre.js + R3F)</a></p>
+        </div>
+
+        <div class="card">
+          <span class="badge">⑥ 実装：canvas + 画像列</span>
+          <h3 class="jp">スクロール連動 画像シーケンス（Apple風）</h3>
+          <p class="jp">“奥へ歩く”ドリー映像を連番書き出しし、スクロール/自動でパラパラ再生。ピクセル完璧で3Dコスト無し。</p>
+          <ul>
+            <li class="pro jp">撮影/レンダ映像そのままの質感</li>
+            <li class="con jp">素材が重い・プリロード必須</li>
+          </ul>
+          <div class="meta-row"><span class="chip">難易度：中</span></div>
+          <p class="src">出典：<a href="https://css-tricks.com/lets-make-one-of-those-fancy-scrolling-animations-used-on-apple-product-pages/" target="_blank" rel="noopener">CSS-Tricks: Apple-style scroll animation</a></p>
+        </div>
+
+        <div class="card">
+          <span class="badge">⑦ 実装：CSS/GSAP</span>
+          <h3 class="jp">カーテン / のれんリビール本体</h3>
+          <p class="jp">パネルを <code>translateY</code> / <code>scaleY</code> で上へ抜き、背後を露出。これが“のれん上昇”そのもの。完了時（<code>onComplete</code>）に①〜⑥へ受け渡す。</p>
+          <ul>
+            <li class="pro jp">要件に直結・受け渡しがきれい</li>
+            <li class="con jp">単体は“入る”ではないので進入と連結必須</li>
+          </ul>
+          <div class="meta-row"><span class="chip">難易度：低〜中</span></div>
+          <p class="src">出典：<a href="https://tympanus.net/codrops/2022/07/06/how-to-create-a-cover-page-transition/" target="_blank" rel="noopener">Codrops: Cover Page Transition</a></p>
+        </div>
+
+      </div>
+
+      <div class="sec-head" style="margin-top:36px;">
+        <h2 style="font-size:16px;"><span class="num">＋</span> 奥行きを足す補助・タイミング・対応状況</h2>
+      </div>
+      <div class="info">
+        <div class="card">
+          <h3 class="jp">重ねがけの奥行き補助</h3>
+          <p class="jp"><b>差分パララックス</b>（前景×0.5/奥×0.2）＝一番効く手がかり。<b>blur→sharp</b>で被写界深度。<b>ビネット＋明るさ上昇</b>で「暗い戸口→明るい店内」。<b>前景要素がカメラ脇を通過</b>（提灯・のれんの端）で前進を強調。</p>
+        </div>
+        <div class="card">
+          <h3 class="jp">イージング & 尺</h3>
+          <p class="jp">入る＝<b>減速</b>（ease-out寄り）。のれん上昇 <code>power2.out</code> 約600–1000ms。進入 <code>power2.inOut</code> / <code>cubic-bezier(0.4,0,0.2,1)</code> 約800ms–1.5s。進入は上昇完了の<b>約0.2s前から</b>重ねる。</p>
+        </div>
+        <div class="card">
+          <h3 class="jp">対応状況 / 方針</h3>
+          <p class="jp">CSS scroll-driven は2026で約85%（Firefox stableはフラグ）。初回イントロは<b>スクロール待ちにせず on-load 自動再生</b>が定石。<code>prefers-reduced-motion</code> で静的フォールバック必須。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== RECOMMENDATION ===================== -->
+    <section id="reco">
+      <div class="reco">
+        <h2 class="jp">推奨案</h2>
+        <p class="lede jp" style="color:#555;">みんなでごはん会は「静かでゆっくり」なモーション言語。軽量で崩れにくく、和の“店に入る”一瞬に合うのはこの順。</p>
+
+        <div class="rank">
+          <div class="rank-item best">
+            <div class="medal">1</div>
+            <div>
+              <h4 class="jp">のれん上昇 → ① Perspective + ③ パララックス・ドリー（on-load 自動再生）</h4>
+              <p class="jp">のれんは <code>translateY</code> で上へ抜き、完了と同時に perspective カメラが前進。数枚の奥行きレイヤー（戸口/中景/奥壁）が異なる速度で手前へ流れ、近い物がレンズ脇を通過。blur→sharp＋明るさ上昇で「入った」瞬間を演出。<b>依存ゼロ・60fps・モバイル安全。</b></p>
+              <p class="spec">尺：上昇 <code>power2.out ~800ms</code> ／ 進入 <code>power2.inOut ~1200ms</code>（~0.2s オーバーラップ）</p>
+            </div>
+          </div>
+          <div class="rank-item">
+            <div class="medal">2</div>
+            <div>
+              <h4 class="jp">のれん上昇 → ④ レイヤードズーム + blur（GSAP）</h4>
+              <p class="jp">“歩いて入る”に最も近い記録済みレシピ。奥行きが畳まれる最上質な入り。要GSAP・多素材だが仕上がりは随一。自動再生後、スクロールで探索へ受け渡しも可。</p>
+            </div>
+          </div>
+          <div class="rank-item">
+            <div class="medal">3</div>
+            <div>
+              <h4 class="jp">のれん上昇 → ⑥ 実写ドリー映像の画像シーケンス</h4>
+              <p class="jp">実際に店内へ歩く映像を用意できるなら、Apple風連番でピクセル完璧な奥行き。素材の重さがトレードオフ。</p>
+            </div>
+          </div>
+        </div>
+
+        <p class="note jp" style="margin-top:16px;">※ フル3D（⑤ Three.js）は、サイト全体が3Dでない限りこの一瞬には過剰。①/④で十分。</p>
+
+        <div class="sec-head" style="margin:26px 0 4px;">
+          <h2 style="font-size:16px;"><span class="num">→</span> 本体（Astro）への落とし込み</h2>
+        </div>
+        <ol class="steps">
+          <li class="jp"><b>新規コンポーネント</b> <code>src/components/NorenIntro.astro</code> ＋ 専用CSSを追加（既存の <code>appear-observer</code> / <code>video-stage</code> と同じ zero-dep Web Component 方式）。</li>
+          <li class="jp"><b>on-load 自動再生</b>のタイムライン（rAF）で「上昇→進入」を連結。スクロールジャックはしない（旧 intro-sequence の反省）。</li>
+          <li class="jp"><b>奥行きレイヤー素材</b>を用意（戸口/中景/奥壁）。当面は <code>hero.webp</code> 等で仮組み → 本番写真に差し替え。</li>
+          <li class="jp"><b>reduced-motion フォールバック</b>：<code>prefers-reduced-motion</code> で即・最終状態を表示（既存方針に準拠）。</li>
+          <li class="jp"><b>モーション言語の順守</b>：DESIGNの「quiet & slow」に合わせ、派手さは抑えめ・尺は上記レンジで。</li>
+        </ol>
+      </div>
+    </section>
+
+  </div>
+
+  <footer class="foot jp">みんなでごはん会 — Noren Motion Lab（提案用モック）／ public/proposals/noren-motion.html</footer>
+
+  <script>
+  (() => {
+    "use strict";
+
+    /* ---------- easing ---------- */
+    const cubicBezier = (x1, y1, x2, y2) => {
+      const cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx;
+      const cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by;
+      const fx = t => ((ax * t + bx) * t + cx) * t;
+      const dfx = t => (3 * ax * t + 2 * bx) * t + cx;
+      const fy = t => ((ay * t + by) * t + cy) * t;
+      return x => {
+        let t = x;
+        for (let i = 0; i < 6; i++) {
+          const e = fx(t) - x, d = dfx(t);
+          if (Math.abs(e) < 1e-4 || d === 0) break;
+          t -= e / d;
+        }
+        return fy(Math.min(1, Math.max(0, t)));
+      };
+    };
+    const clamp01 = v => v < 0 ? 0 : v > 1 ? 1 : v;
+    const lerp = (a, b, t) => a + (b - a) * t;
+    const EASE = {
+      "linear": t => t,
+      "ease-out": cubicBezier(0, 0, 0.2, 1),
+      "material": cubicBezier(0.4, 0, 0.2, 1),
+      "power2.inOut": t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2,
+    };
+    const norenEase = t => 1 - Math.pow(1 - t, 3); // power2.out (cubic)
+
+    const MOTION_INFO = {
+      perspective: {
+        name: "① Perspective ドリー",
+        desc: "<b>perspective + translateZ。</b> レイヤーを手前へ押し出す“カメラ前進”。近い戸口がレンズ脇を通過し、本物の遠近が出るのが強み。もっとも「入っていく」実感が高い。",
+      },
+      scaleclip: {
+        name: "② Scale + Clip ズーム",
+        desc: "<b>scale拡大 + clip-path開き。</b> 背後をズームしながら戸口の窓を開く。最軽量で全ブラウザ対応。blur/明るさ補助で“のみ込まれる”感を足すと良い。",
+      },
+      parallax: {
+        name: "③ 多層パララックス",
+        desc: "<b>前景速く・奥遅く。</b> 空間を進む一番確実な手がかり。前景（戸口）が下方へ流れ去り、奥壁はゆっくり。差分を付けすぎない（酔い）。",
+      },
+      layered: {
+        name: "④ レイヤードズーム + blur",
+        desc: "<b>奥行きが手前へ畳まれる。</b> 縮小＋ボケた各層が scale:1・blur0 へ収束。非3Dで最もシネマティック。実装はやや重め（GSAP相当）。",
+      },
+    };
+
+    /* ---------- stage factory ---------- */
+    function createStage(root) {
+      root.innerHTML = `
+        <div class="phase-tag jp" data-tag>のれん</div>
+        <div class="scene mode-real" data-scene>
+          <div class="layers" data-layers>
+            <div class="layer far"  data-depth="0"><div class="face real"></div><div class="face abstract">奥壁 / back</div></div>
+            <div class="layer mid"  data-depth="0.5"><div class="face real"></div><div class="face abstract">中景 / mid</div></div>
+            <div class="layer near" data-depth="1"><div class="face real"></div><div class="face abstract">前景 / 戸口</div></div>
+          </div>
+          <div class="vignette" data-vig></div>
+          <div class="fg-pass" data-fg><i></i></div>
+          <div class="noren idle" data-noren>
+            <div class="noren-rod"></div>
+            <div class="noren-cloth">
+              <div class="noren-slits"></div>
+              <div class="noren-fold"></div>
+              <div class="noren-label"><span class="noren-seal">ごはん</span>みんなでごはん会</div>
+            </div>
+          </div>
+        </div>`;
+
+      const el = {
+        scene: root.querySelector("[data-scene]"),
+        layers: root.querySelector("[data-layers]"),
+        far: root.querySelector(".layer.far"),
+        mid: root.querySelector(".layer.mid"),
+        near: root.querySelector(".layer.near"),
+        vig: root.querySelector("[data-vig]"),
+        fg: root.querySelector("[data-fg]"),
+        noren: root.querySelector("[data-noren]"),
+        tag: root.querySelector("[data-tag]"),
+      };
+      const LAYERS = [el.far, el.mid, el.near];
+
+      const setLayer = (layer, { tx = 0, ty = 0, tz = 0, s = 1 }) => {
+        layer.style.transform =
+          `translate(-50%,-50%) translate3d(${tx}px,${ty}px,${tz}px) scale(${s})`;
+      };
+
+      let raf = 0;
+
+      const resetStyles = () => {
+        el.scene.style.perspective = "none";
+        el.layers.style.transformStyle = "flat";
+        el.layers.style.transform = "none";
+        el.layers.style.filter = "none";
+        LAYERS.forEach(l => { l.style.transform = "translate(-50%,-50%)"; l.style.filter = "none"; l.style.opacity = "1"; });
+        el.vig.style.opacity = "0";
+        el.fg.style.transform = "translateX(-50%) scale(1)";
+        el.fg.style.opacity = "1";
+      };
+
+      // per-motion frame appliers (p = eased 0..1)
+      const appliers = {
+        perspective: (p, dims) => {
+          el.layers.style.transform = `translateZ(${p * dims.push}px)`;
+        },
+        scaleclip: (p) => {
+          el.layers.style.transform = `scale(${1 + p * 0.32})`;
+          const inset = (1 - p) * 12;
+          el.layers.style.clipPath = `inset(${inset}% ${inset}% round 10px)`;
+          el.layers.style.opacity = String(lerp(0.72, 1, clamp01(p * 1.4)));
+        },
+        parallax: (p, dims) => {
+          LAYERS.forEach(l => {
+            const d = parseFloat(l.dataset.depth);
+            const ty = p * dims.h * (0.02 + d * 0.16);
+            const s = 1 + p * (0.05 + d * 0.55);
+            setLayer(l, { ty, s });
+          });
+        },
+        layered: (p) => {
+          LAYERS.forEach(l => {
+            const d = parseFloat(l.dataset.depth);
+            const start = lerp(0.45, 0.9, d);      // far starts smaller
+            const s = lerp(start, 1.06, p);
+            const bl = lerp((1 - d) * 6 + 1, 0, p); // far starts blurrier
+            setLayer(l, { s });
+            l.style.filter = `blur(${bl}px)`;
+          });
+        },
+      };
+
+      const setupPerspective = (dims) => {
+        el.scene.style.perspective = dims.persp + "px";
+        el.layers.style.transformStyle = "preserve-3d";
+        setLayer(el.far,  { tz: -dims.persp * 1.1 });
+        setLayer(el.mid,  { tz: -dims.persp * 0.5 });
+        setLayer(el.near, { tz: 0 });
+      };
+
+      const applyAddons = (p, cfg) => {
+        // dof + brightness combined on layers filter (layered handles blur per-layer)
+        let blur = 0, bright = 1;
+        if (cfg.dof && cfg.motion !== "layered") blur = lerp(4.5, 0, clamp01(p * 1.15));
+        if (cfg.vignette) { bright = lerp(0.68, 1.06, p); el.vig.style.opacity = String(lerp(0.62, 0.12, p)); }
+        else el.vig.style.opacity = "0";
+        if (cfg.motion !== "scaleclip" && cfg.motion !== "layered") {
+          el.layers.style.filter = (blur || bright !== 1) ? `blur(${blur}px) brightness(${bright})` : "none";
+        } else {
+          // scaleclip/layered use layers.transform/clip or per-layer filter; put dof/brightness on scene instead
+          el.scene.style.filter = (blur || bright !== 1) ? `blur(${blur}px) brightness(${bright})` : "none";
+        }
+        if (cfg.fg) {
+          el.fg.classList.add("on");
+          const s = lerp(1, 3.4, p);
+          const ty = lerp(0, 34, p);
+          const op = p < 0.55 ? 1 : clamp01(1 - (p - 0.55) / 0.45);
+          el.fg.style.transform = `translateX(-50%) translateY(${ty}%) scale(${s})`;
+          el.fg.style.opacity = String(op);
+        } else {
+          el.fg.classList.remove("on");
+        }
+      };
+
+      const setNoren = (np) => {
+        el.noren.style.transform = `translateY(${-np * 112}%)`;
+      };
+
+      const stop = () => { if (raf) cancelAnimationFrame(raf); raf = 0; };
+
+      const setScene = (mode) => {
+        el.scene.classList.toggle("mode-abstract", mode === "abstract");
+        el.scene.classList.toggle("mode-real", mode !== "abstract");
+      };
+
+      const dims = () => {
+        const w = root.clientWidth || 480, h = root.clientHeight || 270;
+        return { w, h, persp: Math.round(w * 1.45), push: Math.round(w * 0.95) };
+      };
+
+      const renderStatic = (cfg) => {
+        // final state (reduced-motion)
+        stop();
+        resetStyles();
+        el.scene.style.filter = "none";
+        el.noren.classList.remove("idle");
+        const D = dims();
+        if (cfg.motion === "perspective") setupPerspective(D);
+        appliers[cfg.motion](1, D);
+        applyAddons(1, cfg);
+        setNoren(1);
+        el.tag.textContent = "静的（reduced-motion）";
+      };
+
+      const play = (cfg) => {
+        stop();
+        resetStyles();
+        el.scene.style.filter = "none";
+        el.noren.classList.remove("idle");
+        setScene(cfg.scene);
+
+        if (cfg.reduced) { renderStatic(cfg); return; }
+
+        const D = dims();
+        if (cfg.motion === "perspective") setupPerspective(D);
+
+        const norenDur = 800;
+        const enterStart = Math.max(0, norenDur - cfg.overlap);
+        const enterDur = cfg.enter;
+        const total = enterStart + enterDur + 250; // small tail
+        const eEnter = EASE[cfg.ease] || EASE["power2.inOut"];
+
+        // initial frame
+        appliers[cfg.motion](0, D);
+        applyAddons(0, cfg);
+        setNoren(0);
+
+        const t0 = performance.now();
+        const frame = (now) => {
+          const e = now - t0;
+          const np = norenEase(clamp01(e / norenDur));
+          const rawEnter = clamp01((e - enterStart) / enterDur);
+          const pe = eEnter(rawEnter);
+          appliers[cfg.motion](pe, D);
+          applyAddons(pe, cfg);
+          setNoren(np);
+          el.tag.textContent = e < norenDur ? "のれん上昇" : (rawEnter < 1 ? "奥へ進入" : "到着");
+          if (e < total) raf = requestAnimationFrame(frame);
+          else { raf = 0; el.tag.textContent = "到着"; }
+        };
+        raf = requestAnimationFrame(frame);
+        return total;
+      };
+
+      // idle reset (noren down, gentle sway)
+      const idle = (cfg) => {
+        stop();
+        resetStyles();
+        setScene(cfg ? cfg.scene : "real");
+        const D = dims();
+        if (cfg && cfg.motion === "perspective") setupPerspective(D);
+        if (cfg) { appliers[cfg.motion](0, D); }
+        setNoren(0);
+        el.scene.style.filter = "none";
+        el.layers.style.filter = "none";
+        el.noren.classList.add("idle");
+        el.tag.textContent = "のれん";
+      };
+
+      return { el, play, idle, setScene, stop, dims, renderStatic };
+    }
+
+    /* ---------- main stage wiring ---------- */
+    const main = createStage(document.getElementById("mainStage"));
+
+    const state = {
+      motion: "perspective",
+      enter: 1300,
+      overlap: 220,
+      ease: "power2.inOut",
+      scene: "real",
+      dof: true, vignette: true, fg: false, reduced: false,
+    };
+
+    const $ = id => document.getElementById(id);
+    const curMotion = $("curMotion"), curTotal = $("curTotal"), motionDesc = $("motionDesc");
+
+    const syncInfo = () => {
+      curMotion.textContent = MOTION_INFO[state.motion].name;
+      motionDesc.innerHTML = MOTION_INFO[state.motion].desc;
+      const norenDur = 800;
+      const total = Math.max(0, norenDur - state.overlap) + state.enter + 250;
+      curTotal.textContent = state.reduced ? "静的" : total + "ms";
+    };
+
+    const play = () => { main.play({ ...state }); syncInfo(); };
+    const idle = () => { main.idle({ ...state }); syncInfo(); };
+
+    // motion segment
+    document.querySelectorAll("#motionSeg [data-m]").forEach(b => {
+      b.addEventListener("click", () => {
+        document.querySelectorAll("#motionSeg [data-m]").forEach(x => x.classList.remove("active"));
+        b.classList.add("active");
+        state.motion = b.dataset.m;
+        play();
+      });
+    });
+    $("replayBtn").addEventListener("click", play);
+
+    // timing
+    $("dur").addEventListener("input", e => { state.enter = +e.target.value; $("durOut").textContent = state.enter + "ms"; syncInfo(); });
+    $("dur").addEventListener("change", play);
+    $("ov").addEventListener("input", e => { state.overlap = +e.target.value; $("ovOut").textContent = state.overlap + "ms"; syncInfo(); });
+    $("ov").addEventListener("change", play);
+    $("ease").addEventListener("change", e => { state.ease = e.target.value; play(); });
+
+    // scene / device
+    document.querySelectorAll("[data-scene]").forEach(b => {
+      if (b.tagName !== "BUTTON") return;
+      b.addEventListener("click", () => {
+        document.querySelectorAll("button[data-scene]").forEach(x => x.classList.remove("active"));
+        b.classList.add("active");
+        state.scene = b.dataset.scene;
+        main.setScene(state.scene);
+        play();
+      });
+    });
+    document.querySelectorAll("[data-dev]").forEach(b => {
+      b.addEventListener("click", () => {
+        document.querySelectorAll("[data-dev]").forEach(x => x.classList.remove("active"));
+        b.classList.add("active");
+        document.getElementById("mainStage").classList.toggle("sp", b.dataset.dev === "sp");
+        play();
+      });
+    });
+
+    // toggles
+    $("tgDof").addEventListener("change", e => { state.dof = e.target.checked; play(); });
+    $("tgVig").addEventListener("change", e => { state.vignette = e.target.checked; play(); });
+    $("tgFg").addEventListener("change", e => { state.fg = e.target.checked; play(); });
+    $("tgRm").addEventListener("change", e => { state.reduced = e.target.checked; if (state.reduced) { main.renderStatic({ ...state }); syncInfo(); } else play(); });
+
+    // init
+    $("durOut").textContent = state.enter + "ms";
+    $("ovOut").textContent = state.overlap + "ms";
+    idle();
+    // gentle auto-first-play after mount
+    setTimeout(play, 500);
+
+    /* ---------- comparison grid (4 mini, auto-loop) ---------- */
+    const MINI = [
+      { motion: "perspective", title: "① Perspective ドリー", sub: "遠近で押し込む・入る実感◎" },
+      { motion: "scaleclip",   title: "② Scale + Clip ズーム", sub: "最軽量・のみ込む" },
+      { motion: "parallax",    title: "③ 多層パララックス", sub: "前景速く/奥遅く" },
+      { motion: "layered",     title: "④ Layered Zoom + blur", sub: "奥行きが畳まれる" },
+    ];
+    const grid = document.getElementById("grid4");
+    const miniCtrls = [];
+    MINI.forEach((m, i) => {
+      const card = document.createElement("div");
+      card.className = "mini";
+      const stg = document.createElement("div");
+      stg.className = "stage";
+      card.appendChild(stg);
+      const h = document.createElement("h3"); h.className = "jp"; h.textContent = m.title;
+      const p = document.createElement("p"); p.className = "jp"; p.textContent = m.sub;
+      card.appendChild(h); card.appendChild(p);
+      grid.appendChild(card);
+      const c = createStage(stg);
+      const cfg = { motion: m.motion, enter: 1400, overlap: 220, ease: "power2.inOut", scene: "real", dof: true, vignette: true, fg: m.motion === "parallax", reduced: false };
+      c.idle(cfg);
+      miniCtrls.push({ c, cfg, timer: 0, delay: 500 + i * 350 });
+    });
+
+    // loop minis only while visible
+    let miniRunning = false;
+    const runMinis = () => {
+      if (miniRunning) return;
+      miniRunning = true;
+      const loop = (mc) => {
+        const total = mc.c.play(mc.cfg) || 2000;
+        mc.timer = setTimeout(() => {
+          mc.c.idle(mc.cfg);
+          mc.timer = setTimeout(() => loop(mc), 900);
+        }, total + 400);
+      };
+      miniCtrls.forEach(mc => { mc.timer = setTimeout(() => loop(mc), mc.delay); });
+    };
+    const stopMinis = () => {
+      miniRunning = false;
+      miniCtrls.forEach(mc => { clearTimeout(mc.timer); mc.c.stop(); mc.c.idle(mc.cfg); });
+    };
+    const io = new IntersectionObserver((ents) => {
+      ents.forEach(en => { if (en.isIntersecting) runMinis(); else stopMinis(); });
+    }, { threshold: 0.25 });
+    io.observe(grid);
+  })();
+  </script>
+</body>
+</html>

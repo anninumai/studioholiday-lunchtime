@@ -20,21 +20,34 @@ export const content = {
   // emblem printed on it (its #f2f2f2 background was keyed to transparent).
   noren: {
     logo: "/assets/noren-logo.webp",
-    tabs: "/assets/noren-tabs.webp", // hand-drawn tab strip threaded on the rod
+    tabs: "/assets/noren-tabs-white.svg", // white チチ (loops); the green rod shows in the gaps
     alt: "みんなでごはん会ののれん",
   },
   // Sticky logo video that blurs into focus.
   video: { src: "/assets/studio/intro_video.mp4", width: 1920, height: 1080 },
-  // White message copy over the pink photo (message_bg). 5 paragraphs: line 1 is
-  // the lead tagline (.msg--lead); line 4 is the long emotional line (.msg--long),
-  // which uses "\n" for its 3 controlled line breaks (rendered as <br> in MessageLead).
-  message: [
-    "同釜共飲、毎週木曜、参加無料。",
-    "STUDIO HOLIDAYが主催する「みんなでごはん会」。",
-    "新大久保駅直結のキッチンスペースで開かれます。",
-    "ごはんを食べながらだと、おしゃべりもはずむ。\n新しいアイデアも思いつく。\nなんだかいろいろ、うまくいく。",
-    "お近くにお越しの際は、お立ち寄りください。",
-  ],
+  // Message section = a pink-halftone "poster": the gathering photo (flanked by
+  // vertical brush labels), then a white cloud-edged panel with the 同釜共飲 brush
+  // title, the body copy (live text) and brush underlines. Brush/cloud art is green
+  // (or pink) PNG under /assets/msg; only the body stays live text.
+  message: {
+    photo: "/assets/studio/gathering-v2.webp",
+    title: "/assets/msg/title.webp", // 同釜共飲 (brush, cloud badges)
+    sideLeft: "/assets/msg/side-left-v2.webp", // 毎週木曜 (vertical brush)
+    sideRight: "/assets/msg/side-right-v2.webp", // 参加無料 (vertical brush)
+    lines: "/assets/msg/lines.webp", // two brush underlines
+    // Body paragraphs; each inner array is one paragraph, its lines joined by <br>.
+    body: [
+      ["STUDIO HOLIDAYが主催する「みんなでごはん会」。"],
+      [
+        "新大久保駅直結のキッチンスペースで開かれます。",
+        "ごはんを食べながらだと、",
+        "おしゃべりもはずむ、",
+        "新しいアイデアも思いつく、",
+        "なんだかいろいろ、うまくいく。",
+      ],
+      ["お近くにお越しの際は、お立ち寄りください。"],
+    ],
+  },
   join: [
     "STUDIO HOLIDAYのキッチンスタッフが、腕によりをかけてお待ちしています。",
     "お越しの際はSTUDIO HOLIDAYメンバー、K,D,C,,,メンバーにお声がけください。",
