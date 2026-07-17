@@ -17,10 +17,14 @@ if (section && card) {
 
     const viewportHeight = window.innerHeight;
     const sectionTop = section.getBoundingClientRect().top;
-    const revealDistance = Math.max(
-      viewportHeight,
-      card.offsetTop + card.offsetHeight,
-    );
+    // The stacked mobile card is much taller than the viewport. Using its full
+    // height as the reveal distance lets the card outrun the green curtain and
+    // appear over the pink section. On mobile, complete the rise in one viewport
+    // so green is always behind the card from the moment it enters.
+    const mobile = window.matchMedia("(max-width: 540px)").matches;
+    const revealDistance = mobile
+      ? viewportHeight
+      : Math.max(viewportHeight, card.offsetTop + card.offsetHeight);
     const progress = Math.min(
       1,
       Math.max(0, (viewportHeight - sectionTop) / revealDistance),
