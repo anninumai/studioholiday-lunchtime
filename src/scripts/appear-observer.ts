@@ -31,8 +31,8 @@ class AppearObserver extends HTMLElement {
     );
     for (const el of els) this.#io.observe(el);
 
-    // Hero: reveal once ~35% of the section is on screen — reliable at any scroll
-    // speed, and the fade/scale + panel rise still reads as it enters.
+    // Hero: begin while the poster is entering, so its staged assembly lands near
+    // the center of the viewport instead of waiting until the tall section is 35% in.
     if (heroes.length > 0) {
       this.#heroIo = new IntersectionObserver(
         (entries) => {
@@ -42,7 +42,7 @@ class AppearObserver extends HTMLElement {
             this.#heroIo?.unobserve(e.target);
           }
         },
-        { threshold: 0.35 },
+        { threshold: 0.18, rootMargin: "0px 0px -10% 0px" },
       );
       for (const el of heroes) this.#heroIo.observe(el);
     }

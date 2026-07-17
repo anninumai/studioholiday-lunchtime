@@ -336,10 +336,10 @@ noren-cloth {
   }
 }
 
-/* ================= video (200vh, sticky, blur fade-in) ================= */
+/* ================= video (125vh, sticky, blur fade-in) ================= */
 .video-stage {
   position: relative;
-  height: 200vh;
+  height: 125vh;
 }
 .video-pin {
   position: sticky;
@@ -394,7 +394,7 @@ noren-cloth {
   width: 100%;
   /* px/vw padding (not % of container) so the flex item never sizes wider than the
      column — a %-padding here overflowed and clipped the side labels. */
-  padding: 0 clamp(28px, 3.5vw, 58px); /* small side gutter; the big labels overlap the photo edge */
+  padding: 0 clamp(8px, 1vw, 16px); /* near full-width desktop photo */
 }
 .msg-photo {
   display: block;
@@ -406,16 +406,16 @@ noren-cloth {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  width: clamp(48px, 7.2%, 84px); /* bigger — overlaps the photo edge slightly */
+  width: clamp(80px, 11%, 132px); /* prominent desktop labels overlapping the photo edge */
   height: auto;
   z-index: 2;
 }
 .msg-side--l {
-  left: clamp(28px, 3.5vw, 58px);
+  left: clamp(8px, 1vw, 16px);
   transform: translate(-80%, -50%);
 }
 .msg-side--r {
-  right: clamp(28px, 3.5vw, 58px);
+  right: clamp(8px, 1vw, 16px);
   transform: translate(80%, -50%);
 }
 /* pink cloud overlays that carve the organic edges (blend into the pink field) */
@@ -491,8 +491,8 @@ noren-cloth {
   width: 44%;
 }
 .msg-cloud--cr-overlay {
-  right: -24%;
-  top: 27%;
+  right: -15%;
+  top: 30%;
   width: 44%;
 }
 /* Bottom-right: the two identical clouds placed side by side (overlapping), small.
@@ -772,36 +772,80 @@ noren-cloth {
     top: 39%;
   }
   .msg-cloud--cr-overlay {
-    top: 52%;
+    right: -15%;
+    top: 50%;
   }
 }
 
 /* ================= message reveal (hero) =================
-   The photo focuses in (blur -> sharp + fade + micro-scale) and the panel rises.
-   Driven once by <appear-observer> adding `.in`. Gated on `.js` AND no-preference
-   so no-JS / reduced-motion users get the final composition immediately. */
+   The centerpiece assembles like a poster: photo focus, side labels, the whole
+   cloud-edged cushion as one sheet, then a stamped title and paragraph cascade.
+   Clouds deliberately do NOT pop in separately; their idle GIF loops continue
+   inside the panel after its entrance. */
 @media (prefers-reduced-motion: no-preference) {
-  .js .appear--hero .msg-photo-wrap {
+  .js .appear--hero .msg-photo {
     opacity: 0;
-    transform: scale(1.05);
-    filter: blur(8px);
+    transform: scale(1.06);
+    filter: blur(12px);
     transition:
-      opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
-      transform 0.9s cubic-bezier(0.16, 1, 0.3, 1),
-      filter 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+      opacity 0.82s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.82s cubic-bezier(0.16, 1, 0.3, 1),
+      filter 0.82s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .js .appear--hero .msg-side {
+    opacity: 0;
+    filter: blur(5px);
+    transition:
+      opacity 0.64s ease-out 0.2s,
+      filter 0.64s ease-out 0.2s;
   }
   .js .appear--hero .msg-panel {
     opacity: 0;
-    transform: translateY(18px);
+    transform: translateY(40px) scale(0.985);
     transition:
-      opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.15s,
-      transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.15s;
+      opacity 0.72s cubic-bezier(0.16, 1, 0.3, 1) 0.38s,
+      transform 0.82s cubic-bezier(0.16, 1, 0.3, 1) 0.38s;
   }
-  .js .appear--hero.in .msg-photo-wrap,
+  .js .appear--hero .msg-title {
+    opacity: 0;
+    filter: blur(6px);
+    transition:
+      opacity 0.64s ease-out 0.72s,
+      filter 0.64s ease-out 0.72s;
+  }
+  .js .appear--hero .msg-body p {
+    opacity: 0;
+    transform: translateY(16px);
+    transition:
+      opacity 0.48s ease-out,
+      transform 0.58s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .js .appear--hero .msg-body p:nth-child(1) {
+    transition-delay: 0.94s;
+  }
+  .js .appear--hero .msg-body p:nth-child(2) {
+    transition-delay: 1.06s;
+  }
+  .js .appear--hero .msg-body p:nth-child(3) {
+    transition-delay: 1.18s;
+  }
+  .js .appear--hero.in .msg-photo,
   .js .appear--hero.in .msg-panel {
     opacity: 1;
     transform: none;
     filter: none;
+  }
+  .js .appear--hero.in .msg-side {
+    opacity: 1;
+    filter: none;
+  }
+  .js .appear--hero.in .msg-title {
+    opacity: 1;
+    filter: none;
+  }
+  .js .appear--hero.in .msg-body p {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
@@ -810,15 +854,41 @@ noren-cloth {
    the join copy, the info card AND the character/photo section — so the green reads
    as one continuous cloth (no seam between the card area and the photo area). */
 .message2 {
+  --green-rise: 1;
   position: relative;
   isolation: isolate;
+  background-color: #ef4d8b;
+  background-image: var(--bg-pink);
+  background-position: center;
+  background-size: cover;
 }
-.message2::before {
+.js .message2 {
+  --green-rise: 0;
+}
+.green-rise {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: var(--bg-canvas) 50% 50% / cover no-repeat;
+  transform: scaleY(var(--green-rise));
+  transform-origin: center bottom;
+  will-change: transform;
+}
+.green-rise::before {
   content: "";
   position: absolute;
-  inset: 0;
-  z-index: -1;
-  background: var(--bg-canvas) 50% 50% / cover no-repeat;
+  top: -12px;
+  left: -2%;
+  width: 104%;
+  height: 24px;
+  background: inherit;
+  border-radius: 50% 50% 0 0 / 12px 12px 0 0;
+}
+.message2 > .access,
+.message2 > .photo {
+  position: relative;
+  z-index: 1;
 }
 
 /* ================= access (join copy + info card + carousel) ================= */
