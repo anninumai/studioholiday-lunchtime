@@ -1099,6 +1099,7 @@ noren-cloth {
 }
 /* Speech bubble the character "says" — white rounded pill with a small nub. */
 .speech {
+  --speech-x: 0%;
   position: absolute;
   top: 16%;
   left: 60%;
@@ -1113,6 +1114,34 @@ noren-cloth {
   background: var(--color-surface);
   border-radius: 999px;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  transform: translateX(var(--speech-x));
+  will-change: transform;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .speech {
+    animation: speech-gif-bob 2.8s steps(1, end) infinite;
+  }
+}
+@keyframes speech-gif-bob {
+  0%,
+  100% {
+    transform: translate(var(--speech-x), 0);
+  }
+  18% {
+    transform: translate(var(--speech-x), -5px);
+  }
+  36% {
+    transform: translate(var(--speech-x), -9px);
+  }
+  54% {
+    transform: translate(var(--speech-x), -3px);
+  }
+  72% {
+    transform: translate(var(--speech-x), 4px);
+  }
+  88% {
+    transform: translate(var(--speech-x), -2px);
+  }
 }
 .speech::after {
   content: "";
@@ -1295,9 +1324,9 @@ noren-cloth {
   }
   /* one line, centered horizontally */
   .speech {
+    --speech-x: -50%;
     top: -24%; /* nudged up */
     left: 50%;
-    transform: translateX(-50%);
     max-width: calc(100% - 32px);
     padding: 8px 14px;
     font-size: 12px;
