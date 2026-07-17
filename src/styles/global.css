@@ -151,10 +151,12 @@ noren-cloth {
 .noren-hero {
   position: relative;
   height: 100vh; /* fallback: no pin */
+  height: 100dvh; /* center within the actually visible mobile viewport */
 }
 .noren-pin {
   position: static; /* fallback: no pin */
   height: 100vh;
+  height: 100dvh;
   overflow: hidden; /* clip the cloth as it lifts above the stage */
 }
 /* Revealed logo video, centered over the show-through green pattern. */
@@ -172,6 +174,7 @@ noren-cloth {
 .noren-video video {
   flex: none;
   height: 100vh;
+  height: 100dvh;
   width: auto;
   max-width: none;
   object-fit: contain;
@@ -261,6 +264,7 @@ noren-cloth {
   height: 100%; /* fill the first viewport so no bg shows below the cloth */
   translate: 0 -125%;
   will-change: transform;
+  transform-origin: 50% 50%; /* scaling must never drift away from viewport centre */
   transform-box: border-box; /* scroll scale/translate reference the svg box */
   /* Soft shadow so the noren reads as hanging in front of the backdrop. */
   filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.16));
@@ -323,6 +327,7 @@ noren-cloth {
   @media (prefers-reduced-motion: no-preference) {
     .noren-hero {
       height: 300vh; /* pin holds for 2 viewports of scroll before releasing */
+      height: 300dvh;
     }
     .noren-pin {
       position: sticky;
