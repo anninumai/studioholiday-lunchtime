@@ -8,17 +8,18 @@ const logo = content.footer.logo;
 
 <section class="access">
   <div class="card appear">
+    <img
+      class="c-logo"
+      src={withBase(logo.src)}
+      width={logo.width}
+      height={logo.height}
+      alt="みんなでごはん会"
+      loading="lazy"
+      decoding="async"
+    />
+
     <div class="card-main">
       <div class="card-info">
-        <img
-          class="c-logo"
-          src={withBase(logo.src)}
-          width={logo.width}
-          height={logo.height}
-          alt="みんなでごはん会"
-          loading="lazy"
-          decoding="async"
-        />
         <p class="c-line">
           <img class="c-icon" src={withBase("/assets/icons/clock-4.png")} alt="" width="20" height="20" loading="lazy" decoding="async" />
           <span>{card.time}</span>

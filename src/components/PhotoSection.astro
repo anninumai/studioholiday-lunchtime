@@ -16,26 +16,35 @@ const { photo } = content;
       decoding="async"
     />
     <img
-      class="photo-utensil photo-utensil--fork"
-      src={withBase(photo.src)}
-      width={photo.width}
-      height={photo.height}
+      class="photo-part photo-fork"
+      src={withBase("/assets/photo/holiday-fork.png")}
+      width="608"
+      height="1519"
       alt=""
       aria-hidden="true"
       loading="lazy"
       decoding="async"
     />
     <img
-      class="photo-utensil photo-utensil--spoon"
-      src={withBase(photo.src)}
-      width={photo.width}
-      height={photo.height}
+      class="photo-part photo-spoon"
+      src={withBase("/assets/photo/holiday-spoon.png")}
+      width="806"
+      height="1485"
       alt=""
       aria-hidden="true"
       loading="lazy"
       decoding="async"
     />
-    <span class="photo-mouth" aria-hidden="true"></span>
+    <img
+      class="photo-part photo-mouth"
+      src={withBase("/assets/photo/holiday-mouth.png")}
+      width="815"
+      height="349"
+      alt=""
+      aria-hidden="true"
+      loading="lazy"
+      decoding="async"
+    />
   </div>
   <p class="speech">{photo.speech}</p>
 </section>

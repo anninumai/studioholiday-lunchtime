@@ -94,9 +94,9 @@ export const content = {
   ],
   // Wide feature photo, shown at 605px height, centered.
   photo: {
-    src: "/assets/studio/feature_photo.webp",
-    width: 2400,
-    height: 1410,
+    src: "/assets/photo/holiday-base.png",
+    width: 5496,
+    height: 3612,
     alt: "",
     // Speech bubble the character says (see .speech in global.css).
     speech: '同じ釜の飯を食べて、"おなかま"に。',
