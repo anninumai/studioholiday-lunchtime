@@ -1,8 +1,30 @@
 ---
+import { getImage } from "astro:assets";
+import posterSource from "../assets/site/studio/intro-poster.jpg";
 import { content } from "../data/content";
 import { withBase } from "../lib/withBase";
 
 const { noren, video } = content;
+const [logo, desktopPoster, mobilePoster] = await Promise.all([
+  getImage({ src: noren.logo, width: 912, format: "webp", quality: 80 }),
+  getImage({
+    src: posterSource,
+    width: 1280,
+    height: 720,
+    format: "webp",
+    quality: 75,
+  }),
+  getImage({
+    src: posterSource,
+    width: 540,
+    height: 960,
+    fit: "cover",
+    position: "center",
+    format: "webp",
+    quality: 75,
+  }),
+]);
+const posterVars = `--video-poster:url("${desktopPoster.src}");--video-poster-mobile:url("${mobilePoster.src}")`;
 
 // A traditional noren drawn as a single SVG: one cloth joined across the top,
 // with 2 slits splitting the lower part into 3 equal-width flaps (their total is
@@ -52,18 +74,27 @@ const logoH = 86;
         <video-stage> island), uncovered as the cloth lifts. Sits behind it. */
     }
     <video-stage data-play-at="0.5">
-      <div class="noren-video">
+      <div class="noren-video" style={posterVars}>
         <video
-          src={`${withBase(video.src)}#t=0.01`}
           width={video.width}
           height={video.height}
           muted
           loop
           playsinline
-          preload="metadata"></video>
+          preload="none"
+        >
+          <source
+            src={withBase(video.mobileSrc)}
+            media="(max-width: 767px)"
+            type="video/mp4"
+          />
+          <source src={withBase(video.desktopSrc)} type="video/mp4" />
+        </video>
       </div>
 
-      {/* Scroll cue — revealed by <video-stage> once the video loops (2nd play). */}
+      {
+        /* Scroll cue — revealed by <video-stage> once the video loops (2nd play). */
+      }
       <div class="scroll-hint" aria-hidden="true">
         <span class="scroll-hint-label">スクロール</span>
         <svg class="scroll-hint-arrow" viewBox="0 0 24 24" aria-hidden="true">
@@ -106,58 +137,60 @@ const logoH = 86;
               baseFrequency="0.008"
               numOctaves="2"
               seed="5"
-              result="warp"
-            />
+              result="warp"></feTurbulence>
             <feDisplacementMap
               in="SourceGraphic"
               in2="warp"
               scale="26"
               xChannelSelector="R"
               yChannelSelector="G"
-              result="rough"
-            />
-            {/* Surface ラフ: broad cloudy mottle + fine grain, clipped to the shape. */}
+              result="rough"></feDisplacementMap>
+            {
+              /* Surface ラフ: broad cloudy mottle + fine grain, clipped to the shape. */
+            }
             <feTurbulence
               type="fractalNoise"
               baseFrequency="0.012"
               numOctaves="3"
               seed="7"
-              result="cloud"
-            />
+              result="cloud"></feTurbulence>
             <feColorMatrix
               in="cloud"
               type="matrix"
               values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.16 0"
-              result="cloudGrain"
-            />
+              result="cloudGrain"></feColorMatrix>
             <feTurbulence
               type="fractalNoise"
               baseFrequency="0.5"
               numOctaves="2"
               seed="4"
-              result="fine"
-            />
+              result="fine"></feTurbulence>
             <feColorMatrix
               in="fine"
               type="matrix"
               values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.10 0"
-              result="fineGrain"
-            />
+              result="fineGrain"></feColorMatrix>
             <feMerge result="grain">
-              <feMergeNode in="cloudGrain" />
-              <feMergeNode in="fineGrain" />
+              <feMergeNode in="cloudGrain"></feMergeNode>
+              <feMergeNode in="fineGrain"></feMergeNode>
             </feMerge>
-            <feComposite in="grain" in2="rough" operator="in" result="grainClip" />
+            <feComposite in="grain" in2="rough" operator="in" result="grainClip"
+            ></feComposite>
             <feMerge>
-              <feMergeNode in="rough" />
-              <feMergeNode in="grainClip" />
+              <feMergeNode in="rough"></feMergeNode>
+              <feMergeNode in="grainClip"></feMergeNode>
             </feMerge>
           </filter>
-          {/* Separate clips cut one full-size emblem copy into the fixed band and
-            three flap fragments. All fragments share the same source geometry. */}
+          {
+            /* Separate clips cut one full-size emblem copy into the fixed band and
+            three flap fragments. All fragments share the same source geometry. */
+          }
           {
             flaps.map((f, i) => (
-              <clipPath id={`noren-flap-clip-${i}`} clipPathUnits="userSpaceOnUse">
+              <clipPath
+                id={`noren-flap-clip-${i}`}
+                clipPathUnits="userSpaceOnUse"
+              >
                 <rect
                   x={`${f.x}%`}
                   y={`${flapY}%`}
@@ -172,8 +205,7 @@ const logoH = 86;
               x={`${flapStart}%`}
               y={`${BAND_TOP}%`}
               width={`${CLOTH_W}%`}
-              height={`${BAND - BAND_TOP + 1}%`}
-            />
+              height={`${BAND - BAND_TOP + 1}%`}></rect>
           </clipPath>
         </defs>
         {
@@ -193,7 +225,7 @@ const logoH = 86;
               />
               <image
                 class="noren-emblem"
-                href={withBase(noren.logo)}
+                href={logo.src}
                 x={`${logoX}%`}
                 y={`${logoY}%`}
                 width={`${logoW}%`}
@@ -204,8 +236,10 @@ const logoH = 86;
             </g>
           ))
         }
-        {/* Connected top band (static). Its top sits below the rod (BAND_TOP) so the
-          cloth reads as hanging in front of the rod. */}
+        {
+          /* Connected top band (static). Its top sits below the rod (BAND_TOP) so the
+          cloth reads as hanging in front of the rod. */
+        }
         <g class="noren-band">
           <rect
             x={`${flapStart}%`}
@@ -215,7 +249,7 @@ const logoH = 86;
             filter="url(#noren-rough)"></rect>
           <image
             class="noren-emblem"
-            href={withBase(noren.logo)}
+            href={logo.src}
             x={`${logoX}%`}
             y={`${logoY}%`}
             width={`${logoW}%`}
@@ -226,9 +260,17 @@ const logoH = 86;
         </g>
         {/* チチ: small tabs along the top edge (the noren's hanging marks). */}
         <g class="noren-chichi">
-          {dashes.map((d) => (
-            <rect x={`${d.x}%`} y="0" width={`${DASH_W}%`} height="4%" rx="2"></rect>
-          ))}
+          {
+            dashes.map((d) => (
+              <rect
+                x={`${d.x}%`}
+                y="0"
+                width={`${DASH_W}%`}
+                height="4%"
+                rx="2"
+              />
+            ))
+          }
         </g>
       </svg>
     </noren-cloth>

@@ -1,25 +1,62 @@
 ---
+import { getImage } from "astro:assets";
+import pinkCanvas from "../assets/site/msg/pink-canvas-bg-v2.webp";
+import bgPatternSource from "../assets/site/studio/bg_pattern.webp";
+import greenCanvas from "../assets/site/textures/green-canvas-bg-v2.webp";
 import { content } from "../data/content";
 import { withBase } from "../lib/withBase";
 import "../styles/global.css";
 
 const { title, description } = content.meta;
+const [
+  hero,
+  norenLogo,
+  bgPattern,
+  bgPatternMobile,
+  bgPinkMobile,
+  bgCanvasMobile,
+] = await Promise.all([
+  getImage({ src: content.hero.src, width: 1200, format: "webp", quality: 80 }),
+  getImage({
+    src: content.noren.logo,
+    width: 912,
+    format: "webp",
+    quality: 80,
+  }),
+  getImage({ src: bgPatternSource, width: 1920, format: "webp", quality: 75 }),
+  getImage({ src: bgPatternSource, width: 768, format: "webp", quality: 75 }),
+  getImage({ src: pinkCanvas, width: 768, format: "webp", quality: 75 }),
+  getImage({ src: greenCanvas, width: 768, format: "webp", quality: 75 }),
+]);
 // Absolute URLs for OG/canonical require `site` in astro.config.ts. Guard so a
 // missing `site` (e.g. mid-config) degrades gracefully instead of throwing.
-const heroSrc = withBase(content.hero.src);
-const ogImage = Astro.site ? new URL(heroSrc, Astro.site).href : heroSrc;
+const ogImage = Astro.site ? new URL(hero.src, Astro.site).href : hero.src;
 const canonical = Astro.site
   ? new URL(Astro.url.pathname, Astro.site).href
   : undefined;
-// Section background images live in global.css via url(); pass them through the
-// base as :root custom properties so they resolve under a project subpath too.
+const fontFaces = `@font-face{
+  font-family:"Zen Maru Gothic";
+  font-style:normal;
+  font-weight:500;
+  font-display:swap;
+  src:url("${withBase("/fonts/zen-maru-500-subset.woff2")}") format("woff2");
+}
+@font-face{
+  font-family:"Zen Maru Gothic";
+  font-style:normal;
+  font-weight:700;
+  font-display:swap;
+  src:url("${withBase("/fonts/zen-maru-700-subset.woff2")}") format("woff2");
+}`;
+// Section backgrounds are generated here because CSS url() references cannot use
+// Astro's image pipeline directly.
 const bgVars = `:root{
-  --bg-pattern:url("${withBase("/assets/studio/bg_pattern.webp")}");
-  --bg-message:url("${withBase("/assets/studio/message_bg.webp")}");
-  --bg-access:url("${withBase("/assets/studio/access_bg.webp")}");
-  --bg-canvas:url("${withBase("/assets/textures/green-canvas-bg-v2.webp")}");
-  --bg-pink:url("${withBase("/assets/msg/pink-canvas-bg-v2.webp")}");
-  --panel-cushion:url("${withBase("/assets/msg/panel-cushion-notitle.webp")}");
+  --bg-pattern:url("${bgPattern.src}");
+  --bg-pattern-mobile:url("${bgPatternMobile.src}");
+  --bg-canvas:url("${greenCanvas.src}");
+  --bg-canvas-mobile:url("${bgCanvasMobile.src}");
+  --bg-pink:url("${pinkCanvas.src}");
+  --bg-pink-mobile:url("${bgPinkMobile.src}");
 }`;
 ---
 
@@ -49,22 +86,11 @@ const bgVars = `:root{
 
     <link rel="icon" href={withBase("/favicon.svg")} type="image/svg+xml" />
 
-    {/* Self-hosted, pre-subset fonts (served as-is from public/). */}
-    <link rel="stylesheet" href={withBase("/fonts/zen-local.css")} />
-
-    {/* Base-aware background-image URLs for global.css (see bgVars above). */}
+    {/* Base-aware font and background URLs for GitHub Pages project sites. */}
+    <style is:inline set:html={fontFaces}></style>
     <style is:inline set:html={bgVars}></style>
 
-    {
-      /* LCP preload parked with <HeroZoom /> (see index.astro): the noren-hero
-      test renders CSS panels + a <video>, so hero.webp is no longer above the
-      fold. Restore this if reverting to HeroZoom. */
-    }
-    {
-      /*
-    <link rel="preload" as="image" href={content.hero.src} fetchpriority="high" />
-    */
-    }
+    <link rel="preload" as="image" href={norenLogo.src} fetchpriority="high" />
   </head>
   <body>
     <slot />

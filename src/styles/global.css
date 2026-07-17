@@ -19,7 +19,7 @@
    STUDIO-matched layout: a single long vertical page.
    A fixed green leaf pattern (.bg-fixed, z-index:0) stays put while .page
    (z-index:1) scrolls over it. 1280px reference width, centered; two
-   breakpoints (840 / 540). Fonts load via <link> to /fonts/zen-local.css.
+   breakpoints (840 / 540). Font faces are inlined by BaseLayout.astro.
    ===================================================================== */
 
 * {
@@ -167,17 +167,20 @@ noren-cloth {
   display: flex;
   align-items: center;
   justify-content: center;
+  background: var(--video-poster) center / cover no-repeat;
   /* Base (reduced-motion / no scroll-timeline): visible. The scroll animation
      below fades it in from ~halfway; <video-stage> starts playback to match. */
   opacity: 1;
 }
 .noren-video video {
-  flex: none;
-  height: 100vh;
-  height: 100dvh;
-  width: auto;
-  max-width: none;
-  object-fit: contain;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+@media (max-width: 767px) {
+  .noren-video {
+    background-image: var(--video-poster-mobile);
+  }
 }
 /* Scroll cue — hidden until <video-stage> adds .is-shown on the video's 2nd loop.
    Sits bottom-center of the pinned stage over the show-through green pattern. */
@@ -696,6 +699,12 @@ noren-cloth {
    height (so the box can't cover them), sit the box just under the photo with only a
    hair of overlap, and fit the wrapped copy without a big gap. */
 @media (max-width: 767px) {
+  .bg-fixed::before {
+    background-image: var(--bg-pattern-mobile);
+  }
+  .message {
+    background-image: var(--bg-pink-mobile);
+  }
   /* photo + side labels: smaller labels that stay within the short photo's height.
      The photo block bleeds slightly past the column (panel unaffected) and uses a
      slim gutter, so the photo itself is noticeably larger (width & height). */
@@ -884,6 +893,14 @@ noren-cloth {
   height: 24px;
   background: inherit;
   border-radius: 50% 50% 0 0 / 12px 12px 0 0;
+}
+@media (max-width: 767px) {
+  .message2 {
+    background-image: var(--bg-pink-mobile);
+  }
+  .green-rise {
+    background-image: var(--bg-canvas-mobile);
+  }
 }
 .message2 > .access,
 .message2 > .photo {

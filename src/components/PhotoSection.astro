@@ -1,47 +1,58 @@
 ---
+import { Image } from "astro:assets";
+import fork from "../assets/site/photo/holiday-fork.png";
+import mouth from "../assets/site/photo/holiday-mouth.png";
+import spoon from "../assets/site/photo/holiday-spoon.png";
 import { content } from "../data/content";
-import { withBase } from "../lib/withBase";
 const { photo } = content;
 ---
 
 <section class="photo">
   <div class="photo-art appear">
-    <img
+    <Image
       class="photo-base"
-      src={withBase(photo.src)}
-      width={photo.width}
-      height={photo.height}
+      src={photo.src}
       alt={photo.alt}
+      widths={[480, 960, 1440]}
+      sizes="(max-width: 540px) 100vw, 920px"
+      format="webp"
+      quality={80}
       loading="lazy"
       decoding="async"
     />
-    <img
+    <Image
       class="photo-part photo-fork"
-      src={withBase("/assets/photo/holiday-fork.png")}
-      width="608"
-      height="1519"
+      src={fork}
       alt=""
       aria-hidden="true"
+      widths={[128, 256, 384]}
+      sizes="12vw"
+      format="webp"
+      quality={80}
       loading="lazy"
       decoding="async"
     />
-    <img
+    <Image
       class="photo-part photo-spoon"
-      src={withBase("/assets/photo/holiday-spoon.png")}
-      width="806"
-      height="1485"
+      src={spoon}
       alt=""
       aria-hidden="true"
+      widths={[128, 256, 384]}
+      sizes="14vw"
+      format="webp"
+      quality={80}
       loading="lazy"
       decoding="async"
     />
-    <img
+    <Image
       class="photo-part photo-mouth"
-      src={withBase("/assets/photo/holiday-mouth.png")}
-      width="815"
-      height="349"
+      src={mouth}
       alt=""
       aria-hidden="true"
+      widths={[120, 240, 360]}
+      sizes="16vw"
+      format="webp"
+      quality={80}
       loading="lazy"
       decoding="async"
     />

@@ -1,5 +1,6 @@
 ---
 import { content } from "../data/content";
+import { withBase } from "../lib/withBase";
 // Scroll-linked intro: the brand noren (the transparent logo art) covers the top
 // and lifts as you scroll, fading the intro video in. noren = the same art shown
 // at the top of the site; video = the existing intro clip.
@@ -12,12 +13,19 @@ const noren = "/assets/studio/noren.png";
     <div class="ng-pin">
       <video
         class="ng-video"
-        src={`${video.src}#t=0.01`}
         width={video.width}
         height={video.height}
         muted
         playsinline
-        preload="metadata"></video>
+        preload="none"
+      >
+        <source
+          src={withBase(video.mobileSrc)}
+          media="(max-width: 767px)"
+          type="video/mp4"
+        />
+        <source src={withBase(video.desktopSrc)} type="video/mp4" />
+      </video>
       <div class="ng-noren">
         <img class="ng-noren-img" src={noren} alt="みんなでごはん会 のれん" />
       </div>

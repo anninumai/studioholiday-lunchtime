@@ -24,8 +24,9 @@ bun run fmt        # Prettier (.astro)
 ## 構成
 
 ```
-astro.config.ts       # output:static / passthroughImageService / @tailwindcss/vite
+astro.config.ts       # output:static / Astro標準画像サービス(Sharp) / @tailwindcss/vite
 src/
+  assets/site/        # astro:assets でビルド時最適化する画像ソース
   pages/index.astro    # 1 枚もの本体（固定背景 + 各セクションを合成 + 島の読み込み）
   layouts/BaseLayout.astro
   components/           # HeroZoom / VideoStage / MessageLead / InfoCard /
@@ -35,8 +36,8 @@ src/
   data/content.ts      # 全 JP コピー・メタ（verbatim）
   styles/global.css    # @import "tailwindcss"; @theme{...}; + レイアウト CSS
 public/
-  assets/studio/       # STUDIO 版アセット（最適化済み webp / mp4）
-  fonts/               # Zen Maru Gothic サブセット（zen-local.css + 49 woff2）
+  assets/studio/       # 動画・提案資料など、固定URLで参照する公開アセット
+  fonts/               # Zen Maru Gothic ページ専用サブセット（500 / 700）
   favicon.svg
 _legacy/               # 移植元の手組みモック（参照専用・ビルド対象外）
 studio-source/          # STUDIO 公開版の抽出物（DESIGN-SPEC.md / 生 CSS・HTML、参照専用）

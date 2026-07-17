@@ -1,5 +1,6 @@
 ---
 import { content } from "../data/content";
+import { withBase } from "../lib/withBase";
 const { video } = content;
 ---
 
@@ -8,17 +9,23 @@ const { video } = content;
     <div class="video-pin">
       {
         /* Played from the top by <video-stage> on scroll-in (not autoplay, so it
-          isn't finished off-screen before the viewer arrives). #t=0.01 shows the
-          first frame as a poster before playback. */
+          isn't finished off-screen before the viewer arrives). */
       }
       <video
         class="appear--video"
-        src={`${video.src}#t=0.01`}
         width={video.width}
         height={video.height}
         muted
         playsinline
-        preload="metadata"></video>
+        preload="none"
+      >
+        <source
+          src={withBase(video.mobileSrc)}
+          media="(max-width: 767px)"
+          type="video/mp4"
+        />
+        <source src={withBase(video.desktopSrc)} type="video/mp4" />
+      </video>
     </div>
   </section>
 </video-stage>

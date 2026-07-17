@@ -31,12 +31,11 @@
 
 参照: Astro Framework Components / Client Directives、`docs.astro.build`。
 
-## 決定 2: 画像 = Sharp 不使用・`passthroughImageService()` + 事前最適化 webp + 素の `<img>`
+## 決定 2: 画像 = Astro標準画像サービス(Sharp) + `astro:assets`【2026-07-18 更新】
 
-- **Sharp 検証結果**: Bun 環境で Sharp(ネイティブモジュール)は不安定。本プロジェクトは画像が既に手作業で webp 最適化済み・レイアウトが固定ピクセルのため、ビルド時変換の利点が無い。→ `astro.config.ts` で `image: { service: passthroughImageService() }`(`astro/config` からの export を実測確認)。Sharp は **install しない**。
-- **`<img>` 方針**: `astro:assets` の `<Image>` は使わず素の `<img>`(`src=/assets/...`、`public/` の安定 URL)。背景画像(葉パターン)は CSS の `url(/assets/...)`。
-- **CLS 対策**: 全 `<img>`/`<video>` に intrinsic 由来の `width`/`height` 属性を付与(CSS で表示幅を制御、比率は属性で確保)。検証で 3 幅とも横スクロール 0・レイアウトシフト無し。
-- **フォールバック(不要だが記録)**: どうしても astro:assets 変換が要る場面が出たら、CI で `npm i --no-save sharp` の後に `astro build`。本番では不要。
+- **Sharp 検証結果**: Bun 1.2.22・Astro 7.0.5・Sharp 0.35.3 で、`<Image>`/`getImage()` を含む本番ビルドが成功。再現可能なインストールのため Sharp を明示的な devDependency とする。
+- **画像方針**: 表示中のラスター画像は `src/assets/site/` から import し、`<Image>` の `widths`/`sizes` で実表示に合うレスポンシブ WebP を生成する。CSS背景は `getImage()` でモバイル版を生成する。
+- **CLS 対策**: `<Image>` がソースの intrinsic dimensions から `width`/`height` を出力し、CSSで表示幅を制御する。動画には明示的な `width`/`height` を維持する。
 
 参照: Astro Images / Image Service API、`docs.astro.build/en/guides/images/`。
 
@@ -49,10 +48,10 @@
 
 参照: Biome Language Support / v2 系ブログ、`biomejs.dev`。
 
-## 決定 4: アセット・フォント配置 = `public/` 直下
+## 決定 4: アセット・フォント配置 = 画像ソースは `src/assets/`、固定URL資産は `public/`【2026-07-18 更新】
 
-- 素 `<img>`・CSS `url()` に安定 URL が必要 → `public/assets/`。
-- フォントは事前サブセット woff2 49 個 + `zen-local.css`(相対 `url(./zmg_*)`)。**無改変**で `public/fonts/` に配置し、`<head>` に `<link rel="stylesheet" href="/fonts/zen-local.css">` で読み込み(Vite バンドルを通さず相対 URL をそのまま解決)。unicode-range サブセットによりブラウザは必要分のみ取得。Astro Fonts API は 49 個の事前サブセットには過剰と判断。
+- ビルド時に変換する画像ソースは `src/assets/site/`。動画や提案資料から固定URLで参照する既存アセットは `public/assets/` に残す。
+- Zen Maru Gothicはビルド済みHTMLの実使用文字と基本記号だけを含む500 / 700のページ専用woff2へ統合し、`public/fonts/` から配信する。従来の50分割ファイルは33リクエスト・約415KBになっていたため廃止。本文を変更して未収録の文字を追加する場合はサブセットを再生成する。
 
 ## 決定 5: レイアウト = 固定 1440px + JS `zoom` を踏襲
 
@@ -121,10 +120,16 @@
 
 - Message 1（全面ピンク写真＋白コピー）は狭幅（≤540px）でセクションが低くなる一方コピーが折返して縦に伸び、写真の賑やかな中央部へ競り上がって読めなくなる（＝画像にテキストが被って見える）。`≤540px` のみ `.message::before` に下方向グラデーション（scrim）を写真の上へ重ね、`.msg` に text-shadow を付与して可読化。デスクトップのレイアウト・配色は不変。設計＝「白文字を写真に載せる」方針は維持。
 
+## 決定 13: イントロ動画 = 端末別H.264 + poster + 意図ベースの遅延読み込み【2026-07-18】
+
+- 元の1920×1080・20秒・9.9MBを、デスクトップ用1280×720・4.6MBとモバイル用540×960中央クロップ・2.4MBへ事前変換。`<source media>` で端末に合う1本だけを選ぶ。
+- 初期状態は `preload="none"` とAstro最適化済みWebP poster。最初のスクロールで先読みし、リビール位置で再生する。`prefers-reduced-motion`・Data Saverでは動画を取得せずposterを維持する。
+- 画面外またはバックグラウンドタブでは停止し、再び表示された場合だけ再開する。動画は互換性とモバイルのハードウェアデコードを優先してH.264 MP4に統一する。
+
 ## パフォーマンス実測(preview ビルド)
 
-- 初期 HTML 7KB(inline module JS 約 3.6KB + critical CSS 含む)、外部 CSS 10KB、**FW ランタイム 0**。フォントは on-demand、動画は `preload="metadata"`。
-- 目標(Lighthouse Perf≥95 / CLS<0.05 等)はローカルでは十分達成見込み。**本番の実測はデプロイ後に CDN/圧縮込みで再確認**(保留)。
+- モバイルLighthouse（ローカルpreview）: Performance 87 / FCP 1.6秒 / LCP 4.0秒 / TBT 0ms / CLS 0 / 初期転送704KB。フォントは33リクエスト・約415KBから2リクエスト・約77KBへ削減。動画は `preload="none"` でスクロール意図があるまで取得しない。
+- **本番の実測はデプロイ後に CDN/圧縮込みで再確認**(保留)。
 
 ## 検証結果
 
@@ -133,6 +138,6 @@ Puppeteer(システム Chrome)で 1440/1920/390 + reduced-motion を自動検証
 ## 人の確認が必要(保留)
 
 1. **対象ブラウザ範囲**: 既定は modern evergreen(`zoom` / `overflow:clip` 対応 = Chromium/Safari 16.4+/最近の Firefox。Tailwind v4 の baseline と一致)。より広い対応が必要なら要相談。
-2. **デプロイ先 / CI / git**: 出力は host 非依存の静的 `dist/`。ホスト・CI・git 初期化の要否は未定(Sharp 不使用のため CI での sharp 対応は不要)。
+2. **デプロイ先 / CI / git**: 出力は host 非依存の静的 `dist/`。CI は lockfile に固定した Sharp を Bun でインストールしてビルドする。
 3. **モバイル Safari の動画自動再生**: `muted playsinline` + スクロールロック時 `currentTime=0; play()` は実機での最終確認が望ましい(レガシーで動作実績あり)。
 4. **カルーセルの reduced-motion**: レガシー未定義のため現状維持(transition 有効)。無効化希望なら要相談。

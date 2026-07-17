@@ -1,47 +1,178 @@
 ---
+import { Image } from "astro:assets";
+import cloudBottomLeft from "../assets/site/msg/clouds/cloud-bottomleft.webp";
+import cloudBottomRight from "../assets/site/msg/clouds/cloud-bottomright.webp";
+import cloudCenterRight from "../assets/site/msg/clouds/cloud-centerright.webp";
+import cloudCenterRightOverlay from "../assets/site/msg/clouds/cloud-centerright-overlay.png";
+import cloudLeftMid from "../assets/site/msg/clouds/cloud-leftmid.webp";
+import cloudLeftMidOverlay from "../assets/site/msg/clouds/cloud-leftmid-overlay.png";
+import cloudTopLeft from "../assets/site/msg/clouds/cloud-topleft.webp";
+import cloudTopRight from "../assets/site/msg/clouds/cloud-topright.webp";
+import title from "../assets/site/msg/title-doufu.webp";
 import { content } from "../data/content";
-import { withBase } from "../lib/withBase";
 const m = content.message;
+const cloudWidths = [400, 800];
+const overlayWidths = [400, 800, 1200];
+const cloudSizes = "(max-width: 767px) 44vw, 660px";
 ---
 
 <section class="message appear--hero">
   <div class="message-inner">
     {/* Photo block: gathering photo flanked by the vertical brush labels. */}
     <div class="msg-photo-wrap">
-      <img
+      <Image
         class="msg-photo"
-        src={withBase(m.photo)}
+        src={m.photo}
         alt="みんなでごはん会の様子"
+        widths={[640, 960, 1500, 1900]}
+        sizes="(max-width: 767px) 100vw, 1500px"
+        format="webp"
+        quality={80}
         loading="lazy"
         decoding="async"
       />
-      <img
-        class="msg-cloud msg-cloud--photo"
-        src={withBase("/assets/msg/cloud-solid.webp")}
-        alt=""
-        aria-hidden="true"
+      <Image
+        class="msg-side msg-side--l"
+        src={m.sideLeft}
+        alt="毎週木曜"
+        widths={[44, 88, 132, 240]}
+        sizes="(max-width: 767px) 44px, 132px"
+        format="webp"
+        quality={80}
       />
-      <img class="msg-side msg-side--l" src={withBase(m.sideLeft)} alt="毎週木曜" />
-      <img class="msg-side msg-side--r" src={withBase(m.sideRight)} alt="参加無料" />
+      <Image
+        class="msg-side msg-side--r"
+        src={m.sideRight}
+        alt="参加無料"
+        widths={[44, 88, 132, 240]}
+        sizes="(max-width: 767px) 44px, 132px"
+        format="webp"
+        quality={80}
+      />
     </div>
 
-    {/* Zabuton: a plain white rectangle with pink cloud clusters straddling its
+    {
+      /* Zabuton: a plain white rectangle with pink cloud clusters straddling its
         edges (they bite into the white to make the organic cushion outline). The
-        standalone 同釜共飲 title sits over the top edge; body copy fills the centre. */}
+        standalone 同釜共飲 title sits over the top edge; body copy fills the centre. */
+    }
     <div class="msg-panel">
-      <img class="msg-cloud msg-cloud--tl" src={withBase("/assets/msg/clouds/cloud-topleft.webp")} alt="" aria-hidden="true" loading="lazy" decoding="async" />
-      <img class="msg-cloud msg-cloud--lm" src={withBase("/assets/msg/clouds/cloud-leftmid.webp")} alt="" aria-hidden="true" loading="lazy" decoding="async" />
-      <img class="msg-cloud msg-cloud--lm-overlay" src={withBase("/assets/msg/clouds/cloud-leftmid-overlay.png")} alt="" aria-hidden="true" loading="lazy" decoding="async" />
-      <img class="msg-cloud msg-cloud--bl" src={withBase("/assets/msg/clouds/cloud-bottomleft.webp")} alt="" aria-hidden="true" loading="lazy" decoding="async" />
-      <img class="msg-cloud msg-cloud--cr-overlay" src={withBase("/assets/msg/clouds/cloud-centerright-overlay.png")} alt="" aria-hidden="true" loading="lazy" decoding="async" />
-      <img class="msg-cloud msg-cloud--cr" src={withBase("/assets/msg/clouds/cloud-centerright.webp")} alt="" aria-hidden="true" loading="lazy" decoding="async" />
-      <img class="msg-cloud msg-cloud--tr" src={withBase("/assets/msg/clouds/cloud-topright.webp")} alt="" aria-hidden="true" loading="lazy" decoding="async" />
-      <img class="msg-cloud msg-cloud--br1" src={withBase("/assets/msg/clouds/cloud-bottomright.webp")} alt="" aria-hidden="true" loading="lazy" decoding="async" />
-      <img class="msg-cloud msg-cloud--br2" src={withBase("/assets/msg/clouds/cloud-bottomright.webp")} alt="" aria-hidden="true" loading="lazy" decoding="async" />
-      <img
+      <Image
+        class="msg-cloud msg-cloud--tl"
+        src={cloudTopLeft}
+        alt=""
+        aria-hidden="true"
+        widths={cloudWidths}
+        sizes={cloudSizes}
+        format="webp"
+        quality={80}
+        loading="lazy"
+        decoding="async"
+      />
+      <Image
+        class="msg-cloud msg-cloud--lm"
+        src={cloudLeftMid}
+        alt=""
+        aria-hidden="true"
+        widths={cloudWidths}
+        sizes={cloudSizes}
+        format="webp"
+        quality={80}
+        loading="lazy"
+        decoding="async"
+      />
+      <Image
+        class="msg-cloud msg-cloud--lm-overlay"
+        src={cloudLeftMidOverlay}
+        alt=""
+        aria-hidden="true"
+        widths={overlayWidths}
+        sizes={cloudSizes}
+        format="webp"
+        quality={80}
+        loading="lazy"
+        decoding="async"
+      />
+      <Image
+        class="msg-cloud msg-cloud--bl"
+        src={cloudBottomLeft}
+        alt=""
+        aria-hidden="true"
+        widths={cloudWidths}
+        sizes={cloudSizes}
+        format="webp"
+        quality={80}
+        loading="lazy"
+        decoding="async"
+      />
+      <Image
+        class="msg-cloud msg-cloud--cr-overlay"
+        src={cloudCenterRightOverlay}
+        alt=""
+        aria-hidden="true"
+        widths={overlayWidths}
+        sizes={cloudSizes}
+        format="webp"
+        quality={80}
+        loading="lazy"
+        decoding="async"
+      />
+      <Image
+        class="msg-cloud msg-cloud--cr"
+        src={cloudCenterRight}
+        alt=""
+        aria-hidden="true"
+        widths={cloudWidths}
+        sizes={cloudSizes}
+        format="webp"
+        quality={80}
+        loading="lazy"
+        decoding="async"
+      />
+      <Image
+        class="msg-cloud msg-cloud--tr"
+        src={cloudTopRight}
+        alt=""
+        aria-hidden="true"
+        widths={cloudWidths}
+        sizes={cloudSizes}
+        format="webp"
+        quality={80}
+        loading="lazy"
+        decoding="async"
+      />
+      <Image
+        class="msg-cloud msg-cloud--br1"
+        src={cloudBottomRight}
+        alt=""
+        aria-hidden="true"
+        widths={cloudWidths}
+        sizes={cloudSizes}
+        format="webp"
+        quality={80}
+        loading="lazy"
+        decoding="async"
+      />
+      <Image
+        class="msg-cloud msg-cloud--br2"
+        src={cloudBottomRight}
+        alt=""
+        aria-hidden="true"
+        widths={cloudWidths}
+        sizes={cloudSizes}
+        format="webp"
+        quality={80}
+        loading="lazy"
+        decoding="async"
+      />
+      <Image
         class="msg-title"
-        src={withBase("/assets/msg/title-doufu.webp")}
+        src={title}
         alt="同釜共飲"
+        widths={[320, 640, 1000]}
+        sizes="(max-width: 767px) 56vw, 780px"
+        format="webp"
+        quality={80}
         loading="lazy"
         decoding="async"
       />

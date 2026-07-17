@@ -1,6 +1,5 @@
 {
   "lockfileVersion": 1,
-  "configVersion": 0,
   "workspaces": {
     "": {
       "name": "minna-de-gohankai",
@@ -15,6 +14,7 @@
         "astro": "7.0.5",
         "prettier": "3.9.4",
         "prettier-plugin-astro": "0.14.1",
+        "sharp": "0.35.3",
         "tailwindcss": "4.3.2",
         "typescript": "5.9.3",
       },
