@@ -65,25 +65,18 @@ const logo = content.footer.logo;
                 }
               </div>
             </div>
-            <div class="nav">
-              <button class="prev" type="button" aria-label="前へ">
-                <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                  <path
-                    d="M13 4l-6 6 6 6"
-                    stroke-width="1.8"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"></path>
-                </svg>
-              </button>
-              <button class="next" type="button" aria-label="次へ">
-                <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                  <path
-                    d="M7 4l6 6-6 6"
-                    stroke-width="1.8"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"></path>
-                </svg>
-              </button>
+            <div class="nav" aria-label="スライドを選択">
+              {
+                carousel.map((_, index) => (
+                  <button
+                    class="dot"
+                    type="button"
+                    data-slide={index}
+                    aria-label={`${index + 1}枚目を表示`}
+                    aria-current={index === 0 ? "true" : "false"}
+                  />
+                ))
+              }
             </div>
           </div>
         </gohan-carousel>

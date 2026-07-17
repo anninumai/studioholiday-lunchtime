@@ -1,5 +1,5 @@
-/** Horizontal slide carousel: prev/next buttons + autoplay. Slide count is
- *  derived from the track children (no dot indicators). Autoplay pauses on
+/** Horizontal slide carousel: dot pagination + autoplay. Slide count is
+ *  derived from the track children. Autoplay pauses on
  *  hover/focus, while the tab is hidden, and never runs under reduced-motion.
  *  Listeners/timer are released in disconnectedCallback. */
 class GohanCarousel extends HTMLElement {
@@ -7,8 +7,7 @@ class GohanCarousel extends HTMLElement {
 
   connectedCallback(): void {
     const track = this.querySelector<HTMLElement>(".track");
-    const prev = this.querySelector<HTMLButtonElement>(".prev");
-    const next = this.querySelector<HTMLButtonElement>(".next");
+    const dots = [...this.querySelectorAll<HTMLButtonElement>(".dot")];
     if (!track) return;
 
     const n = track.children.length;
@@ -18,6 +17,9 @@ class GohanCarousel extends HTMLElement {
     const go = (k: number): void => {
       i = (k + n) % n;
       track.style.transform = `translateX(${-i * 100}%)`;
+      dots.forEach((dot, index) => {
+        dot.setAttribute("aria-current", index === i ? "true" : "false");
+      });
     };
 
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -42,18 +44,12 @@ class GohanCarousel extends HTMLElement {
       this.#teardown.push(() => target.removeEventListener(type, fn));
     };
 
-    if (prev) {
-      listen(prev, "click", () => {
-        go(i - 1);
+    dots.forEach((dot, index) => {
+      listen(dot, "click", () => {
+        go(index);
         restart();
       });
-    }
-    if (next) {
-      listen(next, "click", () => {
-        go(i + 1);
-        restart();
-      });
-    }
+    });
     listen(this, "pointerenter", () => {
       hoverPaused = true;
       stop();
