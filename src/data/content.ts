@@ -32,12 +32,14 @@ export const content = {
   message: {
     photo: "/assets/studio/gathering-v2.webp",
     title: "/assets/msg/title.webp", // 同釜共飲 (brush, cloud badges)
-    sideLeft: "/assets/msg/side-left-v2.webp", // 毎週木曜 (vertical brush)
-    sideRight: "/assets/msg/side-right-v2.webp", // 参加無料 (vertical brush)
+    sideLeft: "/assets/msg/side-left-v3.webp", // 毎週木曜 (vertical brush)
+    sideRight: "/assets/msg/side-right-v3.webp", // 参加無料 (vertical brush)
     lines: "/assets/msg/lines.webp", // two brush underlines
     // Body paragraphs; each inner array is one paragraph, its lines joined by <br>.
+    // Each inner array element is a line, joined by <br> at ALL sizes. Inside a line,
+    // a "|" marks a MOBILE-ONLY break (rendered as <br class="br-sp">, hidden on desktop).
     body: [
-      ["STUDIO HOLIDAYが主催する「みんなでごはん会」。"],
+      ["STUDIO HOLIDAYが主催する|「みんなでごはん会」。"],
       [
         "新大久保駅直結のキッチンスペースで開かれます。",
         "ごはんを食べながらだと、",
@@ -45,7 +47,7 @@ export const content = {
         "新しいアイデアも思いつく、",
         "なんだかいろいろ、うまくいく。",
       ],
-      ["お近くにお越しの際は、お立ち寄りください。"],
+      ["お近くにお越しの際は、|お立ち寄りください。"],
     ],
   },
   join: [

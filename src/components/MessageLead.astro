@@ -31,7 +31,9 @@ const m = content.message;
     <div class="msg-panel">
       <img class="msg-cloud msg-cloud--tl" src={withBase("/assets/msg/clouds/cloud-topleft.webp")} alt="" aria-hidden="true" loading="lazy" decoding="async" />
       <img class="msg-cloud msg-cloud--lm" src={withBase("/assets/msg/clouds/cloud-leftmid.webp")} alt="" aria-hidden="true" loading="lazy" decoding="async" />
+      <img class="msg-cloud msg-cloud--lm-overlay" src={withBase("/assets/msg/clouds/cloud-leftmid-overlay.png")} alt="" aria-hidden="true" loading="lazy" decoding="async" />
       <img class="msg-cloud msg-cloud--bl" src={withBase("/assets/msg/clouds/cloud-bottomleft.webp")} alt="" aria-hidden="true" loading="lazy" decoding="async" />
+      <img class="msg-cloud msg-cloud--cr-overlay" src={withBase("/assets/msg/clouds/cloud-centerright-overlay.png")} alt="" aria-hidden="true" loading="lazy" decoding="async" />
       <img class="msg-cloud msg-cloud--cr" src={withBase("/assets/msg/clouds/cloud-centerright.webp")} alt="" aria-hidden="true" loading="lazy" decoding="async" />
       <img class="msg-cloud msg-cloud--tr" src={withBase("/assets/msg/clouds/cloud-topright.webp")} alt="" aria-hidden="true" loading="lazy" decoding="async" />
       <img class="msg-cloud msg-cloud--br1" src={withBase("/assets/msg/clouds/cloud-bottomright.webp")} alt="" aria-hidden="true" loading="lazy" decoding="async" />
@@ -50,7 +52,12 @@ const m = content.message;
               {para.map((line, i) => (
                 <Fragment>
                   {i > 0 && <br />}
-                  {line}
+                  {line.split("|").map((seg, j) => (
+                    <Fragment>
+                      {j > 0 && <br class="br-sp" />}
+                      {seg}
+                    </Fragment>
+                  ))}
                 </Fragment>
               ))}
             </p>
