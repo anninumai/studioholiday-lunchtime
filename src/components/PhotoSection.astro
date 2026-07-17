@@ -5,14 +5,37 @@ const { photo } = content;
 ---
 
 <section class="photo">
-  <img
-    class="appear"
-    src={withBase(photo.src)}
-    width={photo.width}
-    height={photo.height}
-    alt={photo.alt}
-    loading="lazy"
-    decoding="async"
-  />
+  <div class="photo-art appear">
+    <img
+      class="photo-base"
+      src={withBase(photo.src)}
+      width={photo.width}
+      height={photo.height}
+      alt={photo.alt}
+      loading="lazy"
+      decoding="async"
+    />
+    <img
+      class="photo-utensil photo-utensil--fork"
+      src={withBase(photo.src)}
+      width={photo.width}
+      height={photo.height}
+      alt=""
+      aria-hidden="true"
+      loading="lazy"
+      decoding="async"
+    />
+    <img
+      class="photo-utensil photo-utensil--spoon"
+      src={withBase(photo.src)}
+      width={photo.width}
+      height={photo.height}
+      alt=""
+      aria-hidden="true"
+      loading="lazy"
+      decoding="async"
+    />
+    <span class="photo-mouth" aria-hidden="true"></span>
+  </div>
   <p class="speech">{photo.speech}</p>
 </section>

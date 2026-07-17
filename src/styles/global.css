@@ -967,10 +967,93 @@ noren-cloth {
   align-items: center;
   justify-content: center;
 }
-.photo img {
+.photo-art {
+  position: relative;
   height: 605px;
-  width: auto;
+  aspect-ratio: 2400 / 1410;
   max-width: 100%;
+}
+.photo-art img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.photo-base {
+  z-index: 1;
+}
+.photo-utensil {
+  z-index: 2;
+  will-change: transform;
+}
+.photo-utensil--fork {
+  clip-path: polygon(2% 27%, 14% 25%, 16% 40%, 15% 56%, 23% 76%, 8% 76%, 6% 58%, 1% 47%);
+  transform-origin: 19% 72%;
+  animation: fork-eat 2.4s steps(1, end) infinite;
+}
+.photo-utensil--spoon {
+  clip-path: polygon(87% 24%, 100% 25%, 100% 62%, 83% 76%, 77% 69%, 86% 57%, 87% 39%);
+  transform-origin: 82% 72%;
+  animation: spoon-eat 2.4s steps(1, end) infinite;
+}
+.photo-mouth {
+  position: absolute;
+  left: 47.5%;
+  top: 56.5%;
+  z-index: 3;
+  width: 5%;
+  height: 1.8%;
+  border-radius: 999px;
+  background: var(--color-surface);
+  transform-origin: center;
+  will-change: transform;
+  animation: mouth-chew 2.4s steps(1, end) infinite;
+}
+@keyframes fork-eat {
+  0%,
+  45%,
+  100% {
+    transform: rotate(0deg);
+  }
+  46%,
+  68% {
+    transform: translate(0.5%, -0.6%) rotate(1.5deg);
+  }
+  69%,
+  84% {
+    transform: translate(0.2%, -0.25%) rotate(-0.5deg);
+  }
+}
+@keyframes spoon-eat {
+  0%,
+  45%,
+  100% {
+    transform: rotate(0deg);
+  }
+  46%,
+  68% {
+    transform: translate(-0.5%, -0.6%) rotate(-1.5deg);
+  }
+  69%,
+  84% {
+    transform: translate(-0.2%, -0.25%) rotate(0.5deg);
+  }
+}
+@keyframes mouth-chew {
+  0%,
+  45%,
+  100% {
+    transform: translateY(0) scaleX(1);
+  }
+  46%,
+  68% {
+    transform: translateY(-65%) scaleX(0.72);
+  }
+  69%,
+  84% {
+    transform: translateY(35%) scaleX(1.08);
+  }
 }
 /* Speech bubble the character "says" — white rounded pill with a small nub. */
 .speech {
@@ -1126,20 +1209,28 @@ noren-cloth {
     gap: 12px;
   }
   .photo {
-    height: 450px;
+    height: auto;
+    /* Bottom space so the absolute footer (bottom:0) overlaps empty green rather
+       than the character — mobile has no centering slack like the tall desktop
+       section, so without this the footer swallows the character's lower half.
+       Raising it clear of the footer is what reads as the image moving "up". */
+    padding-bottom: 64px;
   }
-  .photo img {
-    height: 100%;
+  /* Fit by width with proportional height so the character keeps its aspect
+     ratio (height:100% + max-width clamped the width and squashed it). */
+  .photo-art {
+    width: 100%;
+    height: auto;
   }
-  /* keep the bubble on-screen: centered near the top, wrapping if needed */
+  /* one line, centered horizontally */
   .speech {
-    top: 4%;
+    top: -24%; /* nudged up */
     left: 50%;
     transform: translateX(-50%);
     max-width: calc(100% - 32px);
     padding: 8px 14px;
     font-size: 12px;
-    white-space: normal;
+    white-space: nowrap;
     text-align: center;
   }
   .speech::after {
@@ -1151,6 +1242,13 @@ noren-cloth {
   }
   .sh-logo {
     width: 200px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .photo-utensil,
+  .photo-mouth {
+    display: none;
   }
 }
 
