@@ -494,6 +494,142 @@ noren-cloth {
   bottom: -16%;
   width: 34%;
 }
+/* Every cloud follows its own small hand-drawn-GIF loop. Distinct paths, periods,
+   delays and directions keep the frame from moving as one synchronized unit. */
+@media (prefers-reduced-motion: no-preference) {
+  .msg-panel > .msg-cloud {
+    transform-origin: center;
+  }
+  .msg-cloud--tl {
+    animation: cloud-gif-bob 4.7s -0.2s steps(1, end) infinite;
+  }
+  .msg-cloud--lm {
+    animation: cloud-gif-diagonal 3.6s -1.3s steps(1, end) infinite reverse;
+  }
+  .msg-cloud--lm-overlay {
+    animation: cloud-gif-orbit 4.3s -0.8s steps(1, end) infinite;
+  }
+  .msg-cloud--bl {
+    animation: cloud-gif-nudge 3.1s -2.1s steps(1, end) infinite;
+  }
+  .msg-cloud--cr-overlay {
+    animation: cloud-gif-shiver 2.4s -0.7s steps(1, end) infinite;
+  }
+  .msg-cloud--cr {
+    animation: cloud-gif-orbit 5.2s -3.4s steps(1, end) infinite reverse;
+  }
+  .msg-cloud--tr {
+    animation: cloud-gif-wander 3.9s -1.9s steps(1, end) infinite;
+  }
+  .msg-cloud--br1 {
+    animation: cloud-gif-bob 3.5s -2.6s steps(1, end) infinite reverse;
+  }
+  .msg-cloud--br2 {
+    animation: cloud-gif-diagonal 4.6s -0.4s steps(1, end) infinite;
+  }
+}
+@keyframes cloud-gif-wander {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  20% {
+    transform: translate(2px, -3px) rotate(0.35deg);
+  }
+  40% {
+    transform: translate(4px, -1px) rotate(0.1deg);
+  }
+  60% {
+    transform: translate(2px, 2px) rotate(-0.3deg);
+  }
+  80% {
+    transform: translate(-1px, 1px) rotate(-0.15deg);
+  }
+}
+@keyframes cloud-gif-bob {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  25% {
+    transform: translate(-1px, -4px) rotate(-0.25deg);
+  }
+  50% {
+    transform: translate(1px, 1px) rotate(0.2deg);
+  }
+  75% {
+    transform: translate(0, -2px) rotate(0.4deg);
+  }
+}
+@keyframes cloud-gif-nudge {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  22% {
+    transform: translate(-4px, 1px) rotate(-0.35deg);
+  }
+  48% {
+    transform: translate(3px, 0) rotate(0.15deg);
+  }
+  72% {
+    transform: translate(1px, -2px) rotate(0.3deg);
+  }
+}
+@keyframes cloud-gif-orbit {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  20% {
+    transform: translate(3px, -2px) rotate(0.25deg);
+  }
+  45% {
+    transform: translate(4px, 2px) rotate(-0.15deg);
+  }
+  70% {
+    transform: translate(-1px, 4px) rotate(-0.4deg);
+  }
+  85% {
+    transform: translate(-3px, 1px) rotate(0.2deg);
+  }
+}
+@keyframes cloud-gif-shiver {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  16% {
+    transform: translate(-1px, 1px) rotate(-0.2deg);
+  }
+  32% {
+    transform: translate(2px, -1px) rotate(0.25deg);
+  }
+  50% {
+    transform: translate(-2px, 0) rotate(-0.1deg);
+  }
+  68% {
+    transform: translate(1px, 2px) rotate(0.3deg);
+  }
+  84% {
+    transform: translate(0, -2px) rotate(-0.25deg);
+  }
+}
+@keyframes cloud-gif-diagonal {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  30% {
+    transform: translate(-3px, -3px) rotate(0.35deg);
+  }
+  55% {
+    transform: translate(2px, -1px) rotate(-0.25deg);
+  }
+  80% {
+    transform: translate(4px, 3px) rotate(0.1deg);
+  }
+}
 /* Standalone 同釜共飲 title, straddling the cushion's top edge. Anchored by its
    BOTTOM to the white top edge (~33% from the panel top) so it sits correctly on
    both the 4:3 desktop cushion and the taller (stretched) mobile one. */
