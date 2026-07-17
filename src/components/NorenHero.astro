@@ -37,8 +37,10 @@ const flaps = [0, 1, 2].map((i) => ({
 // Emblem box (percent). Sized by WIDTH (a fixed fraction of the viewport width, the
 // same basis as the slits), so it stays a consistent size across aspect ratios and
 // is centred via meet. CSS widens this box on mobile so it crosses both slits.
-const logoX = 18; // left edge (centres a 64%-wide box across both slits)
-const logoW = 64;
+// Native SVG percentage attributes are used (instead of responsive CSS geometry)
+// so every browser computes the same exact 50% centre: 12 + 76 / 2 = 50.
+const logoX = 12;
+const logoW = 76;
 const logoY = 5;
 const logoH = 86;
 ---

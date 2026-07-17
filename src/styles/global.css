@@ -292,13 +292,8 @@ noren-cloth {
 .noren-emblem {
   pointer-events: none;
 }
-/* On phones the emblem intentionally spans the flap slits. */
-@media (max-width: 540px) {
-  .noren-emblem {
-    x: 12%;
-    width: 76%;
-  }
-}
+/* The emblem uses native x/width percentage attributes in NorenHero so its
+   centre is identical in Safari, Chromium and Firefox. */
 /* The reveal plays over the first viewport of the pin (animation-range 0 100vh):
    the noren approaches (0–25%) then lifts away (25–100%). `both` fill then HOLDS
    the lifted state for the rest of the (much longer) pin, so the revealed video

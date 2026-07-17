@@ -83,6 +83,13 @@ const logo = content.footer.logo;
       </div>
     </div>
 
-    <p class="card-note">{join[0]}<br />{join[1]}</p>
+    <p class="card-note">
+      {join.map((line, index) => (
+        <Fragment>
+          {index > 0 && <br />}
+          {line}
+        </Fragment>
+      ))}
+    </p>
   </div>
 </section>
