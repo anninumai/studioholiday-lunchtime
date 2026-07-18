@@ -135,6 +135,13 @@ noren-cloth {
       animation-timeline: scroll(root block) !important;
     }
   }
+
+  @media (prefers-reduced-motion: no-preference) and (max-width: 767px) {
+    .noren-hero {
+      height: 200vh;
+      height: 200dvh;
+    }
+  }
 }
 
 /* ================= noren hero (redesign test: curtain reveal) =================
