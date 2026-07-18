@@ -135,13 +135,6 @@ noren-cloth {
       animation-timeline: scroll(root block) !important;
     }
   }
-
-  @media (prefers-reduced-motion: no-preference) and (max-width: 767px) {
-    .noren-hero {
-      height: 200vh;
-      height: 200dvh;
-    }
-  }
 }
 
 /* ================= noren hero (redesign test: curtain reveal) =================
@@ -342,6 +335,13 @@ noren-cloth {
       animation: noren-reveal linear both;
       animation-timeline: scroll(root block) !important;
       animation-range: 0 100vh; /* reveal over the 1st viewport; fill:both holds the rest */
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) and (max-width: 767px) {
+    .noren-hero {
+      height: 200vh;
+      height: 200dvh;
     }
   }
 }
@@ -903,10 +903,11 @@ noren-cloth {
 }
 @media (max-width: 767px) {
   .message2 {
-    background-image: var(--bg-pink-mobile);
+    background-color: var(--color-brand-green);
+    background-image: var(--bg-canvas-mobile);
   }
   .green-rise {
-    background-image: var(--bg-canvas-mobile);
+    display: none;
   }
 }
 .message2 > .access,
