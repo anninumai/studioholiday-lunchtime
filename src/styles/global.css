@@ -160,8 +160,8 @@ noren-cloth {
 }
 @media (prefers-reduced-motion: no-preference) and (max-width: 767px) {
   .noren-hero {
-    height: 200vh;
-    height: 200svh;
+    height: 300vh;
+    height: 300svh;
   }
   .noren-pin {
     position: sticky;
@@ -351,8 +351,8 @@ noren-cloth {
 
   @media (prefers-reduced-motion: no-preference) and (max-width: 767px) {
     .noren-hero {
-      height: 200vh;
-      height: 200svh;
+      height: 300vh;
+      height: 300svh;
     }
   }
 }
