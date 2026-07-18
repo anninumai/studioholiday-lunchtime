@@ -146,8 +146,7 @@ noren-cloth {
    transform and stays crisp when zoomed. (White, no shadow — the hero photo is
    intentionally unused.) The approach (scale) + lift (translateY) is pure CSS
    scroll-driven. Base state = cloth raised (video visible), so browsers without
-   scroll-timeline support and reduced-motion users get the content, not a stuck
-   curtain. */
+   scroll-timeline support still get the revealed content. */
 .noren-hero {
   position: relative;
   height: 100vh; /* fallback: no pin */
@@ -158,6 +157,18 @@ noren-cloth {
   height: 100vh;
   height: 100dvh;
   overflow: hidden; /* clip the cloth as it lifts above the stage */
+}
+@media (prefers-reduced-motion: no-preference) and (max-width: 767px) {
+  .noren-hero {
+    height: 200vh;
+    height: 200svh;
+  }
+  .noren-pin {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    height: 100svh;
+  }
 }
 /* Revealed logo video, centered over the show-through green pattern. */
 .noren-video {
@@ -316,11 +327,11 @@ noren-cloth {
     translate: 0 -125%;
   }
 }
-/* Enhanced path: pin the stage and drive approach+lift by scroll. @supports
-   keeps this off non-supporting browsers (Firefox stable) and reduced-motion —
-   they keep the base raised state. `animation-timeline` carries !important so
-   Lightning CSS can't fold it into the `animation` shorthand (which browsers
-   reject, dropping the whole rule). */
+/* Enhanced path: drive approach+lift by scroll. @supports keeps the animation
+   off non-supporting browsers and reduced-motion; the mobile pin above remains
+   independent. `animation-timeline` carries !important so Lightning CSS can't
+   fold it into the `animation` shorthand (which browsers reject, dropping the
+   whole rule). */
 @supports (animation-timeline: scroll()) {
   @media (prefers-reduced-motion: no-preference) {
     .noren-hero {
@@ -341,7 +352,7 @@ noren-cloth {
   @media (prefers-reduced-motion: no-preference) and (max-width: 767px) {
     .noren-hero {
       height: 200vh;
-      height: 200dvh;
+      height: 200svh;
     }
   }
 }
