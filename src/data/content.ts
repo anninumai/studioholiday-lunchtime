@@ -68,10 +68,8 @@ export const content = {
     ],
   },
   join: [
-    "STUDIO HOLIDAYのキッチンスタッフが、",
-    "腕によりをかけてお待ちしています。",
-    "お越しの際はSTUDIO HOLIDAYメンバー、",
-    "K,D,C,,,メンバーにお声がけください。",
+    "STUDIO HOLIDAYのキッチンスタッフが、|腕によりをかけてお待ちしています。",
+    "お越しの際はSTUDIO HOLIDAYメンバー、|K,D,C,,,メンバーにお声がけください。",
   ],
   card: {
     role: "Design & Deploy Partner",

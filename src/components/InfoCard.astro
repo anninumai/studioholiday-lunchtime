@@ -120,7 +120,12 @@ const logo = content.footer.logo;
         join.map((line, index) => (
           <Fragment>
             {index > 0 && <br />}
-            {line}
+            {line.split("|").map((segment, segmentIndex) => (
+              <Fragment>
+                {segmentIndex > 0 && <br class="br-sp" />}
+                {segment}
+              </Fragment>
+            ))}
           </Fragment>
         ))
       }
