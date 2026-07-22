@@ -5,7 +5,7 @@ import { content } from "../data/content";
 import { withBase } from "../lib/withBase";
 
 const { noren, video } = content;
-const [logo, desktopPoster, mobilePoster] = await Promise.all([
+const [logo, desktopPoster] = await Promise.all([
   getImage({ src: noren.logo, width: 912, format: "webp", quality: 80 }),
   getImage({
     src: posterSource,
@@ -14,17 +14,8 @@ const [logo, desktopPoster, mobilePoster] = await Promise.all([
     format: "webp",
     quality: 75,
   }),
-  getImage({
-    src: posterSource,
-    width: 540,
-    height: 960,
-    fit: "cover",
-    position: "center",
-    format: "webp",
-    quality: 75,
-  }),
 ]);
-const posterVars = `--video-poster:url("${desktopPoster.src}");--video-poster-mobile:url("${mobilePoster.src}")`;
+const posterVars = `--video-poster:url("${desktopPoster.src}");--video-poster-mobile:url("${withBase(video.mobilePoster)}")`;
 
 // A traditional noren drawn as a single SVG: one cloth joined across the top,
 // with 2 slits splitting the lower part into 3 equal-width flaps (their total is
@@ -38,9 +29,11 @@ const BAND = 32; // connected top band height, percent (the slits start below th
 const BAND_TOP = 3; // cloth top; the small チチ marks stick up from here
 // チチ: a row of small tabs along the top edge — the subtle dashed top of a hung noren.
 const DASH_N = 14;
-const DASH_W = 1.4; // each mark's width, percent
+// Keep the desktop visual weight on every viewport. Percentage width made the
+// same source geometry collapse to roughly 5px on phones.
+const DASH_W = 18; // desktop source width, CSS/SVG pixels
 const dashes = Array.from({ length: DASH_N }, (_, i) => ({
-  x: ((i + 0.5) / DASH_N) * 100 - DASH_W / 2,
+  x: ((i + 0.5) / DASH_N) * 100,
 }));
 const OVERLAP = 1; // flaps tuck this far (percent) under the band so the join can't gap
 // Three EQUAL-width flaps, each as wide as the former centre panel (50%). Their total
@@ -76,29 +69,22 @@ const logoH = 86;
     <video-stage data-play-at="0.5">
       <div class="noren-video" style={posterVars}>
         <video
+          data-src={`${withBase(video.desktopSrc)}#t=0.01`}
+          data-mobile-src={`${withBase(video.mobileSrc)}#t=0.01`}
           width={video.width}
           height={video.height}
           muted
           loop
           playsinline
           preload="none"
-        >
-          <source
-            src={withBase(video.mobileSrc)}
-            media="(max-width: 767px)"
-            type="video/mp4"
-          />
-          <source src={withBase(video.desktopSrc)} type="video/mp4" />
-        </video>
+        ></video>
       </div>
 
-      {
-        /* Scroll cue — revealed by <video-stage> once the video loops (2nd play). */
-      }
-      <div class="scroll-hint" aria-hidden="true">
+      {/* SP scroll cue — visible at the page top and hidden while scrolling below. */}
+      <div class="scroll-hint is-shown" aria-hidden="true">
         <span class="scroll-hint-label">スクロール</span>
-        <svg class="scroll-hint-arrow" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M6 9l6 6 6-6"></path>
+        <svg class="scroll-hint-arrow" viewBox="0 0 24 32" aria-hidden="true">
+          <path d="M12 2c-1 7 1 14 0 23M5 19l7 8 7-8"></path>
         </svg>
       </div>
     </video-stage>
@@ -260,17 +246,15 @@ const logoH = 86;
         </g>
         {/* チチ: small tabs along the top edge (the noren's hanging marks). */}
         <g class="noren-chichi">
-          {
-            dashes.map((d) => (
-              <rect
-                x={`${d.x}%`}
-                y="0"
-                width={`${DASH_W}%`}
-                height="4%"
-                rx="2"
-              />
-            ))
-          }
+          {dashes.map((d) => (
+            <rect
+              x={`${d.x}%`}
+              y="0"
+              width={DASH_W}
+              height="4%"
+              rx="2"
+              transform={`translate(${-DASH_W / 2} 0)`}></rect>
+          ))}
         </g>
       </svg>
     </noren-cloth>

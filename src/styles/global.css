@@ -184,8 +184,10 @@ noren-cloth {
   opacity: 1;
 }
 .noren-video video {
+  display: block;
   width: 100%;
   height: 100%;
+  max-width: none;
   object-fit: cover;
 }
 @media (max-width: 767px) {
@@ -193,18 +195,27 @@ noren-cloth {
     background-image: var(--video-poster-mobile);
   }
 }
-/* Scroll cue — hidden until <video-stage> adds .is-shown on the video's 2nd loop.
-   Sits bottom-center of the pinned stage over the show-through green pattern. */
+@media (min-width: 541px) {
+  .noren-hero,
+  .noren-pin {
+    height: 100vh;
+  }
+  .noren-video video {
+    width: 100vw;
+    height: 100vh;
+  }
+}
+/* SP scroll cue — a quiet hand-drawn prompt at the bottom of the first view. */
 .scroll-hint {
   position: absolute;
   left: 50%;
   bottom: clamp(18px, 4vh, 40px);
   z-index: 2;
-  display: flex;
+  display: none;
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  color: var(--color-on-brand);
+  color: var(--color-brand-green);
   opacity: 0;
   transform: translateX(-50%) translateY(8px);
   pointer-events: none;
@@ -216,17 +227,22 @@ noren-cloth {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
 }
+@media (max-width: 540px) {
+  .scroll-hint {
+    display: flex;
+  }
+}
 .scroll-hint-label {
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.2em;
 }
 .scroll-hint-arrow {
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 29px;
   fill: none;
   stroke: currentColor;
-  stroke-width: 2;
+  stroke-width: 2.2;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
@@ -280,8 +296,6 @@ noren-cloth {
   will-change: transform;
   transform-origin: 50% 50%; /* scaling must never drift away from viewport centre */
   transform-box: border-box; /* scroll scale/translate reference the svg box */
-  /* Soft shadow so the noren reads as hanging in front of the backdrop. */
-  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.16));
 }
 /* Connected top band, drawn over the flap tops — the top never separates. */
 .noren-band {
@@ -881,7 +895,7 @@ noren-cloth {
    the join copy, the info card AND the character/photo section — so the green reads
    as one continuous cloth (no seam between the card area and the photo area). */
 .message2 {
-  --green-rise: 1;
+  --green-rise-top: 0%;
   position: relative;
   isolation: isolate;
   background-color: #ef4d8b;
@@ -890,7 +904,7 @@ noren-cloth {
   background-size: cover;
 }
 .js .message2 {
-  --green-rise: 0;
+  --green-rise-top: 100%;
 }
 .green-rise {
   position: fixed;
@@ -898,19 +912,8 @@ noren-cloth {
   z-index: 0;
   pointer-events: none;
   background: var(--bg-canvas) 50% 50% / cover no-repeat;
-  transform: scaleY(var(--green-rise));
-  transform-origin: center bottom;
-  will-change: transform;
-}
-.green-rise::before {
-  content: "";
-  position: absolute;
-  top: -12px;
-  left: -2%;
-  width: 104%;
-  height: 24px;
-  background: inherit;
-  border-radius: 50% 50% 0 0 / 12px 12px 0 0;
+  clip-path: inset(var(--green-rise-top) 0 0);
+  will-change: clip-path;
 }
 @media (max-width: 767px) {
   .message2 {

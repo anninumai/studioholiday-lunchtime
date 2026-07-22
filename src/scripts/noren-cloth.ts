@@ -17,6 +17,8 @@ class NorenCloth extends HTMLElement {
   #raf = 0;
   #prev = -1; // previous frame timestamp (ms); -1 = loop not started
   #lastX: number | null = null; // previous pointer X, for pointer velocity
+  #lastScrollY = 0; // mobile scroll delta drives a light cloth sway
+  #mobile = false;
   #running = false;
 
   // Soft, languid tuning. STIFFNESS is the base spring back to rest (per-panel
@@ -52,6 +54,8 @@ class NorenCloth extends HTMLElement {
       (_, i) => NorenCloth.#STIFFNESS * (0.85 + 0.3 * ((i * 0.618) % 1)),
     );
     this.#centers = new Array(this.#panels.length).fill(0);
+    this.#mobile = window.matchMedia("(max-width: 540px)").matches;
+    this.#lastScrollY = window.scrollY;
     this.#measure();
 
     this.#cloth.addEventListener("pointermove", this.#onPointerMove, { passive: true });
@@ -59,6 +63,9 @@ class NorenCloth extends HTMLElement {
     this.#cloth.addEventListener("pointerleave", this.#onPointerLeave, { passive: true });
     this.#cloth.addEventListener("pointercancel", this.#onPointerLeave, { passive: true });
     window.addEventListener("resize", this.#measure, { passive: true });
+    if (this.#mobile) {
+      window.addEventListener("scroll", this.#onScroll, { passive: true });
+    }
   }
 
   disconnectedCallback(): void {
@@ -67,6 +74,7 @@ class NorenCloth extends HTMLElement {
     this.#cloth?.removeEventListener("pointerleave", this.#onPointerLeave);
     this.#cloth?.removeEventListener("pointercancel", this.#onPointerLeave);
     window.removeEventListener("resize", this.#measure);
+    window.removeEventListener("scroll", this.#onScroll);
     if (this.#raf) cancelAnimationFrame(this.#raf);
     this.#raf = 0;
     this.#running = false;
@@ -123,6 +131,23 @@ class NorenCloth extends HTMLElement {
   // registered as one huge dx jump.
   #onPointerLeave = (): void => {
     this.#lastX = null;
+  };
+
+  // On phones, translate vertical scroll momentum into a small alternating lean.
+  // This only updates transform values in the existing rAF loop—no image decoding
+  // or repeated asset requests are involved.
+  #onScroll = (): void => {
+    const y = window.scrollY;
+    const raw = y - this.#lastScrollY;
+    this.#lastScrollY = y;
+    const dy = Math.max(-40, Math.min(40, raw));
+    if (Math.abs(dy) < 0.5) return;
+
+    const phase = [-0.72, 1, -0.64];
+    for (let i = 0; i < this.#panels.length; i++) {
+      this.#vel[i] += dy * 0.09 * (phase[i] ?? 1);
+    }
+    this.#start();
   };
 
   #start(): void {

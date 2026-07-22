@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SPスクロール誘導 比較</title>
+    <style>
+      :root {
+        --green: #75d71c;
+        --deep-green: #55ad13;
+        --pink: #ec4e98;
+        --ink: #222;
+        --paper: #f8f7f3;
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        margin: 0;
+        color: var(--ink);
+        font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+        background:
+          radial-gradient(circle at 10% 10%, rgba(117, 215, 28, 0.13), transparent 28rem),
+          #f1f2ed;
+      }
+
+      header {
+        max-width: 1440px;
+        margin: 0 auto;
+        padding: 48px 28px 28px;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(24px, 4vw, 42px);
+        letter-spacing: 0.08em;
+      }
+
+      header p {
+        max-width: 760px;
+        margin: 14px 0 0;
+        color: #686868;
+        font-size: 14px;
+        line-height: 1.8;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(250px, 1fr));
+        gap: 22px;
+        max-width: 1440px;
+        margin: 0 auto;
+        padding: 20px 28px 64px;
+      }
+
+      .proposal {
+        position: relative;
+        padding: 16px;
+        background: rgba(255, 255, 255, 0.82);
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        border-radius: 24px;
+        box-shadow: 0 12px 36px rgba(0, 0, 0, 0.07);
+      }
+
+      .proposal.recommended {
+        border: 2px solid var(--green);
+      }
+
+      .badge {
+        position: absolute;
+        top: -12px;
+        right: 18px;
+        z-index: 5;
+        padding: 6px 12px;
+        color: white;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        background: var(--green);
+        border-radius: 999px;
+      }
+
+      .phone {
+        position: relative;
+        overflow: hidden;
+        width: 100%;
+        aspect-ratio: 390 / 760;
+        background: white;
+        border: 8px solid #171717;
+        border-radius: 38px;
+      }
+
+      .status {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 4;
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 18px;
+        color: #161616;
+        font-size: 10px;
+        font-weight: 800;
+      }
+
+      .noren-demo {
+        position: absolute;
+        inset: 0;
+        background:
+          linear-gradient(to bottom, rgba(117, 215, 28, 0.75) 0 6%, transparent 6%),
+          repeating-linear-gradient(90deg, transparent 0 9%, rgba(117, 215, 28, 0.85) 9% 11%, transparent 11% 20%),
+          linear-gradient(#fbfaf7, #f6f5f1);
+        background-size: 100% 100%, 100% 9%, 100% 100%;
+        background-repeat: no-repeat;
+      }
+
+      .noren-demo::after {
+        content: "みんなで\A ごはん会";
+        position: absolute;
+        top: 37%;
+        left: 50%;
+        color: var(--pink);
+        font-family: "Hiragino Maru Gothic ProN", "Yu Gothic", sans-serif;
+        font-size: clamp(26px, 7vw, 46px);
+        font-weight: 900;
+        line-height: 0.95;
+        text-align: center;
+        white-space: pre;
+        transform: translate(-50%, -50%) rotate(-2deg);
+      }
+
+      .slit {
+        position: absolute;
+        top: 34%;
+        bottom: 0;
+        width: 2px;
+        background: rgba(117, 215, 28, 0.25);
+      }
+
+      .slit { left: 33.33%; }
+      .slit--right { left: 66.66%; }
+
+      .cue {
+        position: absolute;
+        left: 50%;
+        bottom: max(22px, env(safe-area-inset-bottom));
+        z-index: 3;
+        transform: translateX(-50%);
+      }
+
+      /* 01: simple hand-drawn cue */
+      .cue-simple {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 7px;
+        color: var(--deep-green);
+      }
+
+      .cue-simple span {
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.22em;
+      }
+
+      .hand-arrow {
+        width: 22px;
+        height: 28px;
+        animation: soft-bob 1.5s ease-in-out infinite;
+      }
+
+      /* 02: hanging cloth tag */
+      .cue-tag {
+        bottom: 0;
+        display: flex;
+        justify-content: center;
+        width: 72px;
+        height: 126px;
+        padding-top: 18px;
+        color: white;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.2em;
+        writing-mode: vertical-rl;
+        background: var(--green);
+        clip-path: polygon(6% 0, 94% 0, 100% 88%, 50% 100%, 0 88%);
+        transform-origin: 50% 0;
+        animation: tag-sway 2.4s ease-in-out infinite;
+      }
+
+      /* 03: dots */
+      .cue-dots {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        color: var(--deep-green);
+      }
+
+      .cue-dots .label {
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 0.2em;
+      }
+
+      .dot-stack {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+      }
+
+      .dot-stack i {
+        width: 6px;
+        height: 6px;
+        background: var(--green);
+        border-radius: 50%;
+        opacity: 0.22;
+        animation: dot-flow 1.35s steps(1, end) infinite;
+      }
+
+      .dot-stack i:nth-child(2) { animation-delay: 0.18s; }
+      .dot-stack i:nth-child(3) { animation-delay: 0.36s; }
+
+      .dot-stack b {
+        width: 10px;
+        height: 10px;
+        border-right: 2px solid var(--green);
+        border-bottom: 2px solid var(--green);
+        transform: rotate(45deg);
+      }
+
+      /* 04: speech bubble */
+      .cue-bubble {
+        bottom: 28px;
+        padding: 11px 17px;
+        color: var(--deep-green);
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.1em;
+        white-space: nowrap;
+        background: white;
+        border: 2px solid var(--green);
+        border-radius: 999px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        animation: bubble-breathe 2s ease-in-out infinite;
+      }
+
+      .cue-bubble::after {
+        position: absolute;
+        bottom: -7px;
+        left: 50%;
+        width: 12px;
+        height: 12px;
+        content: "";
+        background: white;
+        border-right: 2px solid var(--green);
+        border-bottom: 2px solid var(--green);
+        transform: translateX(-50%) rotate(45deg);
+      }
+
+      h2 {
+        margin: 18px 4px 8px;
+        font-size: 17px;
+        letter-spacing: 0.04em;
+      }
+
+      .description {
+        min-height: 4.8em;
+        margin: 0 4px 14px;
+        color: #666;
+        font-size: 12px;
+        line-height: 1.6;
+      }
+
+      .traits {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin: 0 4px;
+        padding: 0;
+        list-style: none;
+      }
+
+      .traits li {
+        padding: 5px 8px;
+        color: #4a4a4a;
+        font-size: 10px;
+        font-weight: 700;
+        background: #f1f2ed;
+        border-radius: 999px;
+      }
+
+      @keyframes soft-bob {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(6px); }
+      }
+
+      @keyframes tag-sway {
+        0%, 100% { transform: translateX(-50%) rotate(-2deg); }
+        50% { transform: translateX(-50%) rotate(2deg); }
+      }
+
+      @keyframes dot-flow {
+        0%, 24% { opacity: 1; transform: scale(1.25); }
+        25%, 100% { opacity: 0.22; transform: scale(1); }
+      }
+
+      @keyframes bubble-breathe {
+        0%, 100% { transform: translateX(-50%) translateY(0); }
+        50% { transform: translateX(-50%) translateY(-5px); }
+      }
+
+      @media (max-width: 1120px) {
+        .grid { grid-template-columns: repeat(2, minmax(250px, 1fr)); }
+      }
+
+      @media (max-width: 620px) {
+        header { padding: 32px 18px 18px; }
+        .grid { grid-template-columns: 1fr; padding: 14px 18px 48px; }
+        .proposal { max-width: 410px; margin-inline: auto; }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after { animation: none !important; }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>SPスクロール誘導・比較</h1>
+      <p>
+        すべて同じスマホ画面・同じ位置で比較しています。実装時は、最初のスクロールでフェードアウトし、端末のセーフエリアを避けて配置します。
+      </p>
+    </header>
+
+    <main class="grid">
+      <article class="proposal recommended">
+        <span class="badge">おすすめ</span>
+        <div class="phone">
+          <div class="status"><span>12:00</span><span>5G ▰</span></div>
+          <div class="noren-demo"><i class="slit"></i><i class="slit slit--right"></i></div>
+          <div class="cue cue-simple">
+            <span>スクロール</span>
+            <svg class="hand-arrow" viewBox="0 0 24 32" fill="none" aria-hidden="true">
+              <path d="M12 2c-1 7 1 14 0 23M5 19l7 8 7-8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </div>
+        </div>
+        <h2>01 手描き文字＋矢印</h2>
+        <p class="description">サイトの絵柄を邪魔せず、操作だけを素直に案内。矢印だけが静かに上下します。</p>
+        <ul class="traits"><li>視認性◎</li><li>世界観◎</li><li>主張控えめ</li></ul>
+      </article>
+
+      <article class="proposal">
+        <div class="phone">
+          <div class="status"><span>12:00</span><span>5G ▰</span></div>
+          <div class="noren-demo"><i class="slit"></i><i class="slit slit--right"></i></div>
+          <div class="cue cue-tag">スクロール</div>
+        </div>
+        <h2>02 のれんタグ</h2>
+        <p class="description">画面下からタグが垂れている表現。のれんと一緒に揺れるため、世界観が最も強い案です。</p>
+        <ul class="traits"><li>視認性○</li><li>世界観◎</li><li>存在感強め</li></ul>
+      </article>
+
+      <article class="proposal">
+        <div class="phone">
+          <div class="status"><span>12:00</span><span>5G ▰</span></div>
+          <div class="noren-demo"><i class="slit"></i><i class="slit slit--right"></i></div>
+          <div class="cue cue-dots">
+            <span class="label">スクロール</span>
+            <span class="dot-stack"><i></i><i></i><i></i><b></b></span>
+          </div>
+        </div>
+        <h2>03 3つの点＋矢印</h2>
+        <p class="description">点が順番に灯るGIF風の案。カルーセルのドットともデザインを揃えられます。</p>
+        <ul class="traits"><li>視認性○</li><li>動き◎</li><li>UI感あり</li></ul>
+      </article>
+
+      <article class="proposal">
+        <div class="phone">
+          <div class="status"><span>12:00</span><span>5G ▰</span></div>
+          <div class="noren-demo"><i class="slit"></i><i class="slit slit--right"></i></div>
+          <div class="cue cue-bubble">下へスクロール ↓</div>
+        </div>
+        <h2>04 白い吹き出し</h2>
+        <p class="description">一番読みやすく、初見でも迷いません。ほかの吹き出しと役割が重なる可能性があります。</p>
+        <ul class="traits"><li>視認性◎</li><li>説明的</li><li>存在感強め</li></ul>
+      </article>
+    </main>
+  </body>
+</html>

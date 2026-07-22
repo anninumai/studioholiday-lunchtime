@@ -1,9 +1,8 @@
 /** Starts the noren-hero's revealed video once the pinned scroll passes a
- *  threshold (`data-play-at`, a fraction of viewport height). Playback therefore
- *  begins as the video fades in — the fade itself is CSS scroll-driven. When the
- *  looping video finishes its first pass and starts a 2nd (detected via a
- *  timeupdate wrap), it reveals the `.scroll-hint` cue; the cue hides again on the
- *  next scroll. Under reduced-motion the video stays on its poster (no cue).
+ *  threshold (`data-play-at`, a fraction of viewport height). In NorenHero this is
+ *  half a viewport, so playback begins from frame zero while the noren is opening.
+ *  The SP scroll cue is visible at the page top and fades while scrolling below.
+ *  Under reduced-motion the video stays on its poster while the cue remains static.
  *  All listeners are torn down on disconnect. */
 class VideoStage extends HTMLElement {
   #cleanups: Array<() => void> = [];
@@ -11,6 +10,15 @@ class VideoStage extends HTMLElement {
   connectedCallback(): void {
     const video = this.querySelector<HTMLVideoElement>("video");
     if (!video) return;
+    // Select the source explicitly because media-qualified <source> selection is
+    // inconsistent across mobile browsers. Keep preload disabled until scroll
+    // intent so the large media file is not fetched on arrival.
+    const mobile = window.matchMedia("(max-width: 767px)").matches;
+    const src = mobile ? video.dataset.mobileSrc : video.dataset.src;
+    if (!src) return;
+    video.src = src;
+    this.#setupScrollHint();
+
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const connection = (navigator as Navigator & { connection?: { saveData?: boolean } })
       .connection;
@@ -73,37 +81,23 @@ class VideoStage extends HTMLElement {
     };
     document.addEventListener("visibilitychange", onVisibilityChange);
     this.#cleanups.push(() => document.removeEventListener("visibilitychange", onVisibilityChange));
-
-    this.#watchForLoop(video);
   }
 
   disconnectedCallback(): void {
     for (const off of this.#cleanups.splice(0)) off();
   }
 
-  /** Reveal the scroll cue when the loop wraps back to the start (2nd play), then
-   *  hide it once the visitor scrolls in response. */
-  #watchForLoop(video: HTMLVideoElement): void {
+  /** Show the instruction at the page top and hide it while scrolling below. */
+  #setupScrollHint(): void {
     const hint = this.querySelector<HTMLElement>(".scroll-hint");
     if (!hint) return;
 
-    let lastTime = 0;
-    const onTime = (): void => {
-      // A large backward jump in currentTime means the loop restarted.
-      if (video.currentTime + 0.4 < lastTime) {
-        hint.classList.add("is-shown");
-        video.removeEventListener("timeupdate", onTime);
-        const hide = (): void => {
-          hint.classList.remove("is-shown");
-          window.removeEventListener("scroll", hide);
-        };
-        window.addEventListener("scroll", hide, { passive: true });
-        this.#cleanups.push(() => window.removeEventListener("scroll", hide));
-      }
-      lastTime = video.currentTime;
+    const update = (): void => {
+      hint.classList.toggle("is-shown", window.scrollY < 8);
     };
-    video.addEventListener("timeupdate", onTime);
-    this.#cleanups.push(() => video.removeEventListener("timeupdate", onTime));
+    window.addEventListener("scroll", update, { passive: true });
+    this.#cleanups.push(() => window.removeEventListener("scroll", update));
+    update();
   }
 }
 

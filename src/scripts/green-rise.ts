@@ -12,7 +12,7 @@ if (section && card && !mobile) {
   const render = (): void => {
     frame = 0;
     if (reduce) {
-      section.style.setProperty("--green-rise", "1");
+      section.style.setProperty("--green-rise-top", "0%");
       return;
     }
 
@@ -27,7 +27,10 @@ if (section && card && !mobile) {
       Math.max(0, (viewportHeight - sectionTop) / revealDistance),
     );
 
-    section.style.setProperty("--green-rise", progress.toFixed(4));
+    section.style.setProperty(
+      "--green-rise-top",
+      `${((1 - progress) * 100).toFixed(3)}%`,
+    );
   };
 
   const requestRender = (): void => {
