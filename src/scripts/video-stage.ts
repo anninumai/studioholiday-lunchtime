@@ -20,11 +20,10 @@ class VideoStage extends HTMLElement {
     this.#setupScrollHint();
 
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const connection = (navigator as Navigator & { connection?: { saveData?: boolean } })
-      .connection;
-    // Reduced motion and Data Saver keep both source files untouched; the CSS
-    // poster remains as the complete fallback instead.
-    if (reduceMotion || connection?.saveData) return;
+    // Reduced motion keeps the video untouched; the CSS poster remains as the
+    // complete fallback instead. The lightweight encodes are safe to play even
+    // when a browser reports Data Saver, avoiding a permanently frozen stage.
+    if (reduceMotion) return;
 
     const playAt = Number.parseFloat(this.dataset.playAt ?? "0.5");
     let prepared = false;

@@ -36,8 +36,8 @@ export const content = {
   },
   // Sticky logo video that blurs into focus.
   video: {
-    desktopSrc: "/assets/studio/intro_video.mp4",
-    mobileSrc: "/assets/studio/intro_video_mobile.mp4",
+    desktopSrc: "/assets/studio/intro-video-desktop.mp4",
+    mobileSrc: "/assets/studio/intro-video-mobile.mp4",
     mobilePoster: "/assets/studio/intro_video_mobile_poster.jpg",
     width: 1920,
     height: 1080,

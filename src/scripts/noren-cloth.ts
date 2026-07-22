@@ -21,17 +21,17 @@ class NorenCloth extends HTMLElement {
   #mobile = false;
   #running = false;
 
-  // Soft, languid tuning. STIFFNESS is the base spring back to rest (per-panel
+  // Responsive cloth tuning. STIFFNESS is the base spring back to rest (per-panel
   // varied in connectedCallback); DAMPING gives a fluid, few-swing settle;
   // COUPLING pulls each flap toward its neighbours so motion propagates as a
   // wave; GAIN maps pointer speed to an angular kick; SIGMA is the gaussian
   // influence half-width (fraction of viewport width) so the sway originates at
   // the cursor; MAX clamps the swing; MAX_DX clamps a single pointer step so a
   // fast jump can't deliver a violent kick.
-  static readonly #STIFFNESS = 30;
-  static readonly #DAMPING = 4.2;
-  static readonly #COUPLING = 14;
-  static readonly #GAIN = 0.12;
+  static readonly #STIFFNESS = 48;
+  static readonly #DAMPING = 6.4;
+  static readonly #COUPLING = 18;
+  static readonly #GAIN = 0.15;
   static readonly #SIGMA = 0.2;
   static readonly #TAP_KICK = 22;
   static readonly #MAX = 14;
@@ -145,7 +145,7 @@ class NorenCloth extends HTMLElement {
 
     const phase = [-0.72, 1, -0.64];
     for (let i = 0; i < this.#panels.length; i++) {
-      this.#vel[i] += dy * 0.09 * (phase[i] ?? 1);
+      this.#vel[i] += dy * 0.13 * (phase[i] ?? 1);
     }
     this.#start();
   };
