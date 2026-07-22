@@ -18,19 +18,10 @@ if (section && card && !mobile) {
 
     const viewportHeight = window.innerHeight;
     const sectionTop = section.getBoundingClientRect().top;
-    const revealDistance = Math.max(
-      viewportHeight,
-      card.offsetTop + card.offsetHeight,
-    );
-    const progress = Math.min(
-      1,
-      Math.max(0, (viewportHeight - sectionTop) / revealDistance),
-    );
+    const revealDistance = Math.max(viewportHeight, card.offsetTop + card.offsetHeight);
+    const progress = Math.min(1, Math.max(0, (viewportHeight - sectionTop) / revealDistance));
 
-    section.style.setProperty(
-      "--green-rise-top",
-      `${((1 - progress) * 100).toFixed(3)}%`,
-    );
+    section.style.setProperty("--green-rise-top", `${((1 - progress) * 100).toFixed(3)}%`);
   };
 
   const requestRender = (): void => {
