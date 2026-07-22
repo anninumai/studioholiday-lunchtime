@@ -1,7 +1,7 @@
 /** Starts the noren-hero's revealed video once the pinned scroll passes a
  *  threshold (`data-play-at`, a fraction of viewport height). In NorenHero this is
  *  half a viewport, so playback begins from frame zero while the noren is opening.
- *  The SP scroll cue is visible at the page top and fades while scrolling below.
+ *  The mobile scroll cue is visible at the page top and fades while scrolling below.
  *  Under reduced-motion the video stays on its poster while the cue remains static.
  *  All listeners are torn down on disconnect. */
 class VideoStage extends HTMLElement {
@@ -10,6 +10,15 @@ class VideoStage extends HTMLElement {
   connectedCallback(): void {
     const video = this.querySelector<HTMLVideoElement>("video");
     if (!video) return;
+    this.#setupScrollHint();
+
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const connection = (navigator as Navigator & { connection?: { saveData?: boolean } })
+      .connection;
+    // Keep the video source unset when motion is reduced or Data Saver is active;
+    // the optimized CSS poster remains as the complete fallback.
+    if (reduceMotion || connection?.saveData) return;
+
     // Select the source explicitly because media-qualified <source> selection is
     // inconsistent across mobile browsers. Keep preload disabled until scroll
     // intent so the large media file is not fetched on arrival.
@@ -17,13 +26,6 @@ class VideoStage extends HTMLElement {
     const src = mobile ? video.dataset.mobileSrc : video.dataset.src;
     if (!src) return;
     video.src = src;
-    this.#setupScrollHint();
-
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    // Reduced motion keeps the video untouched; the CSS poster remains as the
-    // complete fallback instead. The lightweight encodes are safe to play even
-    // when a browser reports Data Saver, avoiding a permanently frozen stage.
-    if (reduceMotion) return;
 
     const playAt = Number.parseFloat(this.dataset.playAt ?? "0.5");
     let prepared = false;

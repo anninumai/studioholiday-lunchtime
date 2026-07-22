@@ -1,11 +1,12 @@
 ---
 import { getImage } from "astro:assets";
+import mobilePosterSource from "../assets/site/intro-poster-mobile.jpg";
 import posterSource from "../assets/site/studio/intro-poster.jpg";
 import { content } from "../data/content";
 import { withBase } from "../lib/withBase";
 
 const { noren, video } = content;
-const [logo, desktopPoster] = await Promise.all([
+const [logo, desktopPoster, mobilePoster] = await Promise.all([
   getImage({ src: noren.logo, width: 912, format: "webp", quality: 80 }),
   getImage({
     src: posterSource,
@@ -14,8 +15,15 @@ const [logo, desktopPoster] = await Promise.all([
     format: "webp",
     quality: 75,
   }),
+  getImage({
+    src: mobilePosterSource,
+    width: 540,
+    height: 960,
+    format: "webp",
+    quality: 75,
+  }),
 ]);
-const posterVars = `--video-poster:url("${desktopPoster.src}");--video-poster-mobile:url("${withBase(video.mobilePoster)}")`;
+const posterVars = `--video-poster:url("${desktopPoster.src}");--video-poster-mobile:url("${mobilePoster.src}")`;
 
 // A traditional noren drawn as a single SVG: one cloth joined across the top,
 // with 2 slits splitting the lower part into 3 equal-width flaps (their total is
@@ -76,11 +84,12 @@ const logoH = 86;
           muted
           loop
           playsinline
-          preload="none"
-        ></video>
+          preload="none"></video>
       </div>
 
-      {/* SP scroll cue — visible at the page top and hidden while scrolling below. */}
+      {
+        /* Mobile scroll cue — visible at the page top and hidden while scrolling below. */
+      }
       <div class="scroll-hint is-shown" aria-hidden="true">
         <span class="scroll-hint-label">スクロール</span>
         <svg class="scroll-hint-arrow" viewBox="0 0 24 32" aria-hidden="true">
@@ -246,15 +255,18 @@ const logoH = 86;
         </g>
         {/* チチ: small tabs along the top edge (the noren's hanging marks). */}
         <g class="noren-chichi">
-          {dashes.map((d) => (
-            <rect
-              x={`${d.x}%`}
-              y="0"
-              width={DASH_W}
-              height="4%"
-              rx="2"
-              transform={`translate(${-DASH_W / 2} 0)`}></rect>
-          ))}
+          {
+            dashes.map((d) => (
+              <rect
+                x={`${d.x}%`}
+                y="0"
+                width={DASH_W}
+                height="4%"
+                rx="2"
+                transform={`translate(${-DASH_W / 2} 0)`}
+              />
+            ))
+          }
         </g>
       </svg>
     </noren-cloth>

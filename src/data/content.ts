@@ -38,9 +38,8 @@ export const content = {
   video: {
     desktopSrc: "/assets/studio/intro-video-desktop.mp4",
     mobileSrc: "/assets/studio/intro-video-mobile.mp4",
-    mobilePoster: "/assets/studio/intro_video_mobile_poster.jpg",
-    width: 1920,
-    height: 1080,
+    width: 1280,
+    height: 720,
   },
   // Message section = a pink-halftone "poster": the gathering photo (flanked by
   // vertical brush labels), then a white cloud-edged panel with the 同釜共飲 brush
