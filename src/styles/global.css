@@ -195,17 +195,13 @@ noren-cloth {
     background-image: var(--video-poster-mobile);
   }
 }
-@media (min-width: 541px) {
-  .noren-hero,
-  .noren-pin {
-    height: 100vh;
-  }
+@media (min-width: 768px) {
   .noren-video video {
     width: 100vw;
     height: 100vh;
   }
 }
-/* SP scroll cue — a quiet hand-drawn prompt at the bottom of the first view. */
+/* Mobile scroll cue — a quiet hand-drawn prompt at the bottom of the first view. */
 .scroll-hint {
   position: absolute;
   left: 50%;
@@ -227,7 +223,7 @@ noren-cloth {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
 }
-@media (max-width: 540px) {
+@media (max-width: 767px) {
   .scroll-hint {
     display: flex;
   }
