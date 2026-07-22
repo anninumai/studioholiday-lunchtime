@@ -5,6 +5,7 @@
     "includes": [
       "**",
       "!_legacy",
+      "!prototypes",
       "!studio-source",
       "!.claude",
       "!dist",
