@@ -312,6 +312,12 @@ noren-cloth {
   transform-origin: center 32%;
   will-change: transform;
 }
+@media (max-width: 767px) {
+  .noren-cloth-shape {
+    fill: url("#noren-fabric");
+    filter: none;
+  }
+}
 /* Every flap owns a clipped logo fragment and inherits its independent sway. */
 .noren-emblem {
   pointer-events: none;

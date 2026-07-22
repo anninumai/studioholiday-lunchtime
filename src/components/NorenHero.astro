@@ -105,6 +105,21 @@ const logoH = 86;
     <noren-cloth>
       <svg class="noren" role="img" aria-label={noren.alt}>
         <defs>
+          <pattern
+            id="noren-fabric"
+            patternUnits="userSpaceOnUse"
+            width="350"
+            height="325"
+          >
+            <rect width="350" height="325" fill="var(--color-surface)"></rect>
+            <image
+              href={withBase("/assets/noren-texture.webp")}
+              width="350"
+              height="325"
+              opacity="0.42"
+              preserveAspectRatio="none"
+            />
+          </pattern>
           {
             /* "ラフ" — a soft paper/fabric grain baked onto the white cloth only
               (not the emblem). One shared filter, deterministic per user-space
@@ -212,6 +227,7 @@ const logoH = 86;
           flaps.map((f, i) => (
             <g class="noren-panel">
               <rect
+                class="noren-cloth-shape"
                 x={`${f.x}%`}
                 y={`${flapY}%`}
                 width={`${f.w}%`}
@@ -237,6 +253,7 @@ const logoH = 86;
         }
         <g class="noren-band">
           <rect
+            class="noren-cloth-shape"
             x={`${flapStart}%`}
             y={`${BAND_TOP}%`}
             width={`${CLOTH_W}%`}
