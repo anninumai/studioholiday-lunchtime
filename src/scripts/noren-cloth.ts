@@ -17,8 +17,10 @@ class NorenCloth extends HTMLElement {
   #raf = 0;
   #prev = -1; // previous frame timestamp (ms); -1 = loop not started
   #lastX: number | null = null; // previous pointer X, for pointer velocity
-  #lastScrollY = 0; // mobile scroll delta drives a light cloth sway
-  #mobile = false;
+  #lastScrollY = 0; // touch scroll delta drives a light cloth sway
+  #coarsePointer = false;
+  #scrollListening = false;
+  #visibilityObserver: IntersectionObserver | null = null;
   #running = false;
   #tapAnimations: Animation[] = [];
 
@@ -55,7 +57,7 @@ class NorenCloth extends HTMLElement {
       (_, i) => NorenCloth.#STIFFNESS * (0.85 + 0.3 * ((i * 0.618) % 1)),
     );
     this.#centers = new Array(this.#panels.length).fill(0);
-    this.#mobile = window.matchMedia("(max-width: 540px)").matches;
+    this.#coarsePointer = window.matchMedia("(pointer: coarse)").matches;
     this.#lastScrollY = window.scrollY;
     this.#measure();
 
@@ -64,8 +66,13 @@ class NorenCloth extends HTMLElement {
     this.#cloth.addEventListener("pointerleave", this.#onPointerLeave, { passive: true });
     this.#cloth.addEventListener("pointercancel", this.#onPointerLeave, { passive: true });
     window.addEventListener("resize", this.#measure, { passive: true });
-    if (this.#mobile) {
-      window.addEventListener("scroll", this.#onScroll, { passive: true });
+    if (this.#coarsePointer) {
+      // Observe the SVG rather than this display:contents custom element. The
+      // scroll listener exists only while the moving cloth intersects the screen.
+      this.#visibilityObserver = new IntersectionObserver(([entry]) => {
+        this.#setScrollListening(entry?.isIntersecting ?? false);
+      });
+      this.#visibilityObserver.observe(this.#cloth);
     }
   }
 
@@ -75,7 +82,9 @@ class NorenCloth extends HTMLElement {
     this.#cloth?.removeEventListener("pointerleave", this.#onPointerLeave);
     this.#cloth?.removeEventListener("pointercancel", this.#onPointerLeave);
     window.removeEventListener("resize", this.#measure);
-    window.removeEventListener("scroll", this.#onScroll);
+    this.#setScrollListening(false);
+    this.#visibilityObserver?.disconnect();
+    this.#visibilityObserver = null;
     for (const animation of this.#tapAnimations) animation.cancel();
     this.#tapAnimations = [];
     if (this.#raf) cancelAnimationFrame(this.#raf);
@@ -103,9 +112,8 @@ class NorenCloth extends HTMLElement {
 
   #onPointerMove = (e: PointerEvent): void => {
     // Touch scrolling already drives the cloth through #onScroll. Running the
-    // pointer spring at the same time causes competing transforms and dropped
-    // frames on phones.
-    if (this.#mobile) return;
+    // pointer spring at the same time causes competing transforms and dropped frames.
+    if (this.#coarsePointer) return;
     const x = e.clientX;
     // Convert the pointer's horizontal step into an angular kick on the nearest
     // flaps. Clamp the step so a fast jump can't deliver a violent kick.
@@ -123,8 +131,8 @@ class NorenCloth extends HTMLElement {
   #onPointerDown = (e: PointerEvent): void => {
     // Mouse hover already sways via pointermove; only touch/pen "tap" needs a kick.
     if (e.pointerType === "mouse") return;
-    if (this.#mobile) {
-      this.#playMobileTap(e.clientX);
+    if (this.#coarsePointer) {
+      this.#playTouchTap(e.clientX);
       return;
     }
     const x = e.clientX;
@@ -138,10 +146,10 @@ class NorenCloth extends HTMLElement {
     this.#start();
   };
 
-  // A phone tap uses the browser's animation compositor instead of running the
+  // A touch tap uses the browser's animation compositor instead of running the
   // spring integrator on the main thread for every frame. This keeps the same
   // mirrored flap gesture while the large clipped artwork remains smooth.
-  #playMobileTap(x: number): void {
+  #playTouchTap(x: number): void {
     for (const animation of this.#tapAnimations) animation.cancel();
     this.#tapAnimations = [];
 
@@ -171,7 +179,21 @@ class NorenCloth extends HTMLElement {
     this.#lastX = null;
   };
 
-  // On phones, translate vertical scroll momentum into a small alternating lean.
+  #setScrollListening(active: boolean): void {
+    if (active === this.#scrollListening) return;
+    this.#scrollListening = active;
+
+    if (active) {
+      // Reset the baseline so scrolling performed while the cloth was offscreen
+      // cannot become one large velocity kick when it re-enters.
+      this.#lastScrollY = window.scrollY;
+      window.addEventListener("scroll", this.#onScroll, { passive: true });
+      return;
+    }
+    window.removeEventListener("scroll", this.#onScroll);
+  }
+
+  // On touch-first devices, translate vertical scroll momentum into a small lean.
   // This only updates transform values in the existing rAF loop—no image decoding
   // or repeated asset requests are involved.
   #onScroll = (): void => {
