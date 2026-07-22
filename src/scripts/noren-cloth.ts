@@ -17,10 +17,7 @@ class NorenCloth extends HTMLElement {
   #raf = 0;
   #prev = -1; // previous frame timestamp (ms); -1 = loop not started
   #lastX: number | null = null; // previous pointer X, for pointer velocity
-  #lastScrollY = 0; // touch scroll delta drives a light cloth sway
   #coarsePointer = false;
-  #scrollListening = false;
-  #visibilityObserver: IntersectionObserver | null = null;
   #running = false;
   #tapAnimations: Animation[] = [];
 
@@ -58,7 +55,6 @@ class NorenCloth extends HTMLElement {
     );
     this.#centers = new Array(this.#panels.length).fill(0);
     this.#coarsePointer = window.matchMedia("(pointer: coarse)").matches;
-    this.#lastScrollY = window.scrollY;
     this.#measure();
 
     this.#cloth.addEventListener("pointermove", this.#onPointerMove, { passive: true });
@@ -66,14 +62,6 @@ class NorenCloth extends HTMLElement {
     this.#cloth.addEventListener("pointerleave", this.#onPointerLeave, { passive: true });
     this.#cloth.addEventListener("pointercancel", this.#onPointerLeave, { passive: true });
     window.addEventListener("resize", this.#measure, { passive: true });
-    if (this.#coarsePointer) {
-      // Observe the SVG rather than this display:contents custom element. The
-      // scroll listener exists only while the moving cloth intersects the screen.
-      this.#visibilityObserver = new IntersectionObserver(([entry]) => {
-        this.#setScrollListening(entry?.isIntersecting ?? false);
-      });
-      this.#visibilityObserver.observe(this.#cloth);
-    }
   }
 
   disconnectedCallback(): void {
@@ -82,9 +70,6 @@ class NorenCloth extends HTMLElement {
     this.#cloth?.removeEventListener("pointerleave", this.#onPointerLeave);
     this.#cloth?.removeEventListener("pointercancel", this.#onPointerLeave);
     window.removeEventListener("resize", this.#measure);
-    this.#setScrollListening(false);
-    this.#visibilityObserver?.disconnect();
-    this.#visibilityObserver = null;
     for (const animation of this.#tapAnimations) animation.cancel();
     this.#tapAnimations = [];
     if (this.#raf) cancelAnimationFrame(this.#raf);
@@ -111,8 +96,8 @@ class NorenCloth extends HTMLElement {
   }
 
   #onPointerMove = (e: PointerEvent): void => {
-    // Touch scrolling already drives the cloth through #onScroll. Running the
-    // pointer spring at the same time causes competing transforms and dropped frames.
+    // Touch uses the compositor-driven tap animation; pointer movement is only
+    // needed for mouse and trackpad input.
     if (this.#coarsePointer) return;
     const x = e.clientX;
     // Convert the pointer's horizontal step into an angular kick on the nearest
@@ -155,18 +140,23 @@ class NorenCloth extends HTMLElement {
 
     for (let i = 0; i < this.#panels.length; i++) {
       const direction = this.#centers[i] < x ? -1 : 1;
-      const peak = direction * (i === 1 ? 7 : 5.5);
+      const peak = direction * (i === 1 ? 5 : 4);
       const animation = this.#panels[i].animate(
         [
-          { transform: "skewX(0deg)", offset: 0 },
-          { transform: `skewX(${peak}deg)`, offset: 0.2 },
-          { transform: `skewX(${-peak * 0.42}deg)`, offset: 0.5 },
-          { transform: `skewX(${peak * 0.16}deg)`, offset: 0.76 },
+          {
+            transform: "skewX(0deg)",
+            offset: 0,
+            easing: "cubic-bezier(.2,.75,.3,1)",
+          },
+          {
+            transform: `skewX(${peak}deg)`,
+            offset: 0.3,
+            easing: "cubic-bezier(.25,.1,.25,1)",
+          },
           { transform: "skewX(0deg)", offset: 1 },
         ],
         {
-          duration: 520 + i * 35,
-          easing: "cubic-bezier(.2,.7,.25,1)",
+          duration: 620 + i * 30,
         },
       );
       this.#tapAnimations.push(animation);
@@ -177,41 +167,6 @@ class NorenCloth extends HTMLElement {
   // registered as one huge dx jump.
   #onPointerLeave = (): void => {
     this.#lastX = null;
-  };
-
-  #setScrollListening(active: boolean): void {
-    if (active === this.#scrollListening) return;
-    this.#scrollListening = active;
-
-    if (active) {
-      // Reset the baseline so scrolling performed while the cloth was offscreen
-      // cannot become one large velocity kick when it re-enters.
-      this.#lastScrollY = window.scrollY;
-      window.addEventListener("scroll", this.#onScroll, { passive: true });
-      return;
-    }
-    window.removeEventListener("scroll", this.#onScroll);
-  }
-
-  // On touch-first devices, translate vertical scroll momentum into a small lean.
-  // This only updates transform values in the existing rAF loop—no image decoding
-  // or repeated asset requests are involved.
-  #onScroll = (): void => {
-    if (this.#tapAnimations.length > 0) {
-      for (const animation of this.#tapAnimations) animation.cancel();
-      this.#tapAnimations = [];
-    }
-    const y = window.scrollY;
-    const raw = y - this.#lastScrollY;
-    this.#lastScrollY = y;
-    const dy = Math.max(-40, Math.min(40, raw));
-    if (Math.abs(dy) < 0.5) return;
-
-    const phase = [-0.72, 1, -0.64];
-    for (let i = 0; i < this.#panels.length; i++) {
-      this.#vel[i] += dy * 0.13 * (phase[i] ?? 1);
-    }
-    this.#start();
   };
 
   #start(): void {
