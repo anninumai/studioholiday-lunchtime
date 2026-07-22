@@ -20,6 +20,7 @@ class NorenCloth extends HTMLElement {
   #lastScrollY = 0; // mobile scroll delta drives a light cloth sway
   #mobile = false;
   #running = false;
+  #tapAnimations: Animation[] = [];
 
   // Responsive cloth tuning. STIFFNESS is the base spring back to rest (per-panel
   // varied in connectedCallback); DAMPING gives a fluid, few-swing settle;
@@ -75,6 +76,8 @@ class NorenCloth extends HTMLElement {
     this.#cloth?.removeEventListener("pointercancel", this.#onPointerLeave);
     window.removeEventListener("resize", this.#measure);
     window.removeEventListener("scroll", this.#onScroll);
+    for (const animation of this.#tapAnimations) animation.cancel();
+    this.#tapAnimations = [];
     if (this.#raf) cancelAnimationFrame(this.#raf);
     this.#raf = 0;
     this.#running = false;
@@ -99,6 +102,10 @@ class NorenCloth extends HTMLElement {
   }
 
   #onPointerMove = (e: PointerEvent): void => {
+    // Touch scrolling already drives the cloth through #onScroll. Running the
+    // pointer spring at the same time causes competing transforms and dropped
+    // frames on phones.
+    if (this.#mobile) return;
     const x = e.clientX;
     // Convert the pointer's horizontal step into an angular kick on the nearest
     // flaps. Clamp the step so a fast jump can't deliver a violent kick.
@@ -116,6 +123,10 @@ class NorenCloth extends HTMLElement {
   #onPointerDown = (e: PointerEvent): void => {
     // Mouse hover already sways via pointermove; only touch/pen "tap" needs a kick.
     if (e.pointerType === "mouse") return;
+    if (this.#mobile) {
+      this.#playMobileTap(e.clientX);
+      return;
+    }
     const x = e.clientX;
     for (let i = 0; i < this.#panels.length; i++) {
       // Push panels away from the tap (sign by side) for a symmetric shimmer.
@@ -127,6 +138,33 @@ class NorenCloth extends HTMLElement {
     this.#start();
   };
 
+  // A phone tap uses the browser's animation compositor instead of running the
+  // spring integrator on the main thread for every frame. This keeps the same
+  // mirrored flap gesture while the large clipped artwork remains smooth.
+  #playMobileTap(x: number): void {
+    for (const animation of this.#tapAnimations) animation.cancel();
+    this.#tapAnimations = [];
+
+    for (let i = 0; i < this.#panels.length; i++) {
+      const direction = this.#centers[i] < x ? -1 : 1;
+      const peak = direction * (i === 1 ? 7 : 5.5);
+      const animation = this.#panels[i].animate(
+        [
+          { transform: "skewX(0deg)", offset: 0 },
+          { transform: `skewX(${peak}deg)`, offset: 0.2 },
+          { transform: `skewX(${-peak * 0.42}deg)`, offset: 0.5 },
+          { transform: `skewX(${peak * 0.16}deg)`, offset: 0.76 },
+          { transform: "skewX(0deg)", offset: 1 },
+        ],
+        {
+          duration: 520 + i * 35,
+          easing: "cubic-bezier(.2,.7,.25,1)",
+        },
+      );
+      this.#tapAnimations.push(animation);
+    }
+  }
+
   // The pointer left the cloth: forget its position so a later re-entry isn't
   // registered as one huge dx jump.
   #onPointerLeave = (): void => {
@@ -137,6 +175,10 @@ class NorenCloth extends HTMLElement {
   // This only updates transform values in the existing rAF loop—no image decoding
   // or repeated asset requests are involved.
   #onScroll = (): void => {
+    if (this.#tapAnimations.length > 0) {
+      for (const animation of this.#tapAnimations) animation.cancel();
+      this.#tapAnimations = [];
+    }
     const y = window.scrollY;
     const raw = y - this.#lastScrollY;
     this.#lastScrollY = y;
