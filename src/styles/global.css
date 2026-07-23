@@ -36,6 +36,12 @@ body {
   overflow-x: clip;
 }
 
+@media (hover: none) and (pointer: coarse) {
+  html {
+    overscroll-behavior-y: none;
+  }
+}
+
 /* Smooth momentum scrolling is handled by Lenis (see src/scripts/smooth-scroll.ts),
    which drives the real scroll position (so the scroll-driven reveals still track).
    Lenis adds .lenis/.lenis-smooth to <html>; these are its required styles. CSS
