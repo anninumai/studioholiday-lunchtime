@@ -30,9 +30,12 @@ class VideoStage extends HTMLElement {
     let prepared = false;
     let started = false;
     let playedOnce = false;
-    let playPending = false;
-    const initialRect = video.getBoundingClientRect();
-    let visible = initialRect.bottom > 0 && initialRect.top < window.innerHeight;
+    const visibilityTarget = this.closest<HTMLElement>(".noren-hero") ?? video;
+    const isVisible = (): boolean => {
+      const rect = visibilityTarget.getBoundingClientRect();
+      return rect.bottom > 0 && rect.top < window.innerHeight;
+    };
+    let visible = isVisible();
 
     const prepare = (): void => {
       if (prepared) return;
@@ -42,21 +45,13 @@ class VideoStage extends HTMLElement {
     };
 
     const resume = (): void => {
-      if (!started || !visible || document.hidden || !video.paused || playPending) return;
+      if (!started || !visible || document.hidden || !video.paused) return;
       prepare();
       if (!playedOnce) {
         playedOnce = true;
         video.currentTime = 0;
       }
-      playPending = true;
-      void video.play().then(
-        () => {
-          playPending = false;
-        },
-        () => {
-          playPending = false;
-        },
-      );
+      void video.play().catch(() => {});
     };
 
     // This hero is the first experience on the page. Buffer it immediately so
@@ -68,6 +63,9 @@ class VideoStage extends HTMLElement {
       // into the pinned reveal we are; play once we pass playAt * viewport height.
       if (window.scrollY < playAt * window.innerHeight) return;
       started = true;
+      // Read the current geometry here instead of waiting for the asynchronous
+      // observer so the threshold and visibility use the same scroll position.
+      visible = isVisible();
       resume();
     };
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -88,7 +86,7 @@ class VideoStage extends HTMLElement {
       if (visible) resume();
       else video.pause();
     });
-    visibilityObserver.observe(video);
+    visibilityObserver.observe(visibilityTarget);
     this.#cleanups.push(() => visibilityObserver.disconnect());
 
     const onVisibilityChange = (): void => {
