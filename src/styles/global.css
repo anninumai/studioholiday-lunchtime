@@ -307,6 +307,17 @@ noren-cloth {
 .noren-chichi {
   fill: #a1d648;
 }
+.noren-tabs-art {
+  display: none;
+}
+@media (min-width: 768px) {
+  .noren-chichi {
+    display: none;
+  }
+  .noren-tabs-art {
+    display: block;
+  }
+}
 /* Each flap is joined to the band along its top edge; <noren-cloth> leans it with
    skewX anchored at that edge, so only the hem sways (the top never tears away).
    The gaps between the flaps are the slits, showing the video behind. */

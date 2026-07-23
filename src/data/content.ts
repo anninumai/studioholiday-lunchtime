@@ -31,7 +31,7 @@ export const content = {
   // emblem printed on it (its #f2f2f2 background was keyed to transparent).
   noren: {
     logo: norenLogo,
-    tabs: "/assets/noren-tabs-white.svg", // white チチ (loops); the green rod shows in the gaps
+    tabs: "/assets/noren-tabs.svg", // 14 repeated hand-drawn green hanging tabs
     alt: "みんなでごはん会ののれん",
   },
   // Sticky logo video that blurs into focus.
