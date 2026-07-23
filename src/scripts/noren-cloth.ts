@@ -18,8 +18,11 @@ class NorenCloth extends HTMLElement {
   #prev = -1; // previous frame timestamp (ms); -1 = loop not started
   #lastX: number | null = null; // previous pointer X, for pointer velocity
   #coarsePointer = false;
+  #touchPointerId: number | null = null;
+  #touchStartX = 0;
+  #touchStartY = 0;
+  #touchMoved = false;
   #running = false;
-  #tapAnimations: Animation[] = [];
 
   // Responsive cloth tuning. STIFFNESS is the base spring back to rest (per-panel
   // varied in connectedCallback); DAMPING gives a fluid, few-swing settle;
@@ -59,19 +62,19 @@ class NorenCloth extends HTMLElement {
 
     this.#cloth.addEventListener("pointermove", this.#onPointerMove, { passive: true });
     this.#cloth.addEventListener("pointerdown", this.#onPointerDown, { passive: true });
+    this.#cloth.addEventListener("pointerup", this.#onPointerUp, { passive: true });
     this.#cloth.addEventListener("pointerleave", this.#onPointerLeave, { passive: true });
-    this.#cloth.addEventListener("pointercancel", this.#onPointerLeave, { passive: true });
+    this.#cloth.addEventListener("pointercancel", this.#onPointerCancel, { passive: true });
     window.addEventListener("resize", this.#measure, { passive: true });
   }
 
   disconnectedCallback(): void {
     this.#cloth?.removeEventListener("pointermove", this.#onPointerMove);
     this.#cloth?.removeEventListener("pointerdown", this.#onPointerDown);
+    this.#cloth?.removeEventListener("pointerup", this.#onPointerUp);
     this.#cloth?.removeEventListener("pointerleave", this.#onPointerLeave);
-    this.#cloth?.removeEventListener("pointercancel", this.#onPointerLeave);
+    this.#cloth?.removeEventListener("pointercancel", this.#onPointerCancel);
     window.removeEventListener("resize", this.#measure);
-    for (const animation of this.#tapAnimations) animation.cancel();
-    this.#tapAnimations = [];
     if (this.#raf) cancelAnimationFrame(this.#raf);
     this.#raf = 0;
     this.#running = false;
@@ -96,9 +99,13 @@ class NorenCloth extends HTMLElement {
   }
 
   #onPointerMove = (e: PointerEvent): void => {
-    // Touch uses the compositor-driven tap animation; pointer movement is only
-    // needed for mouse and trackpad input.
-    if (this.#coarsePointer) return;
+    if (this.#coarsePointer) {
+      if (e.pointerId !== this.#touchPointerId) return;
+      const dx = e.clientX - this.#touchStartX;
+      const dy = e.clientY - this.#touchStartY;
+      if (Math.hypot(dx, dy) > 10) this.#touchMoved = true;
+      return;
+    }
     const x = e.clientX;
     // Convert the pointer's horizontal step into an angular kick on the nearest
     // flaps. Clamp the step so a fast jump can't deliver a violent kick.
@@ -117,50 +124,36 @@ class NorenCloth extends HTMLElement {
     // Mouse hover already sways via pointermove; only touch/pen "tap" needs a kick.
     if (e.pointerType === "mouse") return;
     if (this.#coarsePointer) {
-      this.#playTouchTap(e.clientX);
+      this.#touchPointerId = e.pointerId;
+      this.#touchStartX = e.clientX;
+      this.#touchStartY = e.clientY;
+      this.#touchMoved = false;
       return;
     }
-    const x = e.clientX;
+    this.#kick(e.clientX);
+    // Seed lastX so a drag right after the tap measures dx from the tap point.
+    this.#lastX = e.clientX;
+  };
+
+  #onPointerUp = (e: PointerEvent): void => {
+    if (!this.#coarsePointer || e.pointerId !== this.#touchPointerId) return;
+    // Check the release point as well because a short browser-coalesced gesture
+    // can reach pointerup without delivering an intermediate pointermove.
+    const dx = e.clientX - this.#touchStartX;
+    const dy = e.clientY - this.#touchStartY;
+    const moved = this.#touchMoved || Math.hypot(dx, dy) > 10;
+    if (!moved) this.#kick(e.clientX);
+    this.#resetTouch();
+  };
+
+  #kick(x: number): void {
     for (let i = 0; i < this.#panels.length; i++) {
-      // Push panels away from the tap (sign by side) for a symmetric shimmer.
+      // Push panels away from the tap; distance controls how strongly each flap
+      // receives the same damped spring motion used by desktop pointer movement.
       const dir = this.#centers[i] < x ? -1 : 1;
       this.#vel[i] += dir * NorenCloth.#TAP_KICK * this.#influence(x, i);
     }
-    // Seed lastX so a drag right after the tap measures dx from the tap point.
-    this.#lastX = e.clientX;
     this.#start();
-  };
-
-  // A touch tap uses the browser's animation compositor instead of running the
-  // spring integrator on the main thread for every frame. This keeps the same
-  // mirrored flap gesture while the large clipped artwork remains smooth.
-  #playTouchTap(x: number): void {
-    for (const animation of this.#tapAnimations) animation.cancel();
-    this.#tapAnimations = [];
-
-    for (let i = 0; i < this.#panels.length; i++) {
-      const direction = this.#centers[i] < x ? -1 : 1;
-      const peak = direction * (i === 1 ? 5 : 4);
-      const animation = this.#panels[i].animate(
-        [
-          {
-            transform: "skewX(0deg)",
-            offset: 0,
-            easing: "cubic-bezier(.2,.75,.3,1)",
-          },
-          {
-            transform: `skewX(${peak}deg)`,
-            offset: 0.3,
-            easing: "cubic-bezier(.25,.1,.25,1)",
-          },
-          { transform: "skewX(0deg)", offset: 1 },
-        ],
-        {
-          duration: 620 + i * 30,
-        },
-      );
-      this.#tapAnimations.push(animation);
-    }
   }
 
   // The pointer left the cloth: forget its position so a later re-entry isn't
@@ -168,6 +161,16 @@ class NorenCloth extends HTMLElement {
   #onPointerLeave = (): void => {
     this.#lastX = null;
   };
+
+  #onPointerCancel = (): void => {
+    this.#lastX = null;
+    this.#resetTouch();
+  };
+
+  #resetTouch(): void {
+    this.#touchPointerId = null;
+    this.#touchMoved = false;
+  }
 
   #start(): void {
     if (this.#running) return;
