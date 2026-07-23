@@ -24,12 +24,15 @@ class VideoStage extends HTMLElement {
     const mobile = window.matchMedia("(max-width: 767px)").matches;
     const src = mobile ? video.dataset.mobileSrc : video.dataset.src;
     if (!src) return;
+    // Mobile Safari gives autoplaying inline video a more reliable loading path.
+    // Desktop keeps the existing threshold-triggered playback behavior.
+    video.autoplay = mobile;
     video.src = src;
 
     const playAt = Number.parseFloat(this.dataset.playAt ?? "0.5");
     let prepared = false;
     let started = false;
-    let playedOnce = false;
+    let revealStarted = false;
     const visibilityTarget = this.closest<HTMLElement>(".noren-hero") ?? video;
     const isVisible = (): boolean => {
       const rect = visibilityTarget.getBoundingClientRect();
@@ -47,10 +50,6 @@ class VideoStage extends HTMLElement {
     const resume = (): void => {
       if (!started || !visible || document.hidden || !video.paused) return;
       prepare();
-      if (!playedOnce) {
-        playedOnce = true;
-        video.currentTime = 0;
-      }
       void video.play().catch(() => {});
     };
 
@@ -66,7 +65,14 @@ class VideoStage extends HTMLElement {
       // Read the current geometry here instead of waiting for the asynchronous
       // observer so the threshold and visibility use the same scroll position.
       visible = isVisible();
+      // Mobile may already be playing behind the cloth to force Safari to load
+      // and decode it. Restart once, exactly when the visible reveal begins.
+      if (!revealStarted) {
+        revealStarted = true;
+        video.currentTime = 0;
+      }
       resume();
+      if (!video.paused) window.removeEventListener("scroll", onScroll);
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     this.#cleanups.push(() => window.removeEventListener("scroll", onScroll));
@@ -74,11 +80,22 @@ class VideoStage extends HTMLElement {
 
     // A rejected or deferred first play can be retried once enough data arrives.
     video.addEventListener("canplay", resume);
-    const onPlaying = (): void => window.removeEventListener("scroll", onScroll);
-    video.addEventListener("playing", onPlaying, { once: true });
+    const onPlaying = (): void => {
+      if (started) window.removeEventListener("scroll", onScroll);
+    };
+    video.addEventListener("playing", onPlaying);
+
+    // A touch that begins scrolling is a user gesture, so it also unlocks video
+    // on iOS configurations that decline muted autoplay (for example Low Power Mode).
+    const onPointerDown = (): void => {
+      if (!mobile || started || !video.paused) return;
+      void video.play().catch(() => {});
+    };
+    visibilityTarget.addEventListener("pointerdown", onPointerDown, { passive: true });
     this.#cleanups.push(() => {
       video.removeEventListener("canplay", resume);
       video.removeEventListener("playing", onPlaying);
+      visibilityTarget.removeEventListener("pointerdown", onPointerDown);
     });
 
     const visibilityObserver = new IntersectionObserver(([entry]) => {
