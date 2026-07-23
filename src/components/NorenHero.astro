@@ -122,96 +122,24 @@ const logoH = 86;
             />
           </pattern>
           {
-            /* Mobile replaces the live displacement filter with three fixed hems.
-              Object-bounding-box coordinates keep each irregular edge proportional
-              to its flap at every viewport size without per-frame filter work. */
+            /* Fixed hems keep each irregular edge proportional to its flap at every
+              viewport size without per-frame filter work. */
           }
-          <clipPath id="noren-mobile-hem-0" clipPathUnits="objectBoundingBox">
+          <clipPath id="noren-hem-0" clipPathUnits="objectBoundingBox">
             <path
               d="M0 0H1V.966C.91.984.82.954.72.974C.61.995.51.963.4.981C.29.997.17.956 0 .976Z"
             ></path>
           </clipPath>
-          <clipPath id="noren-mobile-hem-1" clipPathUnits="objectBoundingBox">
+          <clipPath id="noren-hem-1" clipPathUnits="objectBoundingBox">
             <path
               d="M0 0H1V.978C.89.956.78.991.67.971C.56.951.46.986.35.968C.23.948.12.989 0 .97Z"
             ></path>
           </clipPath>
-          <clipPath id="noren-mobile-hem-2" clipPathUnits="objectBoundingBox">
+          <clipPath id="noren-hem-2" clipPathUnits="objectBoundingBox">
             <path
               d="M0 0H1V.969C.9.992.8.96.69.979C.58.997.48.955.37.975C.25.995.13.962 0 .983Z"
             ></path>
           </clipPath>
-          {
-            /* "ラフ" — a soft paper/fabric grain baked onto the white cloth only
-              (not the emblem). One shared filter, deterministic per user-space
-              coordinate, so the texture reads continuously across the band and the
-              flaps and rides each flap when it skews. Two scales: broad cloudy
-              mottle + fine grain, laid over the white at low opacity. */
-          }
-          <filter
-            id="noren-rough"
-            filterUnits="objectBoundingBox"
-            x="-14%"
-            y="-14%"
-            width="128%"
-            height="128%"
-            primitiveUnits="userSpaceOnUse"
-          >
-            {
-              /* Rough the OUTLINE: warp the straight cloth edges with low-frequency
-                noise so the silhouette reads hand-drawn/organic. Shared seed +
-                userSpaceOnUse → the warp is one continuous field, so neighbouring
-                flap edges (and the band/flap join) move together. */
-            }
-            <feTurbulence
-              type="fractalNoise"
-              baseFrequency="0.008"
-              numOctaves="2"
-              seed="5"
-              result="warp"></feTurbulence>
-            <feDisplacementMap
-              in="SourceGraphic"
-              in2="warp"
-              scale="26"
-              xChannelSelector="R"
-              yChannelSelector="G"
-              result="rough"></feDisplacementMap>
-            {
-              /* Surface ラフ: broad cloudy mottle + fine grain, clipped to the shape. */
-            }
-            <feTurbulence
-              type="fractalNoise"
-              baseFrequency="0.012"
-              numOctaves="3"
-              seed="7"
-              result="cloud"></feTurbulence>
-            <feColorMatrix
-              in="cloud"
-              type="matrix"
-              values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.16 0"
-              result="cloudGrain"></feColorMatrix>
-            <feTurbulence
-              type="fractalNoise"
-              baseFrequency="0.5"
-              numOctaves="2"
-              seed="4"
-              result="fine"></feTurbulence>
-            <feColorMatrix
-              in="fine"
-              type="matrix"
-              values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.10 0"
-              result="fineGrain"></feColorMatrix>
-            <feMerge result="grain">
-              <feMergeNode in="cloudGrain"></feMergeNode>
-              <feMergeNode in="fineGrain"></feMergeNode>
-            </feMerge>
-            <feComposite in="grain" in2="rough" operator="in" result="grainClip"
-            ></feComposite>
-            <feMerge>
-              <feMergeNode in="rough"></feMergeNode>
-              <feMergeNode in="grainClip"></feMergeNode>
-            </feMerge>
-          </filter>
           {
             /* Separate clips cut one full-size emblem copy into the fixed band and
             three flap fragments. All fragments share the same source geometry. */
@@ -253,7 +181,6 @@ const logoH = 86;
                 y={`${flapY}%`}
                 width={`${f.w}%`}
                 height={`${flapH}%`}
-                filter="url(#noren-rough)"
               />
               <image
                 class="noren-emblem"
@@ -278,8 +205,7 @@ const logoH = 86;
             x={`${flapStart}%`}
             y={`${BAND_TOP}%`}
             width={`${CLOTH_W}%`}
-            height={`${BAND - BAND_TOP}%`}
-            filter="url(#noren-rough)"></rect>
+            height={`${BAND - BAND_TOP}%`}></rect>
           <image
             class="noren-emblem"
             href={logo.src}
