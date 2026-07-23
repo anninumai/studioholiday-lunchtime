@@ -1,6 +1,6 @@
 /** Starts the noren-hero's revealed video once the pinned scroll passes a
- *  threshold (`data-play-at`, a fraction of viewport height). In NorenHero this is
- *  half a viewport, so playback begins from frame zero while the noren is opening.
+ *  threshold (`data-play-at`, a fraction of viewport height). The video buffers
+ *  as soon as the stage connects so mobile playback is ready when the noren opens.
  *  The mobile scroll cue is visible at the page top and fades while scrolling below.
  *  Under reduced-motion the video stays on its poster while the cue remains static.
  *  All listeners are torn down on disconnect. */
@@ -20,8 +20,7 @@ class VideoStage extends HTMLElement {
     if (reduceMotion || connection?.saveData) return;
 
     // Select the source explicitly because media-qualified <source> selection is
-    // inconsistent across mobile browsers. Keep preload disabled until scroll
-    // intent so the large media file is not fetched on arrival.
+    // inconsistent across mobile browsers.
     const mobile = window.matchMedia("(max-width: 767px)").matches;
     const src = mobile ? video.dataset.mobileSrc : video.dataset.src;
     if (!src) return;
@@ -31,42 +30,58 @@ class VideoStage extends HTMLElement {
     let prepared = false;
     let started = false;
     let playedOnce = false;
+    let playPending = false;
     const initialRect = video.getBoundingClientRect();
     let visible = initialRect.bottom > 0 && initialRect.top < window.innerHeight;
 
     const prepare = (): void => {
       if (prepared) return;
       prepared = true;
-      // The markup starts at preload="none". Switching only after scroll intent
-      // lets the browser select the matching <source media> before buffering it.
       video.preload = "auto";
       video.load();
     };
 
     const resume = (): void => {
-      if (!started || !visible || document.hidden) return;
+      if (!started || !visible || document.hidden || !video.paused || playPending) return;
       prepare();
       if (!playedOnce) {
         playedOnce = true;
         video.currentTime = 0;
       }
-      void video.play().catch(() => {});
+      playPending = true;
+      void video.play().then(
+        () => {
+          playPending = false;
+        },
+        () => {
+          playPending = false;
+        },
+      );
     };
 
+    // This hero is the first experience on the page. Buffer it immediately so
+    // mobile devices do not reveal a stalled first frame while the file loads.
+    prepare();
+
     const onScroll = (): void => {
-      // A first scroll is enough intent to buffer ahead of the reveal, but a page
-      // restored below the hero must not fetch a video that is already offscreen.
-      if (window.scrollY > 0 && visible) prepare();
       // The noren hero is the first section, so scrollY maps directly to how far
       // into the pinned reveal we are; play once we pass playAt * viewport height.
       if (window.scrollY < playAt * window.innerHeight) return;
       started = true;
       resume();
-      window.removeEventListener("scroll", onScroll);
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     this.#cleanups.push(() => window.removeEventListener("scroll", onScroll));
     onScroll(); // in case the page is loaded already scrolled past the threshold
+
+    // A rejected or deferred first play can be retried once enough data arrives.
+    video.addEventListener("canplay", resume);
+    const onPlaying = (): void => window.removeEventListener("scroll", onScroll);
+    video.addEventListener("playing", onPlaying, { once: true });
+    this.#cleanups.push(() => {
+      video.removeEventListener("canplay", resume);
+      video.removeEventListener("playing", onPlaying);
+    });
 
     const visibilityObserver = new IntersectionObserver(([entry]) => {
       visible = entry?.isIntersecting ?? false;
