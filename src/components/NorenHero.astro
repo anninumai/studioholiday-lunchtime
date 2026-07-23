@@ -121,6 +121,26 @@ const logoH = 86;
             />
           </pattern>
           {
+            /* Mobile replaces the live displacement filter with three fixed hems.
+              Object-bounding-box coordinates keep each irregular edge proportional
+              to its flap at every viewport size without per-frame filter work. */
+          }
+          <clipPath id="noren-mobile-hem-0" clipPathUnits="objectBoundingBox">
+            <path
+              d="M0 0H1V.966C.91.984.82.954.72.974C.61.995.51.963.4.981C.29.997.17.956 0 .976Z"
+            ></path>
+          </clipPath>
+          <clipPath id="noren-mobile-hem-1" clipPathUnits="objectBoundingBox">
+            <path
+              d="M0 0H1V.978C.89.956.78.991.67.971C.56.951.46.986.35.968C.23.948.12.989 0 .97Z"
+            ></path>
+          </clipPath>
+          <clipPath id="noren-mobile-hem-2" clipPathUnits="objectBoundingBox">
+            <path
+              d="M0 0H1V.969C.9.992.8.96.69.979C.58.997.48.955.37.975C.25.995.13.962 0 .983Z"
+            ></path>
+          </clipPath>
+          {
             /* "ラフ" — a soft paper/fabric grain baked onto the white cloth only
               (not the emblem). One shared filter, deterministic per user-space
               coordinate, so the texture reads continuously across the band and the
@@ -227,7 +247,7 @@ const logoH = 86;
           flaps.map((f, i) => (
             <g class="noren-panel">
               <rect
-                class="noren-cloth-shape"
+                class={`noren-cloth-shape noren-cloth-shape-${i}`}
                 x={`${f.x}%`}
                 y={`${flapY}%`}
                 width={`${f.w}%`}
