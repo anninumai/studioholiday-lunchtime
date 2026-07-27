@@ -329,17 +329,22 @@ noren-cloth {
   transform-origin: center 32%;
   will-change: transform;
 }
-.noren-cloth-shape {
-  fill: url("#noren-fabric");
-}
-.noren-cloth-shape-0 {
-  clip-path: url("#noren-hem-0");
-}
-.noren-cloth-shape-1 {
-  clip-path: url("#noren-hem-1");
-}
-.noren-cloth-shape-2 {
-  clip-path: url("#noren-hem-2");
+/* Desktop keeps the live #noren-rough filter (hand-drawn outline + grain) set on
+   the rects themselves; mobile swaps it for the cheap fabric pattern + fixed hems. */
+@media (max-width: 767px) {
+  .noren-cloth-shape {
+    fill: url("#noren-fabric");
+    filter: none;
+  }
+  .noren-cloth-shape-0 {
+    clip-path: url("#noren-hem-0");
+  }
+  .noren-cloth-shape-1 {
+    clip-path: url("#noren-hem-1");
+  }
+  .noren-cloth-shape-2 {
+    clip-path: url("#noren-hem-2");
+  }
 }
 /* Every flap owns a clipped logo fragment and inherits its independent sway. */
 .noren-emblem {

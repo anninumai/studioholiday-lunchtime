@@ -141,6 +141,77 @@ const logoH = 86;
             ></path>
           </clipPath>
           {
+            /* "ラフ" — a soft paper/fabric grain baked onto the white cloth only
+              (not the emblem). One shared filter, deterministic per user-space
+              coordinate, so the texture reads continuously across the band and the
+              flaps and rides each flap when it skews. Two scales: broad cloudy
+              mottle + fine grain, laid over the white at low opacity. */
+          }
+          <filter
+            id="noren-rough"
+            filterUnits="objectBoundingBox"
+            x="-14%"
+            y="-14%"
+            width="128%"
+            height="128%"
+            primitiveUnits="userSpaceOnUse"
+          >
+            {
+              /* Rough the OUTLINE: warp the straight cloth edges with low-frequency
+                noise so the silhouette reads hand-drawn/organic. Shared seed +
+                userSpaceOnUse → the warp is one continuous field, so neighbouring
+                flap edges (and the band/flap join) move together. */
+            }
+            <feTurbulence
+              type="fractalNoise"
+              baseFrequency="0.008"
+              numOctaves="2"
+              seed="5"
+              result="warp"></feTurbulence>
+            <feDisplacementMap
+              in="SourceGraphic"
+              in2="warp"
+              scale="26"
+              xChannelSelector="R"
+              yChannelSelector="G"
+              result="rough"></feDisplacementMap>
+            {
+              /* Surface ラフ: broad cloudy mottle + fine grain, clipped to the shape. */
+            }
+            <feTurbulence
+              type="fractalNoise"
+              baseFrequency="0.012"
+              numOctaves="3"
+              seed="7"
+              result="cloud"></feTurbulence>
+            <feColorMatrix
+              in="cloud"
+              type="matrix"
+              values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.16 0"
+              result="cloudGrain"></feColorMatrix>
+            <feTurbulence
+              type="fractalNoise"
+              baseFrequency="0.5"
+              numOctaves="2"
+              seed="4"
+              result="fine"></feTurbulence>
+            <feColorMatrix
+              in="fine"
+              type="matrix"
+              values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.10 0"
+              result="fineGrain"></feColorMatrix>
+            <feMerge result="grain">
+              <feMergeNode in="cloudGrain"></feMergeNode>
+              <feMergeNode in="fineGrain"></feMergeNode>
+            </feMerge>
+            <feComposite in="grain" in2="rough" operator="in" result="grainClip"
+            ></feComposite>
+            <feMerge>
+              <feMergeNode in="rough"></feMergeNode>
+              <feMergeNode in="grainClip"></feMergeNode>
+            </feMerge>
+          </filter>
+          {
             /* Separate clips cut one full-size emblem copy into the fixed band and
             three flap fragments. All fragments share the same source geometry. */
           }
@@ -181,6 +252,7 @@ const logoH = 86;
                 y={`${flapY}%`}
                 width={`${f.w}%`}
                 height={`${flapH}%`}
+                filter="url(#noren-rough)"
               />
               <image
                 class="noren-emblem"
@@ -205,7 +277,8 @@ const logoH = 86;
             x={`${flapStart}%`}
             y={`${BAND_TOP}%`}
             width={`${CLOTH_W}%`}
-            height={`${BAND - BAND_TOP}%`}></rect>
+            height={`${BAND - BAND_TOP}%`}
+            filter="url(#noren-rough)"></rect>
           <image
             class="noren-emblem"
             href={logo.src}
