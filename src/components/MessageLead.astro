@@ -177,6 +177,7 @@ const cloudSizes = "(max-width: 767px) 44vw, 660px";
         decoding="async"
       />
       <div class="msg-body">
+        <p class="msg-about">ABOUT US</p>
         {
           m.body.map((para) => (
             <p>
@@ -196,5 +197,12 @@ const cloudSizes = "(max-width: 767px) 44vw, 660px";
         }
       </div>
     </div>
+  </div>
+
+  <div class="pink-cue" aria-hidden="true">
+    スクロール
+    <svg class="scroll-hint-arrow" viewBox="0 0 24 32" aria-hidden="true">
+      <path d="M12 2c-1 7 1 14 0 23M5 19l7 8 7-8"></path>
+    </svg>
   </div>
 </section>

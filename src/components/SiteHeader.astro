@@ -1,0 +1,70 @@
+---
+import { Image } from "astro:assets";
+import logo from "../assets/site/studio/footer_logo.webp";
+---
+
+<header class="site-header">
+  <a class="site-header__link" href="#top" aria-label="みんなでごはん会のトップへ戻る">
+    <Image
+      class="site-header__logo site-header__logo--light"
+      src={logo}
+      alt="みんなでごはん会"
+      widths={[160, 240, 320]}
+      sizes="clamp(108px, 10vw, 170px)"
+      format="webp"
+      quality={85}
+      loading="eager"
+      decoding="async"
+    />
+    <Image
+      class="site-header__logo site-header__logo--dark"
+      src={logo}
+      alt=""
+      aria-hidden="true"
+      widths={[160, 240, 320]}
+      sizes="clamp(108px, 10vw, 170px)"
+      format="webp"
+      quality={85}
+      loading="eager"
+      decoding="async"
+    />
+  </a>
+</header>
+
+<script>
+  const header = document.querySelector<HTMLElement>(".site-header");
+
+  if (header) {
+    let frame = 0;
+    const updateTone = () => {
+      frame = 0;
+      const logo = header.querySelector<HTMLElement>(".site-header__link");
+      if (!logo) return;
+      const rect = logo.getBoundingClientRect();
+      const columns = 7;
+      const rows = 5;
+      let lightSamples = 0;
+      let totalSamples = 0;
+      for (let row = 0; row < rows; row += 1) {
+        for (let column = 0; column < columns; column += 1) {
+          const x = Math.min(window.innerWidth - 1, rect.left + ((column + 0.5) / columns) * rect.width);
+          const y = Math.min(window.innerHeight - 1, rect.top + ((row + 0.5) / rows) * rect.height);
+          const isLightSurface = document
+            .elementsFromPoint(x, y)
+            .some((element) => element.closest(".msg-panel, .access .card, .member-cushion__sheet"));
+          totalSamples += 1;
+          if (isLightSurface) lightSamples += 1;
+        }
+      }
+      const darkness = totalSamples ? lightSamples / totalSamples : 0;
+      header.style.setProperty("--logo-darkness", darkness.toFixed(3));
+    };
+    const requestToneUpdate = () => {
+      if (!frame) frame = window.requestAnimationFrame(updateTone);
+    };
+
+    window.addEventListener("scroll", requestToneUpdate, { passive: true });
+    window.addEventListener("resize", requestToneUpdate);
+    requestToneUpdate();
+  }
+</script>

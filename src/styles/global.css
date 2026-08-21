@@ -67,7 +67,6 @@ html.lenis body {
 body,
 .msg-body,
 .card-info,
-.card-note,
 .cap {
   letter-spacing: 0.15em;
   line-height: 1.4;
@@ -94,6 +93,64 @@ noren-cloth {
   inset: 0;
   /* `cover` fills the viewport; no-repeat because it never tiles under cover. */
   background: var(--bg-pattern) 50% 50% / cover no-repeat;
+}
+
+/* Persistent brand mark. The difference blend keeps the gray mark legible as
+   the page moves across pink, green and white surfaces without a background pill. */
+.site-header {
+  --logo-darkness: 0;
+  position: fixed;
+  z-index: 100;
+  top: max(16px, env(safe-area-inset-top));
+  left: max(16px, env(safe-area-inset-left));
+  pointer-events: none;
+}
+.site-header__link {
+  display: block;
+  width: clamp(108px, 10vw, 170px);
+  pointer-events: auto;
+}
+.site-header__logo {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: auto;
+  transition: opacity 140ms linear;
+}
+.site-header__logo--light {
+  position: relative;
+  filter: brightness(0) invert(1);
+  opacity: calc(1 - var(--logo-darkness));
+}
+.site-header__logo--dark {
+  filter: brightness(0);
+  opacity: var(--logo-darkness);
+}
+@media (prefers-reduced-motion: reduce) {
+  .site-header__logo {
+    transition: none;
+  }
+}
+@media (max-width: 540px) {
+  .site-header {
+    top: max(12px, env(safe-area-inset-top));
+    left: max(12px, env(safe-area-inset-left));
+  }
+  .site-header__link {
+    width: 112px;
+  }
+}
+
+/* Height of the wave band where the footer's top edge meets the member cushion.
+   Lives here because BOTH blocks need it: the footer draws the wave, and the
+   cushion above has to pad its bottom enough to clear the crest. With the mask
+   path below (viewBox 0 0 120 12, 6 crests) the crest sits at 1/12 of the band
+   and the trough at 11/12, so the crest reaches 0.917 × --wave-h above the seam
+   and the peak-to-trough is 0.833 × --wave-h. */
+:root {
+  --wave-h: clamp(20px, 2.3vw, 40px);
+  --wave-crest: 0.917;
 }
 
 /* the scrolling document that rides over the fixed pattern */
@@ -163,6 +220,8 @@ noren-cloth {
   height: 100vh;
   height: 100dvh;
   overflow: hidden; /* clip the cloth as it lifts above the stage */
+  /* No background: the fixed leaf pattern (.bg-fixed) shows through the slits
+     and around the cloth until the video fades in. */
 }
 @media (prefers-reduced-motion: no-preference) and (max-width: 767px) {
   .noren-hero {
@@ -174,6 +233,22 @@ noren-cloth {
     top: 0;
     height: 100vh;
     height: 100svh;
+  }
+  .message {
+    margin-top: calc(-100vh - 40vh);
+    margin-top: calc(-100svh - 40vh);
+  }
+  .js .message {
+    clip-path: inset(100% 0 0 0);
+    will-change: clip-path;
+  }
+  .js .message .message-inner {
+    opacity: 0;
+    transition: opacity 0.9s ease;
+  }
+  .js .message.is-revealed .message-inner {
+    opacity: 1;
+    transition: opacity 0.9s ease 0.35s;
   }
 }
 /* Revealed logo video, centered over the show-through green pattern. */
@@ -230,7 +305,7 @@ noren-cloth {
   transform: translateX(-50%) translateY(0);
 }
 @media (max-width: 767px) {
-  .scroll-hint {
+  .scroll-hint--top {
     display: flex;
   }
 }
@@ -260,6 +335,75 @@ noren-cloth {
   }
   50% {
     transform: translateY(4px);
+  }
+}
+/* ============ pink cue — post-loop scroll label ============
+   The pink mound itself is .message's own background revealed by a clip-path
+   (single pink ground; see the enhanced .message rules and pink-surge.ts).
+   This element is only the スクロール label riding the mound's peak: it
+   springs up with the mound after the first video loop and idles with the
+   poyon bob; it fades once the scroll-driven growth takes over. */
+.pink-cue {
+  --surge-cue-peak: clamp(120px, 20vh, 190px);
+  /* Fixed to the viewport bottom; lives inside .message so it paints above
+     the mound and is clipped away with it. */
+  position: fixed;
+  left: 50%;
+  bottom: clamp(26px, 5vh, 48px);
+  z-index: 3;
+  display: none; /* pink-surge.ts enables it under the enhanced-path guard */
+  pointer-events: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-on-brand);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  transform: translate(-50%, calc(var(--surge-cue-peak) + 60px)); /* rests below */
+  transition: opacity 0.4s ease;
+}
+.pink-cue.is-active {
+  display: flex;
+}
+/* Springy entrance from below, then the idle poyon; travel is mound-scaled. */
+.pink-cue.is-cue {
+  animation:
+    cue-in 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) both,
+    cue-poyon 2.4s ease-in-out 0.65s infinite;
+}
+/* Re-entering the hold after the cue already played: skip the spring. */
+.pink-cue.is-cue.is-settled {
+  animation: cue-poyon 2.4s ease-in-out infinite;
+}
+/* Scroll-driven growth takes over: the label bows out. */
+.pink-cue.is-grown {
+  animation: none;
+  transform: translate(-50%, 0);
+  opacity: 0;
+}
+@keyframes cue-in {
+  from {
+    transform: translate(-50%, calc(var(--surge-cue-peak) + 60px));
+  }
+  to {
+    transform: translate(-50%, 0);
+  }
+}
+@keyframes cue-poyon {
+  /* Decaying bobs, matching the mound's JS bob. */
+  0%,
+  100% {
+    transform: translate(-50%, 0);
+  }
+  30% {
+    transform: translate(-50%, -8px);
+  }
+  55% {
+    transform: translate(-50%, 3px);
+  }
+  75% {
+    transform: translate(-50%, -4px);
   }
 }
 /* The video fades in over the back half of the reveal (50–100% of 0 100vh); `both`
@@ -371,6 +515,29 @@ noren-cloth {
     translate: 0 -125%;
   }
 }
+/* 登場演出「歩み寄る」: the cloth fades in at 0.97× and grows to the seated TOP
+   view (transform: none). Scaled about its top centre, so it keeps hanging
+   from the rod; the cloth is wider than the viewport (152%), so its side edges
+   never enter the screen — only a sliver of ground shows under the hem while
+   it is small. Runs once per load; html.noren-entrance is stamped pre-paint
+   (BaseLayout) only when the page opens at the top. */
+@keyframes noren-entrance {
+  0% {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  40% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+.noren-scene {
+  transform-box: view-box;
+  transform-origin: 50% 0;
+}
 /* Enhanced path: drive approach+lift by scroll. @supports keeps the animation
    off non-supporting browsers and reduced-motion; the mobile pin above remains
    independent. `animation-timeline` carries !important so Lightning CSS can't
@@ -390,6 +557,30 @@ noren-cloth {
       animation: noren-reveal linear both;
       animation-timeline: scroll(root block) !important;
       animation-range: 0 100vh; /* reveal over the 1st viewport; fill:both holds the rest */
+    }
+    /* Entrance lives on the .noren-scene group INSIDE the svg, not on .noren
+       (whose animation slot and scale/translate are scroll-driven) and not on
+       .noren-pin (scaling the stage would show its edges). Scrolling during
+       the approach simply composes with it. Same @supports gate as the
+       reveal — anywhere else the cloth is raised at load. */
+    .noren-entrance .noren-scene {
+      animation: noren-entrance 1.4s cubic-bezier(0.22, 0.9, 0.3, 1) both;
+    }
+    .message {
+      margin-top: calc(-100vh - 40vh);
+      margin-top: calc(-100dvh - 40vh);
+    }
+    .js .message {
+      clip-path: inset(100% 0 0 0);
+      will-change: clip-path;
+    }
+    .js .message .message-inner {
+      opacity: 0;
+      transition: opacity 0.9s ease;
+    }
+    .js .message.is-revealed .message-inner {
+      opacity: 1;
+      transition: opacity 0.9s ease 0.35s;
     }
   }
 
@@ -511,7 +702,6 @@ noren-cloth {
     var(--color-surface) 3% 100%
   );
   border-radius: 20px;
-  container-type: inline-size; /* so .msg-body can scale in cqw with the panel */
 }
 /* Pink cloud clusters straddling the white rectangle's edges — they overlap the
    corners/sides so the white reads as an organic cushion. Behind the title/body. */
@@ -722,8 +912,10 @@ noren-cloth {
   pointer-events: none;
 }
 /* Body copy sits in the clear white zone (clouds are at the corners, title on top).
-   font-size in cqw scales the line count-fixed block with the panel width, so it
-   keeps the same fit at every viewport. */
+   Same type as the contact card's 「毎週木曜日12:00-13:00頃」 (.card-detail dd), so
+   the page's two blocks of running text scale on one formula. The panel keeps
+   250–320px of spare height at desktop sizes, so the block simply centres in it;
+   the tight case is narrow phones, handled in the ≤540px block. */
 .msg-body {
   position: absolute;
   z-index: 2; /* above the cloud clusters */
@@ -737,19 +929,30 @@ noren-cloth {
   color: #079400; /* body green */
   text-align: center;
   font-weight: 700;
-  letter-spacing: 0.04em;
-  line-height: 2.15;
+  /* Tuned after the editorial rhythm of the supplied ABOUT reference: the
+     paragraph breathes, but the lines still read as one calm block. */
+  letter-spacing: 0.09em;
+  line-height: 1.88;
   /* Break Japanese at phrase boundaries (not mid-word) when a line wraps on mobile.
      Unsupported browsers fall back to normal wrapping. */
   word-break: auto-phrase;
-  /* Scales with the box width but capped so it never gets oversized on big screens. */
-  font-size: clamp(16px, 1.9cqw, 21px);
+  font-size: clamp(15px, 1.11vw, 24px); /* = .card-detail dd */
 }
 .msg-body p {
   margin: 0;
 }
+.msg-body .msg-about {
+  margin-bottom: 1.55em;
+  color: #079400;
+  font-size: 0.68em;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+}
+.msg-body .msg-about + p {
+  margin-top: 0;
+}
 .msg-body p + p {
-  margin-top: 2em;
+  margin-top: 1.65em;
 }
 /* mobile-only line break (see content.ts "|" marker); no break on desktop */
 .br-sp {
@@ -764,7 +967,8 @@ noren-cloth {
   .bg-fixed::before {
     background-image: var(--bg-pattern-mobile);
   }
-  .message {
+  .message,
+  .access {
     background-image: var(--bg-pink-mobile);
   }
   /* photo + side labels: smaller labels that stay within the short photo's height.
@@ -802,12 +1006,14 @@ noren-cloth {
     bottom: 10%;
     left: 13%;
     right: 13%;
-    font-size: clamp(12px, 3.2vw, 15px);
-    line-height: 2.05;
-    letter-spacing: 0.02em;
+    line-height: 1.9;
+    letter-spacing: 0.07em;
   }
   .msg-body p + p {
-    margin-top: 1.7em;
+    margin-top: 1.55em;
+  }
+  .msg-body .msg-about {
+    margin-bottom: 1.5em;
   }
   .br-sp {
     display: inline; /* activate the mobile-only breaks */
@@ -891,13 +1097,13 @@ noren-cloth {
       opacity 0.48s ease-out,
       transform 0.58s cubic-bezier(0.16, 1, 0.3, 1);
   }
-  .js .appear--hero .msg-body p:nth-child(1) {
+  .js .appear--hero .msg-body p:nth-child(2) {
     transition-delay: 0.94s;
   }
-  .js .appear--hero .msg-body p:nth-child(2) {
+  .js .appear--hero .msg-body p:nth-child(3) {
     transition-delay: 1.06s;
   }
-  .js .appear--hero .msg-body p:nth-child(3) {
+  .js .appear--hero .msg-body p:nth-child(4) {
     transition-delay: 1.18s;
   }
   .js .appear--hero.in .msg-photo,
@@ -920,130 +1126,132 @@ noren-cloth {
   }
 }
 
-/* ================= message 2 region (join + card + feature photo) =================
-   One green canvas-texture background covers the whole lower green region — behind
-   the join copy, the info card AND the character/photo section — so the green reads
-   as one continuous cloth (no seam between the card area and the photo area). */
-.message2 {
-  --green-rise-top: 0%;
-  position: relative;
-  isolation: isolate;
-  background-color: #ef4d8b;
-  background-image: var(--bg-pink);
-  background-position: center;
-  background-size: cover;
-}
-.js .message2 {
-  --green-rise-top: 100%;
-}
-.green-rise {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background: var(--bg-canvas) 50% 50% / cover no-repeat;
-  clip-path: inset(var(--green-rise-top) 0 0);
-  will-change: clip-path;
-}
-@media (max-width: 767px) {
-  .message2 {
-    background-color: var(--color-brand-green);
-    background-image: var(--bg-canvas-mobile);
-  }
-  .green-rise {
-    display: none;
-  }
-}
-.message2 > .access,
-.message2 > .photo {
-  position: relative;
-  z-index: 1;
-}
-
-/* ================= access (join copy + info card + carousel) ================= */
+/* ================= access — the white cushion (info card + carousel) =========
+   First of three stacked cushions in the lower page (white → lighter green →
+   textured green footer). The first two carry the ground colour of the block
+   ABOVE them, so their rounded top corners cut through to that colour rather
+   than to the fixed leaf pattern, and each overlaps the previous by 1px so no
+   hairline gap can open at the seam. (The footer instead meets the cushion above
+   it with a wave — see .footer.) Here the ground is the pink of .message — the pink hands
+   straight over to the white sheet, no wave and no spacer between them. */
 .access {
   position: relative;
+  z-index: 3;
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin-top: -1px;
+  background-color: #ef4d8b;
+  background-image: var(--bg-pink);
+  background-size: cover;
+  background-position: center;
 }
-/* White "cushion" card. A column: the info + carousel row on top, then the intro
-   copy (which used to sit above the card) as a full-width note at the bottom. */
+/* The sheet pins at the top and the member cushion rides up over it.
+   1024px and up only: below that the card switches to its stacked layout and
+   measures 1298–1429px — taller than any viewport — so pinning it would mean
+   never being able to show the whole card. */
+@media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
+  .access {
+    position: sticky;
+    /* 0 (pin the top) while the card fits the viewport. When it is taller this
+       goes negative, which pins the card's BOTTOM to the viewport bottom
+       instead, so the whole card stays readable. --access-h is published by
+       src/scripts/contact-pin.ts; unset, this collapses to a plain top: 0. */
+    top: min(0px, calc(100svh - var(--access-h, 100svh)));
+    z-index: 1; /* down from 3: .member-cushion (2) has to pass over it */
+  }
+}
+/* A broad white information sheet: a footer-like silhouette with a rounded top.
+   Padding is sized for the details + carousel alone — the guidance copy and the
+   character that used to fill a second row below them have moved out. */
 .card {
-  display: flex;
-  flex-direction: column;
-  gap: 36px;
-  width: 93.33%;
-  max-width: 1300px;
-  margin: 280px 0 64px;
-  padding: 68px 72px;
+  width: 100%;
+  margin: 0;
+  padding: calc(100 / 1440 * 100vw) 0 calc(88 / 1440 * 100vw);
   background: var(--color-surface);
-  border-radius: 50px;
+  border-radius: calc(100 / 1440 * 100vw) calc(100 / 1440 * 100vw) 0 0;
 }
 .card-main {
-  display: flex;
-  flex-direction: row;
+  display: grid;
+  grid-template-columns: 27.57% 63.57%;
   justify-content: space-between;
   align-items: stretch;
-  gap: 64px;
-  width: min(100%, 1156px);
+  width: 81.12%;
   margin-inline: auto;
 }
 .card-info {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  gap: 22px;
-  width: 420px;
+  width: 100%;
   color: var(--color-ink);
 }
-.c-logo {
-  display: block;
-  width: 210px;
-  height: auto;
-  margin-inline: auto;
-  margin-bottom: 24px;
+.card-heading {
+  padding-bottom: 34px;
+  border-bottom: 1px solid var(--color-hairline);
 }
-.card-info p {
-  font-size: 20px;
+.card-eyebrow,
+.carousel-heading {
+  color: var(--color-brand-green);
+  font-size: clamp(11px, 0.83vw, 18px);
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  line-height: 1;
+}
+.card-heading h2 {
+  margin-top: 14px;
+  font-size: clamp(30px, 2.8vw, 52px);
   font-weight: 600;
-  line-height: 1.75;
   letter-spacing: 0.12em;
+  line-height: 1.2;
 }
-/* icon + text rows; lines without an icon get a same-width spacer so all the
-   copy aligns under a single left edge. */
-.card-info .c-line {
+.card-details {
+  display: flex;
+  flex-direction: column;
+}
+.card-detail {
+  display: grid;
+  grid-template-columns: 98px minmax(0, 1fr);
+  gap: 18px;
+  padding: 22px 0;
+  border-bottom: 1px solid var(--color-hairline);
+}
+.card-detail dt {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
+  gap: 8px;
+  color: var(--color-brand-green);
+  font-size: clamp(10px, 0.76vw, 16px);
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  line-height: 1.75;
 }
-.card-info .c-icon {
-  flex: 0 0 22px;
-  width: 22px;
-  height: 22px;
+.card-detail dd {
+  font-size: clamp(15px, 1.11vw, 24px);
+  font-weight: 600;
+  line-height: 1.8;
+  letter-spacing: 0.12em;
+}
+.card-detail .c-icon {
+  flex: 0 0 16px;
+  width: 16px;
+  height: 16px;
   margin-top: 2px;
 }
 .card-info a {
   color: var(--color-ink);
-  text-decoration: underline;
-  text-underline-offset: 3px;
+  text-decoration: none;
+  border-bottom: 1px solid currentColor;
+  padding-bottom: 2px;
 }
-/* Intro copy, now inside the enlarged card, spanning full width at the bottom. */
-.card-note {
-  width: min(100%, 800px);
-  margin-inline: auto;
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
-  padding-top: 30px;
-  color: var(--color-ink);
-  font-size: 16px;
-  font-weight: 600;
-  line-height: 1.8;
-  text-align: center;
-}
-
 /* carousel */
 .card-carousel {
-  width: min(640px, 58%);
+  min-width: 0;
+  width: 100%;
+  max-width: none;
+}
+.carousel-heading {
+  margin-bottom: 18px;
 }
 .carousel {
   position: relative;
@@ -1070,7 +1278,7 @@ noren-cloth {
   display: block;
 }
 .carousel .cap {
-  font-size: 12px;
+  font-size: clamp(11px, 0.83vw, 18px);
   font-weight: 500;
   color: var(--color-brand-green);
 }
@@ -1109,10 +1317,348 @@ noren-cloth {
   outline-offset: 3px;
 }
 
-/* ================= feature photo (green section) =================
-   No own background: the green canvas texture comes from .message2::before (one
-   continuous cloth for the whole lower region). The white character (transparent
-   feature photo) and the speech bubble sit on top. */
+/* ================= member cushion (second of the three stacked cushions) =====
+   A lighter green than the footer's brand green, so the two greens read as two
+   cushions rather than one field. The wrapper carries the white of the card
+   above (the sheet's rounded top corners cut through to it) and pulls up 1px so
+   no hairline gap opens at the seam. */
+.member-cushion {
+  position: relative;
+  z-index: 2;
+  margin-top: -1px;
+  background: var(--color-surface);
+}
+.member-cushion__sheet {
+  /* This green is far lighter than the footer's, so the text is dark green ink
+     rather than the white used over the brand green (both inks clear 5:1). */
+  --member-ink: #2c5f10;
+  --member-ink-soft: #3d6d14;
+  --lead-size: clamp(15px, 1.11vw, 24px); /* = .card-detail dd */
+  /* Capped at 14px: the card stops growing at 1280px, so a bigger profile
+     would outgrow its own column on very wide screens. */
+  --bio-size: clamp(12px, 0.9vw, 14px); /* 13px @1440 */
+  /* Bottom pad = top pad + how far the footer's wave crest rises into this
+     cushion, so the card ends up the SAME distance from the cushion's top edge
+     as from the crest below it. */
+  --sheet-pad: clamp(72px, 8vw, 120px);
+  padding: var(--sheet-pad) 0 calc(var(--sheet-pad) + var(--wave-h) * var(--wave-crest));
+  background-color: #b8f06a;
+  background-image: var(--bg-canvas);
+  background-blend-mode: screen;
+  background-position: center;
+  background-size: cover;
+  border-radius: clamp(48px, 7vw, 108px) clamp(48px, 7vw, 108px) 0 0;
+}
+@media (max-width: 767px) {
+  .member-cushion__sheet {
+    background-image: var(--bg-canvas-mobile);
+  }
+}
+/* The guidance copy, centred on the bare sheet above the card. Same type as the
+   contact card's 「毎週木曜日12:00-13:00頃」 (.card-detail dd) apart from the
+   leading — the card's 1.8 suits wrapped values, but these are single lines. */
+.member-lead {
+  width: min(100% - 48px, 1240px);
+  margin: 0 auto clamp(48px, 6.1vw, 88px); /* 88px @1440 down to the card */
+  color: var(--member-ink);
+  font-size: var(--lead-size);
+  font-weight: 600;
+  line-height: 1.8;
+  letter-spacing: 0.12em;
+  text-align: center;
+}
+
+/* The member card — the inner cushion holding the portrait, titles and profile.
+   A flat, slightly lighter green than the textured sheet it sits on, so the two
+   read as a cushion on a cushion. Desktop: photo left (order 1), text right
+   (order 2); under 1024px it stacks photo → text.
+
+   Type scales on the SAME formula the contact card uses — clamp(floor,
+   <design px at 1440 ÷ 1440 × 100>vw, cap) — so both sections grow and shrink
+   together instead of stepping at breakpoints. Where a member element has an
+   exact counterpart in the card, it reuses that declaration verbatim:
+     FOOD CREATOR → .card-eyebrow / .carousel-heading
+     堀内 愛      → .card-heading h2 */
+.member-feature {
+  position: relative;
+  --member-dot-color: #b5df42;
+  --member-line-color: var(--member-ink-soft);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(24px, 4.5vw, 72px);
+  text-align: left;
+  /* A shade wider than .card-main's 81.12% above: the profile's longest line
+     wants ~52em, and this is what gives the text column that much at 1440. */
+  width: min(84%, 1280px);
+  min-height: 0;
+  margin: 0 auto;
+  padding: clamp(32px, 4.5vw, 72px);
+  box-sizing: border-box;
+  color: var(--member-ink);
+  /* Brighter than the sheet it sits on. The sheet's own #b8f06a lands at about
+     #e2fd93 once the canvas texture is screened over it, so the card needs to
+     clear THAT, not the declared value — at #e2ffa2 the two were 2% apart in
+     lightness and the card's edge was invisible. */
+  background: #f0ffc0;
+  border-radius: clamp(28px, 4.2vw, 60px);
+}
+.member-feature__info {
+  position: relative;
+  z-index: 3;
+  order: initial;
+  padding-top: 0;
+  text-align: left;
+}
+.member-feature__details {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex: 1 1 auto;
+  min-width: 0;
+  order: 2;
+}
+.member-feature__eyebrow {
+  display: block;
+  margin-bottom: clamp(7px, 0.7vw, 13px); /* 10px @1440 */
+  color: var(--member-ink-soft);
+  font-size: clamp(11px, 0.83vw, 18px); /* = .card-eyebrow */
+  font-weight: 700;
+  letter-spacing: 0.2em;
+}
+.member-feature__name {
+  margin: 0;
+  font-size: clamp(30px, 2.8vw, 52px); /* = .card-heading h2 */
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+.member-feature__role {
+  margin: clamp(6px, 0.56vw, 10px) 0 0; /* 8px @1440 */
+  color: #d7edbb;
+  font-size: clamp(11px, 1.04vw, 22px); /* 15px @1440 */
+  font-weight: 700;
+  letter-spacing: 0.13em;
+}
+.member-feature__subrole {
+  margin: clamp(6px, 0.56vw, 10px) 0 0; /* 8px @1440 */
+  /* No exact card counterpart (matching .card-detail dt would shrink it to
+     11px), so the current size is kept and expressed on the same formula. */
+  color: var(--member-ink-soft);
+  font-size: clamp(11px, 0.97vw, 21px); /* 14px @1440 */
+  font-weight: 600;
+  letter-spacing: 0.1em;
+}
+/* Sized to the portrait itself (a 3300×3300 square): the old 360px box reserved
+   room for the blob / ground-line decor this layout does not render, and that
+   dead width is what the copy needs to stay on one line at 1024px. */
+.member-feature__portrait-stage {
+  position: relative;
+  order: 1;
+  justify-self: center;
+  /* About 18% of the card, matching the reference layout, and sized so the
+     profile column keeps its ~52em. */
+  width: clamp(170px, 16vw, 230px);
+  height: clamp(170px, 16vw, 230px);
+  margin-top: 0;
+  isolation: isolate;
+}
+.member-decor {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+.member-decor__dots,
+.member-decor__line {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.member-decor__dots { z-index: 0; }
+.member-decor__line { z-index: 2; }
+.member-feature__blob {
+  position: absolute;
+  z-index: -1;
+  display: block;
+}
+.member-feature__blob--pink {
+  top: 48px;
+  right: 5px;
+  width: 280px;
+  height: 225px;
+  background: #ffa8c2;
+  border-radius: 54% 46% 61% 39% / 44% 58% 42% 56%;
+}
+.member-feature__blob--lime {
+  top: 148px;
+  left: 2px;
+  width: 235px;
+  height: 190px;
+  background: #b5df42;
+  border-radius: 39% 61% 43% 57% / 57% 38% 62% 43%;
+}
+.member-feature__portrait {
+  position: absolute;
+  z-index: 1;
+  bottom: 0;
+  left: 50%;
+  display: block;
+  width: 100%;
+  max-width: none;
+  height: auto;
+  transform: translateX(-50%);
+  filter: drop-shadow(0 9px 12px rgba(2, 47, 25, 0.22));
+}
+.member-feature__ground-line {
+  position: absolute;
+  z-index: 2;
+  right: 2%;
+  bottom: 16px;
+  left: 2%;
+  height: 17px;
+  border-top: 4px solid var(--color-on-brand);
+  border-radius: 54% 45% 48% 52%;
+  transform: rotate(-1deg);
+}
+.member-feature__ground-line::before,
+.member-feature__ground-line::after {
+  content: "";
+  position: absolute;
+  height: 2px;
+  background: var(--color-on-brand);
+  opacity: 0.9;
+}
+.member-feature__ground-line::before {
+  top: 5px;
+  left: 5%;
+  width: 47%;
+  transform: rotate(-0.8deg);
+}
+.member-feature__ground-line::after {
+  top: 8px;
+  right: 7%;
+  width: 29%;
+  transform: rotate(1.5deg);
+}
+.member-feature__name-block {
+  order: 2;
+  margin-top: clamp(12px, 1.25vw, 23px); /* 18px @1440 */
+  text-align: left;
+}
+/* The profile. Smaller than the lead above the card so the two blocks read as
+   headline copy and detail; one line per content.member.bio entry, wrapping on
+   its own when the column gets too narrow for a line. */
+.member-feature__bio {
+  position: relative;
+  z-index: 3;
+  order: 3;
+  margin: clamp(18px, 2vw, 36px) 0 0;
+  color: var(--member-ink);
+  padding-top: 0;
+  font-size: var(--bio-size);
+  font-weight: 600;
+  line-height: 1.9;
+  letter-spacing: 0.08em;
+  /* Below ~1200px the row cannot give a line its full ~52em; `pretty` keeps the
+     overflow from stranding a couple of characters on their own line. */
+  text-wrap: pretty;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .member-feature__blob--pink {
+    animation: member-blob-pink 8s ease-in-out infinite alternate;
+  }
+  .member-feature__blob--lime {
+    animation: member-blob-lime 6.5s ease-in-out infinite alternate;
+  }
+}
+@keyframes member-blob-pink {
+  from { transform: translate(-6px, 6px) rotate(-5deg) scale(0.96); border-radius: 54% 46% 61% 39% / 44% 58% 42% 56%; }
+  to { transform: translate(9px, -9px) rotate(7deg) scale(1.06); border-radius: 40% 60% 43% 57% / 59% 43% 57% 41%; }
+}
+@keyframes member-blob-lime {
+  from { transform: translate(7px, -5px) rotate(5deg) scale(1.04); }
+  to { transform: translate(-8px, 10px) rotate(-7deg) scale(0.94); border-radius: 58% 42% 62% 38% / 41% 61% 39% 59%; }
+}
+/* Stacked layout (photo → text). The breakpoint matches the white card's
+   (1023px): below it the row cannot give the copy the ~42em it needs for one
+   line, while stacked it gets the cushion's full width. Type is NOT overridden
+   here — the clamps above already cover every width; only layout is. */
+@media (max-width: 1023px) {
+  .member-feature {
+    display: flex;
+    flex-direction: column;
+    /* Wider than the desktop 81.12% so the stacked column keeps usable measure. */
+    width: calc(100% - 2 * clamp(16px, 4vw, 40px));
+    min-height: 0;
+    padding: clamp(28px, 5vw, 48px) clamp(20px, 4vw, 40px) clamp(32px, 5.5vw, 52px);
+    margin: 0 auto;
+    text-align: center;
+    gap: clamp(16px, 3vw, 28px);
+  }
+  .member-lead {
+    width: calc(100% - 2 * clamp(16px, 4vw, 40px));
+  }
+  .member-feature__info {
+    order: initial;
+    padding-top: 0;
+  }
+  .member-feature__portrait-stage {
+    order: 1;
+    width: min(215px, 62vw);
+    height: min(215px, 62vw);
+    margin-top: 0;
+  }
+  .member-feature__portrait {
+    bottom: 0;
+    width: 100%;
+  }
+  .member-decor {
+    inset: -4px -12px 0;
+    width: calc(100% + 24px);
+  }
+  .member-feature__blob--pink {
+    top: 38px;
+    right: 9px;
+    width: 218px;
+    height: 175px;
+  }
+  .member-feature__blob--lime {
+    top: 118px;
+    left: 12px;
+    width: 182px;
+    height: 147px;
+  }
+  .member-feature__ground-line {
+    right: 4%;
+    bottom: 9px;
+    left: 4%;
+  }
+  .member-feature__details {
+    order: 2;
+    align-items: center;
+    text-align: center;
+  }
+  .member-feature__name-block,
+  .member-feature__info {
+    text-align: center;
+  }
+  .member-feature__bio {
+    order: 3;
+    margin: clamp(10px, 1.4vw, 22px) auto 0;
+    padding-top: 0;
+    text-align: center;
+  }
+}
+
+/* ================= feature photo (inside the green footer) =================
+   No own background: the green canvas texture comes from .footer. The white
+   character (transparent feature photo) and the speech bubble sit on top. */
 .photo {
   position: relative;
   height: 780px;
@@ -1120,11 +1666,17 @@ noren-cloth {
   align-items: center;
   justify-content: center;
 }
+/* Sized by WIDTH so the box always keeps the artwork's ratio: the fork, spoon
+   and mouth are positioned in % of this box, so a letterboxed box (a fixed
+   height the width cannot honour) would slide them off the character. 921px is
+   605px at this ratio, i.e. the desktop size. */
 .photo-art {
   position: relative;
-  height: 605px;
+  width: min(100%, 921px);
   aspect-ratio: 5496 / 3612;
-  max-width: 100%;
+  /* Reference for the speech bubble inside it: the bubble's type — and so its
+     width — tracks the character instead of staying a fixed 14px. */
+  container-type: inline-size;
 }
 .photo-base {
   position: absolute;
@@ -1229,15 +1781,24 @@ noren-cloth {
   }
 }
 /* Speech bubble the character "says" — white rounded pill with a small nub. */
+/* Anchored inside .photo-art, so the bubble keeps the same position relative to
+   the character rather than jumping at each breakpoint. Right-anchored (rather
+   than the old left: 78%, which pushed it past the box) with the type scaling to
+   the box, so it lands in the clear zone beside the hat: the character reaches
+   66% of the box width down to a fifth of its height, and 1% of clearance on the
+   right puts the bubble's left edge at 68%.
+   The bubble cannot shrink below ~205px and stay legible, so under 1024px — where
+   that clear zone is narrower than the bubble — it moves above the character
+   instead (see the max-width: 1023px rule below). */
 .speech {
   --speech-x: 0%;
   position: absolute;
-  top: 16%;
-  left: 60%;
-  z-index: 2;
-  padding: 10px 18px;
+  top: 6%;
+  right: calc(1% - 5px);
+  z-index: 4; /* above .photo-mouth (3) */
+  padding: 0.7em 1.3em;
   color: var(--color-brand-green);
-  font-size: 14px;
+  font-size: clamp(10px, 1.55cqi, 14px);
   font-weight: 700;
   letter-spacing: 0.06em;
   line-height: 1.4;
@@ -1277,7 +1838,7 @@ noren-cloth {
 .speech::after {
   content: "";
   position: absolute;
-  left: 28px;
+  left: 2em;
   bottom: -5px;
   width: 14px;
   height: 14px;
@@ -1285,36 +1846,91 @@ noren-cloth {
   border-radius: 3px;
   transform: rotate(45deg);
 }
+/* Under 1024px the space beside the hat is narrower than the bubble, so it sits
+   directly above the character — still a fixed offset from .photo-art, so it
+   never drifts within this range. */
+@media (max-width: 1023px) {
+  .speech {
+    top: auto;
+    bottom: 100%;
+    right: calc(6% - 5px);
+    margin-bottom: 2%;
+  }
+}
 
-/* ================= footer (square gray band, extending below the photo) ================= */
+/* ================= footer — the textured green cushion =======================
+   Last of the three stacked cushions and the character's home: the same green
+   canvas the member section is built from (brand green + --bg-canvas, soft-light).
+   Its top edge is a wave: the element is pulled up by --wave-h so it rises into
+   the member cushion, and masked so that band reads as a crest-and-trough edge
+   with the lighter green showing through the troughs. The mask is TWO layers on
+   the footer itself — the wave across the top band, a solid fill for everything
+   below (1px of overlap so no hairline can open between them) — rather than a
+   separate strip, so the canvas texture stays one continuous cloth across the
+   edge instead of seaming where two boxes meet.
+   It sits above .member-cushion (z-index 2, later in the DOM) because the wave
+   has to paint over the cushion it rises into. */
 .footer {
   position: relative;
   width: 100%;
-  z-index: 1;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* Preserve roughly the old overlapping top edge, then add height below it. */
-  margin-top: -100px;
-  padding: clamp(30px, 4.5vh, 52px) 40px 140px;
-  background: #75d71c;
+  --wave-clear: calc(var(--wave-h) * var(--wave-crest) + 40px);
+  margin-top: calc(-1 * var(--wave-h));
+  padding: var(--wave-clear) 40px clamp(48px, 6vw, 96px);
+  background-color: var(--color-brand-green);
+  background-image: var(--bg-canvas);
+  background-blend-mode: soft-light;
+  background-position: center;
+  background-size: cover;
   border-radius: 0;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 12' preserveAspectRatio='none'%3E%3Cpath fill='white' d='M0 6 Q5 -4 10 6 T20 6 T30 6 T40 6 T50 6 T60 6 T70 6 T80 6 T90 6 T100 6 T110 6 T120 6 V12 H0 Z'/%3E%3C/svg%3E"), linear-gradient(#fff, #fff);
+  -webkit-mask-size: 100% var(--wave-h), 100% calc(100% - var(--wave-h) + 1px);
+  -webkit-mask-position:
+    top,
+    bottom;
+  -webkit-mask-repeat: no-repeat, no-repeat;
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 12' preserveAspectRatio='none'%3E%3Cpath fill='white' d='M0 6 Q5 -4 10 6 T20 6 T30 6 T40 6 T50 6 T60 6 T70 6 T80 6 T90 6 T100 6 T110 6 T120 6 V12 H0 Z'/%3E%3C/svg%3E"), linear-gradient(#fff, #fff);
+  mask-size: 100% var(--wave-h), 100% calc(100% - var(--wave-h) + 1px);
+  mask-position:
+    top,
+    bottom;
+  mask-repeat: no-repeat, no-repeat;
 }
-/* STUDIO HOLIDAY logo + "/ K,D,C,,," credit, centered on one row. */
+@media (max-width: 767px) {
+  .footer {
+    background-image: var(--bg-canvas-mobile);
+  }
+}
+/* The character sits in a full-width band above the credit (the footer is a
+   centered column, so the section needs the width spelled out). */
+.footer > .photo {
+  width: 100%;
+}
+/* STUDIO HOLIDAY logo + "/ K,D,C,,," credit, centered on one row. The row is a
+   container so the logo and the credit scale as one unit and the row can never
+   outgrow its own width: the credit measures 5.03em (measured, including the "/"
+   and its margin), so 60cqi (logo) + 5.03 × 4.5cqi (credit) ≈ 83cqi leaves room
+   at every size. Both settle on their px caps at about 810px wide and hold.
+   NOTE: cqi is only usable on the CHILDREN — an element cannot query itself, so
+   a cqi gap here would resolve against the viewport instead. */
 .footer-inner {
+  container-type: inline-size;
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  gap: 16px;
-  width: 1280px;
-  max-width: 100%;
-  transform: translateY(32px);
+  gap: clamp(4px, 0.7vw, 10px);
+  width: 100%;
+  max-width: 1300px;
 }
-/* Inline SVG logo (recolorable via `color`; defaults to its own gray). */
+/* Inline SVG logo (recolorable via `color`; defaults to its own gray).
+   440px at 1440 — about the span of the character's two hands above it. */
 .sh-logo {
   display: block;
-  width: 240px;
+  width: min(440px, 60cqi);
   flex: 0 0 auto;
 }
 .sh-logo svg {
@@ -1325,7 +1941,7 @@ noren-cloth {
 }
 .sh-kdc {
   color: var(--color-on-brand);
-  font-size: 18px;
+  font-size: min(33px, 4.5cqi); /* tracks the logo (18px at the old 240px) */
   font-weight: 700;
   letter-spacing: 0.06em;
   white-space: nowrap;
@@ -1350,6 +1966,26 @@ noren-cloth {
   opacity: 1;
   transform: translateY(0);
 }
+/* Member profile rises gently from below when it enters the viewport. */
+.js .member-feature {
+  opacity: 0;
+  transform: translateY(48px);
+  transition:
+    opacity 900ms ease-out,
+    transform 900ms cubic-bezier(0.22, 0.72, 0.24, 1);
+}
+.js .member-feature.in {
+  opacity: 1;
+  transform: translateY(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .js .member-feature,
+  .js .member-feature.in {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
 /* video variant: slow blur -> focus (STUDIO 2000ms). Overrides the generic
    translateY so the video does not inherit it. */
 .js .appear--video {
@@ -1366,23 +2002,29 @@ noren-cloth {
   transform: none;
 }
 
-/* ================= responsive: tablet (<=1120) ================= */
-@media (max-width: 1120px) {
+/* ================= responsive: tablet (<=1023) ================= */
+@media (max-width: 1023px) {
   .card {
-    padding: 56px;
+    padding: calc(90 / 390 * 100vw) 0 calc(80 / 390 * 100vw);
+    border-radius: calc(72 / 390 * 100vw) calc(72 / 390 * 100vw) 0 0;
   }
   .card-main {
+    display: flex;
     flex-direction: column;
     align-items: stretch;
-    gap: 48px;
-    width: min(100%, 600px);
+    gap: calc(48 / 390 * 100vw);
+    width: 79.48%;
   }
   .card-info,
   .card-carousel {
     width: 100%;
+    max-width: none;
   }
   .carousel {
     padding-bottom: 40px;
+  }
+  .member-cushion__sheet {
+    --sheet-pad: 92px;
   }
 }
 
@@ -1392,39 +2034,58 @@ noren-cloth {
     padding-top: 112px;
     padding-bottom: 170px;
   }
+  /* Mirror the card's own mobile step (.card-detail dd → 14px). The poster panel
+     is portrait here (aspect-ratio 1/1.3) and the copy runs to ten lines once the
+     "|" breaks activate, so the extra size is paid for by opening the body box
+     into the panel's margins and tightening the paragraph gaps — not by shrinking
+     the type back down. */
+  .msg-body {
+    top: 13%;
+    bottom: 7%;
+    font-size: 14px;
+  }
+  .msg-body p + p {
+    margin-top: 1.25em;
+  }
+  .msg-body .msg-about {
+    margin-bottom: 1.15em;
+  }
   .card {
-    gap: 30px;
-    width: 93.33%;
-    margin: 180px 0 200px;
-    padding: 30px 6.665vw 40px;
-    border-radius: 25px;
+    width: 100%;
+    margin: 0;
+    padding: calc(90 / 390 * 100vw) 0 calc(52 / 390 * 100vw);
+    border-radius: calc(72 / 390 * 100vw) calc(72 / 390 * 100vw) 0 0;
   }
   .card-main {
     gap: 30px;
   }
-  .card-note {
-    padding-top: 24px;
-    font-size: 12px;
-    line-height: 1.67;
+  .card-heading {
+    padding-bottom: 26px;
+  }
+  .card-heading h2 {
+    margin-top: 12px;
+    font-size: 28px;
+  }
+  .card-detail {
+    grid-template-columns: 76px minmax(0, 1fr);
+    gap: 12px;
+    padding: 17px 0;
   }
   .card-info {
     justify-content: flex-start;
-    gap: 16px;
     width: 100%;
   }
-  .card-info p {
+  .card-detail dd {
     font-size: 14px;
     line-height: 1.64;
   }
-  .card-info .c-icon {
-    flex-basis: 20px;
-    width: 20px;
-    height: 20px;
+  .card-detail dt {
+    font-size: 10px;
   }
-  .c-logo {
-    width: 148px;
-    margin-top: 20px;
-    margin-bottom: 0;
+  .card-detail .c-icon {
+    flex-basis: 14px;
+    width: 14px;
+    height: 14px;
   }
   .card-carousel {
     width: 100%;
@@ -1439,41 +2100,34 @@ noren-cloth {
   .carousel .nav {
     gap: 12px;
   }
+  /* --lead-size mirrors the card's own mobile step (.card-detail dd → 14px),
+     as .card-heading h2 → 28px does for the name below. */
+  .member-cushion__sheet {
+    --sheet-pad: 68px;
+    --lead-size: 14px;
+  }
+  .member-feature__name {
+    font-size: 28px;
+  }
   .photo {
     height: auto;
-    /* Bottom space so the absolute footer (bottom:0) overlaps empty green rather
-       than the character — mobile has no centering slack like the tall desktop
-       section, so without this the footer swallows the character's lower half.
-       Raising it clear of the footer is what reads as the image moving "up". */
-    padding-bottom: 64px;
-  }
-  /* Fit by width with proportional height so the character keeps its aspect
-     ratio (height:100% + max-width clamped the width and squashed it). */
-  .photo-art {
-    width: 100%;
-    height: auto;
-  }
-  /* one line, centered horizontally */
-  .speech {
-    --speech-x: -50%;
-    top: -24%; /* nudged up */
-    left: 50%;
-    max-width: calc(100% - 32px);
-    padding: 8px 14px;
-    font-size: 12px;
-    white-space: nowrap;
-    text-align: center;
-  }
-  .speech::after {
-    left: 50%;
-    margin-left: -7px;
+    /* No centering slack at this size, so the band the bubble sits in (above
+       .photo-art) and the clearance from the credit row are both padding. */
+    padding: 13% 0 32px;
   }
   .footer {
-    margin-top: -80px;
-    padding: 26px 16px 110px;
+    padding: var(--wave-clear) 16px 56px;
   }
-  .sh-logo {
-    width: 200px;
+}
+
+/* ================= responsive: very narrow (<=359) =================
+   Below ~360px a couple of body lines wrap again and the portrait panel's 1/1.3
+   box can no longer hold the copy — it overflowed the white field even at the
+   old smaller type. Let the panel grow taller instead of pushing text over the
+   cloud edges. */
+@media (max-width: 359px) {
+  .msg-panel {
+    aspect-ratio: 1 / 1.7;
   }
 }
 

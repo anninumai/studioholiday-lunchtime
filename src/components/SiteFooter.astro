@@ -1,4 +1,5 @@
 ---
+import PhotoSection from "./PhotoSection.astro";
 import { content } from "../data/content";
 // The footer is the STUDIO HOLIDAY logo followed by the "/ K,D,C,,," credit.
 // The logo is inlined as raw SVG so it can be recolored via CSS `color` (it
@@ -6,9 +7,13 @@ import { content } from "../data/content";
 // "by HOLIDAY KITCHEN / K,D,C,,," wordmark image (KDC is now the credit text).
 import logoSvg from "../assets/studio-holiday-logo.svg?raw";
 const { credit } = content.footer;
+// It is also the last cushion of the lower page: the same textured green the
+// member section is built from, carrying the character + speech bubble (moved
+// out of the white card) above the credit.
 ---
 
 <footer class="footer">
+  <PhotoSection />
   <div class="footer-inner">
     <span class="sh-logo" set:html={logoSvg}></span>
     <span class="sh-kdc">{credit}</span>

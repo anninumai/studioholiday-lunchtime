@@ -1,3 +1,4 @@
+import memberPortrait from "../assets/site/member/ai-horiuchi.png";
 import sideLeft from "../assets/site/msg/side-left-v3.webp";
 import sideRight from "../assets/site/msg/side-right-v3.webp";
 import norenLogo from "../assets/site/noren-logo.webp";
@@ -82,6 +83,25 @@ export const content = {
     access: "JR新大久保駅直結",
     mapLabel: "Google maps ",
     mapUrl: "https://maps.app.goo.gl/DJeuMw5D5rwiaYx99",
+  },
+  // The member portrait is a project-local PNG imported here (not a public/ path)
+  // so astro:assets resizes it — the source is 3300×3300 and it renders at most
+  // 340px. Replace only this object when the name, role, copy, or photograph
+  // changes.
+  member: {
+    name: "堀内 愛",
+    role: "フードクリエイター",
+    subrole: "みんなでごはん会 進行役",
+    imageSrc: memberPortrait,
+    imageAlt: "キッチンに立つ堀内愛さん",
+    copy: ["毎週木曜のごはんを、", "みんなでおいしく", "食べられるようにつくっています。"],
+    // Profile shown inside the member card. One entry per line (joined by <br>);
+    // long lines still wrap on their own when the column is too narrow.
+    bio: [
+      "料理人歴20年。イタリアン、フレンチ、カレー、居酒屋など多ジャンルを経験。",
+      "これまで培った幅広い経験を活かし、レシピ開発からケータリング、食品の商品開発まで幅広く手がける。",
+      "ターゲットやシーンに合わせた最適な食のデザインを提案。",
+    ],
   },
   // 3-step access guide from the station to the 4F (all real photos). Captions are
   // numbered ①②③ so the order reads clearly. Add/remove entries freely.

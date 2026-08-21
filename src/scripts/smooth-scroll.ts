@@ -5,11 +5,16 @@
  *  Disabled under reduced-motion (native scroll then). Runs for the page lifetime. */
 import Lenis from "lenis";
 
-if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-  const lenis = new Lenis({ lerp: 0.09, smoothWheel: true });
+/** Shared instance for modules that need programmatic scrolling
+ *  (noren-auto-reveal). Stays null under reduced-motion (native scroll). */
+export let lenis: Lenis | null = null;
 
+if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  lenis = new Lenis({ lerp: 0.09, smoothWheel: true });
+
+  const instance = lenis;
   const raf = (time: number): void => {
-    lenis.raf(time);
+    instance.raf(time);
     requestAnimationFrame(raf);
   };
   requestAnimationFrame(raf);

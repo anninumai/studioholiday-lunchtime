@@ -5,6 +5,8 @@ import mouth from "../assets/site/photo/holiday-mouth.png";
 import spoon from "../assets/site/photo/holiday-spoon.png";
 import { content } from "../data/content";
 const { photo } = content;
+// The speech bubble lives INSIDE .photo-art so its offsets are relative to the
+// character itself — one .speech rule then holds at every viewport width.
 ---
 
 <section class="photo">
@@ -56,6 +58,6 @@ const { photo } = content;
       loading="lazy"
       decoding="async"
     />
+    <p class="speech">{photo.speech}</p>
   </div>
-  <p class="speech">{photo.speech}</p>
 </section>

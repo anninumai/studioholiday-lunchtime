@@ -8,23 +8,27 @@ import NorenHero from "../components/NorenHero.astro";
 // import VideoStage from "../components/VideoStage.astro";
 import MessageLead from "../components/MessageLead.astro";
 import InfoCard from "../components/InfoCard.astro";
-import PhotoSection from "../components/PhotoSection.astro";
+import MemberIntro from "../components/MemberIntro.astro";
+import SiteHeader from "../components/SiteHeader.astro";
 import SiteFooter from "../components/SiteFooter.astro";
+// The lower page is three stacked cushions, each overlapping the one above by
+// 1px (see .access / .member-cushion / .footer in global.css): the white contact
+// sheet, the lighter-green member sheet, then the textured-green footer that
+// carries the character. Pink hands straight over to the white cushion — the old
+// .message2 green wrapper and its wave are gone.
 ---
 
 <BaseLayout>
   <div class="bg-fixed"></div>
+  <SiteHeader />
 
-  <div class="page">
+  <div class="page" id="top">
     <NorenHero />
     {/* <HeroZoom /> — parked; superseded by <NorenHero /> */}
     {/* <VideoStage /> — moved into <NorenHero /> as the revealed background */}
     <MessageLead />
-    <section class="message2">
-      <div class="green-rise" aria-hidden="true"></div>
-      <InfoCard />
-      <PhotoSection />
-    </section>
+    <InfoCard />
+    <MemberIntro />
     <SiteFooter />
   </div>
 

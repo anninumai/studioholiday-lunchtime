@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>みんなでごはん会｜運営メンバー紹介案</title>
+    <link rel="stylesheet" href="/fonts/zen-local.css" />
+    <style>
+      :root { --green:#12663d; --deep-green:#0c4c31; --pink:#ffa8c2; --lime:#b5df42; --paper:#fffefa; }
+      * { box-sizing:border-box; }
+      body { margin:0; background:#eff3e9; color:#31583f; font-family:"Zen Maru Gothic", sans-serif; letter-spacing:.08em; }
+      .intro { width:min(1020px, calc(100% - 40px)); margin:48px auto 32px; }
+      h1 { margin:0 0 10px; color:var(--green); font-size:clamp(23px,4vw,33px); letter-spacing:.13em; }
+      .intro p { margin:0; font-size:13px; line-height:1.9; }
+      .mock { overflow:hidden; position:relative; min-height:790px; padding:78px 0 0; background-color:var(--green); background-image:url('/assets/textures/green-canvas-bg-v2.webp'); background-position:center; background-size:cover; }
+      /* The current contact panel is represented only to show the exact insertion point. */
+      .contact { width:min(88%, 880px); margin:auto; padding:38px 48px 32px; background:var(--paper); border-radius:34px; box-shadow:0 15px 35px #002b1630; }
+      .contact-logo { display:block; width:147px; margin:0 auto 24px; }
+      .contact-grid { display:grid; grid-template-columns:1fr .9fr; gap:38px; align-items:center; }
+      .contact-copy { font-size:13px; line-height:1.9; }
+      .contact-copy p { margin:0 0 7px; }
+      .route { height:112px; border-radius:10px; background:url('/assets/studio/access-building.webp') center/cover; }
+      /* Member feature */
+      .member { position:relative; z-index:1; display:grid; grid-template-columns:1fr 330px 1fr; align-items:center; width:min(88%, 1000px); min-height:385px; margin:25px auto 0; color:white; }
+      .member-info { align-self:center; padding:35px 0 0; }
+      .eyebrow { display:block; margin-bottom:9px; font-size:10px; font-weight:700; letter-spacing:.19em; opacity:.77; }
+      .name { margin:0; font-size:clamp(24px,3vw,34px); font-weight:700; letter-spacing:.14em; }
+      .role { margin:8px 0 0; color:#d9edbd; font-size:13px; font-weight:700; letter-spacing:.12em; }
+      .line { width:35px; height:2px; margin:20px 0; background:#d9edbd; transform:rotate(-2deg); }
+      .member-copy { align-self:center; max-width:235px; margin-left:auto; padding:35px 0 0; font-size:14px; font-weight:700; line-height:2; }
+      .member-copy p { margin:0; }
+      .portrait-stage { position:relative; align-self:end; height:351px; }
+      .blob { position:absolute; z-index:-1; display:block; filter:blur(.1px); }
+      .blob--pink { top:52px; right:11px; width:238px; height:190px; background:var(--pink); border-radius:54% 46% 61% 39% / 44% 58% 42% 56%; animation:float-pink 8s ease-in-out infinite alternate; }
+      .blob--lime { top:138px; left:4px; width:205px; height:170px; background:var(--lime); border-radius:39% 61% 43% 57% / 57% 38% 62% 43%; animation:float-lime 6.5s ease-in-out infinite alternate; }
+      .portrait { position:absolute; z-index:1; bottom:14px; left:50%; width:295px; max-width:none; height:auto; transform:translateX(-50%); filter:drop-shadow(0 8px 10px #06351d35); }
+      /* The line covers the lower crop so the body seems to grow from it. */
+      .hand-line { position:absolute; z-index:2; right:5%; bottom:16px; left:5%; height:16px; border-top:4px solid var(--paper); border-radius:54% 45% 48% 52%; transform:rotate(-1deg); }
+      .hand-line::before, .hand-line::after { content:""; position:absolute; height:2px; background:var(--paper); opacity:.9; }
+      .hand-line::before { top:5px; left:5%; width:47%; transform:rotate(-.8deg); }
+      .hand-line::after { top:8px; right:7%; width:29%; transform:rotate(1.5deg); }
+      .bubble { position:absolute; z-index:3; top:51px; right:-6px; padding:10px 13px; color:var(--deep-green); background:var(--paper); border-radius:18px 18px 18px 3px; box-shadow:0 4px 14px #00301724; font-size:12px; font-weight:700; line-height:1.45; white-space:nowrap; animation:bob 3.2s ease-in-out infinite; }
+      .bubble::after { content:""; position:absolute; bottom:-6px; left:10px; width:12px; height:12px; background:var(--paper); transform:rotate(45deg); }
+      .next { position:absolute; right:0; bottom:0; left:0; height:104px; background:#75d71c; }
+      .next::before { content:""; position:absolute; top:-44px; left:50%; width:min(60%, 540px); height:100px; background:url('/assets/photo/holiday-base.png') center 43% / cover; border-radius:100% 100% 0 0; transform:translateX(-50%); }
+      @keyframes float-pink { from { transform:translate(-6px, 6px) rotate(-5deg) scale(.96); border-radius:54% 46% 61% 39% / 44% 58% 42% 56%; } to { transform:translate(9px, -9px) rotate(7deg) scale(1.06); border-radius:40% 60% 43% 57% / 59% 43% 57% 41%; } }
+      @keyframes float-lime { from { transform:translate(7px, -5px) rotate(5deg) scale(1.04); } to { transform:translate(-8px, 10px) rotate(-7deg) scale(.94); border-radius:58% 42% 62% 38% / 41% 61% 39% 59%; } }
+      @keyframes bob { 0%,100% { transform:translateY(0) rotate(1deg); } 50% { transform:translateY(-7px) rotate(-1deg); } }
+      @media (prefers-reduced-motion:reduce) { .blob, .bubble { animation:none; } }
+      @media (max-width:680px) {
+        .intro { width:calc(100% - 32px); margin-top:30px; }
+        .mock { min-height:940px; padding-top:48px; }
+        .contact { width:90%; padding:29px 24px; border-radius:25px; }
+        .contact-grid { grid-template-columns:1fr; gap:10px; }
+        .route { height:75px; }
+        .member { display:flex; flex-direction:column; width:90%; min-height:525px; margin-top:0; text-align:center; }
+        .member-info { order:1; padding-top:30px; }
+        .member-copy { order:3; max-width:270px; margin:13px auto 0; padding:0; font-size:12px; }
+        .line { margin:13px auto 0; }
+        .portrait-stage { order:2; width:300px; height:300px; margin-top:4px; }
+        .portrait { width:265px; bottom:8px; }
+        .blob--pink { top:44px; right:12px; width:210px; height:167px; }
+        .blob--lime { top:124px; left:14px; width:175px; height:143px; }
+        .hand-line { right:4%; bottom:9px; left:4%; }
+        .bubble { top:42px; right:-7px; font-size:11px; }
+        .next { height:82px; }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="intro">
+      <h1>運営メンバー紹介 — 切り抜き案</h1>
+      <p>コンタクトの白いカード直下に置く、中央の切り抜きポートレートを主役にした比較用モックです。名前と役職、説明文は仮置きです。</p>
+    </header>
+    <main class="mock">
+      <section class="contact" aria-label="開催情報（現在のコンタクトカードの簡易再現）">
+        <img class="contact-logo" src="/assets/studio/footer_logo.webp" alt="みんなでごはん会" />
+        <div class="contact-grid"><div class="contact-copy"><p>🕘 毎週木曜日 12:00–13:00頃</p><p>📍 JR新大久保駅直結</p><p>STUDIO HOLIDAYメンバーに<br />お声がけください。</p></div><div class="route"></div></div>
+      </section>
+      <section class="member" aria-label="運営メンバー紹介">
+        <div class="member-info"><span class="eyebrow">FOOD CREATOR</span><h2 class="name">山田 はな</h2><p class="role">フードクリエイター</p><div class="line"></div></div>
+        <div class="portrait-stage"><i class="blob blob--pink"></i><i class="blob blob--lime"></i><img class="portrait" src="/assets/member/food-creator-cutout.png" alt="笑顔のフードクリエイター" /><span class="hand-line" aria-hidden="true"></span><span class="bubble">おいしいよ！</span></div>
+        <div class="member-copy"><p>毎週木曜のごはんを、</p><p>みんなでおいしく</p><p>食べられるようにつくっています。</p></div>
+      </section>
+      <div class="next" aria-hidden="true"></div>
+    </main>
+  </body>
+</html>

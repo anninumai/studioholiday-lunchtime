@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>みんなでごはん会｜運営メンバー紹介の提案</title>
+    <link rel="stylesheet" href="/fonts/zen-local.css" />
+    <style>
+      :root { --green:#28663d; --pink:#ffd9e3; --ink:#31513c; --paper:#fffdf7; --line:#d8e1d2; }
+      * { box-sizing:border-box; }
+      body { margin:0; color:var(--ink); background:#f2f5ec; font-family:"Zen Maru Gothic", sans-serif; letter-spacing:.07em; }
+      .page { width:min(100%, 820px); margin:auto; padding:50px 24px 88px; }
+      header { margin:0 0 42px; }
+      h1 { margin:0 0 10px; color:var(--green); font-size:clamp(23px,5vw,34px); letter-spacing:.14em; }
+      header p { margin:0; font-size:13px; line-height:1.9; }
+      .reference { margin:0 0 40px; padding:15px 18px; border-left:3px solid var(--green); background:#e5eddc; font-size:12px; line-height:1.85; }
+      .reference a { color:inherit; text-underline-offset:3px; }
+      .option { margin:0 0 34px; padding:26px; background:var(--paper); border-radius:22px; box-shadow:0 8px 24px #40604012; }
+      .option > h2 { margin:0 0 3px; font-size:20px; letter-spacing:.12em; }
+      .option > p { margin:0 0 22px; font-size:12px; line-height:1.75; color:#557361; }
+      .contact { padding:22px 20px; border-radius:16px; background:var(--green); color:white; }
+      .contact small { display:block; margin-bottom:6px; font-size:10px; opacity:.72; }
+      .contact strong { font-size:17px; }
+      .contact span { display:block; margin-top:6px; font-size:12px; }
+      .kicker { display:block; margin:24px 0 9px; font-size:10px; font-weight:700; letter-spacing:.18em; color:#729576; }
+      .member-name { margin:0; font-size:16px; letter-spacing:.12em; }
+      .role { margin:3px 0 0; font-size:11px; color:#729576; }
+      .portrait { background-image:url('/assets/studio/gathering-v2.webp'); background-size:cover; background-position:78% 37%; border:4px solid var(--paper); box-shadow:0 2px 10px #31513c24; }
+      .bubble { position:relative; display:inline-block; background:white; color:var(--green); font-weight:700; font-size:13px; line-height:1.45; box-shadow:0 2px 10px #31513c1a; }
+      .bubble:after { content:""; position:absolute; width:11px; height:11px; background:white; transform:rotate(45deg); }
+      /* A: The quietest option. One compact row after the contact panel. */
+      .option-a .member { display:grid; grid-template-columns:60px 1fr auto; align-items:center; gap:12px; padding:14px 2px 0; }
+      .option-a .portrait { width:58px; height:58px; border-radius:50%; }
+      .option-a .bubble { padding:8px 11px; border-radius:12px; white-space:nowrap; }
+      .option-a .bubble:after { left:-4px; top:50%; margin-top:-5px; }
+      /* B: A small stamped badge, useful when the page has a playful handmade feel. */
+      .option-b .member { position:relative; min-height:157px; padding:27px 0 0 157px; }
+      .option-b .portrait { position:absolute; left:0; top:0; width:136px; height:136px; border-radius:47% 53% 49% 51% / 55% 45% 55% 45%; transform:rotate(-4deg); }
+      .option-b .member:before { content:""; position:absolute; left:7px; top:5px; width:130px; height:130px; border:1px dashed #e99bb3; border-radius:50%; transform:rotate(13deg); }
+      .option-b .bubble { margin-top:12px; padding:10px 14px; border:1px solid #f3c3d1; border-radius:18px; }
+      .option-b .bubble:after { left:19px; top:-6px; border-left:1px solid #f3c3d1; border-top:1px solid #f3c3d1; }
+      /* C: A little note attached to the contact section; least like a formal profile. */
+      .option-c .contact-wrap { position:relative; padding-bottom:55px; }
+      .option-c .member { position:absolute; z-index:2; right:14px; bottom:0; display:flex; align-items:end; gap:8px; }
+      .option-c .portrait { width:75px; height:75px; border-radius:50% 50% 46% 46%; }
+      .option-c .bubble { max-width:126px; margin-bottom:29px; padding:9px 11px; border-radius:15px 15px 3px 15px; font-size:12px; }
+      .option-c .bubble:after { right:10px; bottom:-5px; }
+      .option-c .member-meta { position:absolute; right:5px; bottom:-37px; width:176px; text-align:right; }
+      .option-c .kicker { margin:0 0 3px; font-size:9px; }
+      .option-c .member-name { font-size:13px; }
+      .option-c .role { font-size:9px; }
+      .note { margin:18px 0 0; padding-top:13px; border-top:1px solid var(--line); font-size:11px; line-height:1.8; color:#617866; }
+      @media (max-width:520px) { .page { padding:32px 17px 64px; } .option { padding:20px; } .option-a .member { grid-template-columns:54px 1fr; } .option-a .portrait { width:52px; height:52px; } .option-a .bubble { grid-column:2; justify-self:start; margin-top:-5px; } .option-b .member { min-height:172px; padding:105px 0 0; } .option-b .portrait { width:100px; height:100px; } .option-b .member:before { width:96px; height:96px; } }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <header>
+        <h1>運営メンバーを、そっと。</h1>
+        <p>コンタクトのすぐ下に添える、一人だけの小さな紹介。顔・役割・ひとことが一目で伝わる3案です。</p>
+      </header>
+
+      <aside class="reference">
+        参考にした方向性：<a href="https://monopo.co.jp/work/soda-communications-inc-corporate-website/" target="_blank" rel="noreferrer">Soda! Communications / monopo</a> の「人物を世界観の一部として扱う」考え方、<a href="https://ple-cre.jp/blog/staffpage/" target="_blank" rel="noreferrer">スタッフ紹介デザインの事例</a> の「丸い写真・短い役割で親しみをつくる」構成。今回はプロフィールページにはせず、イベントの温度を保つ小さな案内役にしています。
+      </aside>
+
+      <section class="option option-a">
+        <h2>A. さりげない横並び <small>おすすめ</small></h2>
+        <p>情報量が最少で、コンタクトの流れを壊しません。実装後もいちばん静かな存在感です。</p>
+        <div class="contact"><small>CONTACT</small><strong>ご参加・ご相談はお気軽に</strong><span>STUDIO HOLIDAYメンバーにお声がけください。</span></div>
+        <span class="kicker">THIS EVENT IS MADE BY</span>
+        <div class="member">
+          <div class="portrait" role="img" aria-label="運営メンバーの顔写真（仮）"></div>
+          <div><p class="member-name">山田 はな</p><p class="role">フードクリエイター</p></div>
+          <span class="bubble">おいしいよ！</span>
+        </div>
+        <p class="note">名前・役職・写真はダミーです。実際の写真は、顔が見えて明るい一枚に差し替えます。</p>
+      </section>
+
+      <section class="option option-b">
+        <h2>B. ひとりの小さなポートレート</h2>
+        <p>少しだけ「この会をつくっている人」が見える案。手づくり感や親近感をほんのり強めます。</p>
+        <div class="contact"><small>CONTACT</small><strong>ご参加・ご相談はお気軽に</strong><span>STUDIO HOLIDAYメンバーにお声がけください。</span></div>
+        <div class="member">
+          <div class="portrait" role="img" aria-label="運営メンバーの顔写真（仮）"></div>
+          <span class="kicker">HOST</span><p class="member-name">山田 はな</p><p class="role">フードクリエイター</p>
+          <span class="bubble">あったかいうちに、どうぞ！</span>
+        </div>
+        <p class="note">写真に手描き風の点線を添えるだけなので、サイト全体のモチーフとも馴染ませやすい案です。</p>
+      </section>
+
+      <section class="option option-c">
+        <h2>C. コンタクトに寄り添う案内役</h2>
+        <p>プロフィールとして独立させず、最後に話しかけてくる感じ。いちばん遊び心があります。</p>
+        <div class="contact-wrap">
+          <div class="contact"><small>CONTACT</small><strong>ご参加・ご相談はお気軽に</strong><span>STUDIO HOLIDAYメンバーにお声がけください。</span></div>
+          <div class="member">
+            <span class="bubble">おいしいごはん、<br />つくってます！</span>
+            <div class="portrait" role="img" aria-label="運営メンバーの顔写真（仮）"></div>
+            <div class="member-meta"><span class="kicker">FOOD CREATOR</span><p class="member-name">山田 はな</p><p class="role">みんなでごはん会のごはん担当</p></div>
+          </div>
+        </div>
+        <p class="note">モバイルでは「最後に一声かける」体験になりやすい案。写真の表情が見えることが特に重要です。</p>
+      </section>
+    </main>
+  </body>
+</html>

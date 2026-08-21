@@ -3,72 +3,72 @@ import { Image } from "astro:assets";
 import clockIcon from "../assets/site/icons/clock-4.png";
 import mapIcon from "../assets/site/icons/map-pin-house.png";
 import { content } from "../data/content";
-const { join, card, carousel } = content;
-// The card is titled with the みんなでごはん会 brand logo (same mark as the footer).
-const logo = content.footer.logo;
+const { card, carousel } = content;
+// The white cushion: the first block of the lower page, handed straight over
+// from the pink message. .access is the pink ground the sheet's rounded top
+// corners cut into. The guidance copy and the character that used to fill a
+// second row here have moved to <MemberIntro /> and <SiteFooter />.
 ---
 
 <section class="access">
-  <div class="card appear">
-    <Image
-      class="c-logo"
-      src={logo.src}
-      alt="みんなでごはん会"
-      widths={[148, 210, 235]}
-      sizes="210px"
-      format="webp"
-      quality={80}
-      loading="lazy"
-      decoding="async"
-    />
-
+  <div class="card">
     <div class="card-main">
       <div class="card-info">
-        <p class="c-line">
-          <Image
-            class="c-icon"
-            src={clockIcon}
-            alt=""
-            width={20}
-            height={20}
-            format="webp"
-            loading="lazy"
-            decoding="async"
-          />
-          <span>{card.time}</span>
-        </p>
-        <p class="c-line">
-          <Image
-            class="c-icon"
-            src={mapIcon}
-            alt=""
-            width={20}
-            height={20}
-            format="webp"
-            loading="lazy"
-            decoding="async"
-          />
-          <span
-            >{card.addressLines[0]}<br />{card.addressLines[1]}<br />{
-              card.addressLines[2]
-            }</span
-          >
-        </p>
-        <p class="c-line">
-          <span class="c-icon" aria-hidden="true"></span>
-          <span>{card.access}</span>
-        </p>
-        <p class="c-line">
-          <span class="c-icon" aria-hidden="true"></span>
-          <span
-            ><a href={card.mapUrl} target="_blank" rel="noopener"
-              >{card.mapLabel}</a
-            ></span
-          >
-        </p>
+        <header class="card-heading">
+          <p class="card-eyebrow">CONTACT</p>
+          <h2>開催情報</h2>
+        </header>
+
+        <dl class="card-details">
+          <div class="card-detail">
+            <dt>
+              <Image
+                class="c-icon"
+                src={clockIcon}
+                alt=""
+                width={20}
+                height={20}
+                format="webp"
+                loading="lazy"
+                decoding="async"
+              />
+              TIME
+            </dt>
+            <dd>{card.time}</dd>
+          </div>
+          <div class="card-detail">
+            <dt>
+              <Image
+                class="c-icon"
+                src={mapIcon}
+                alt=""
+                width={20}
+                height={20}
+                format="webp"
+                loading="lazy"
+                decoding="async"
+              />
+              PLACE
+            </dt>
+            <dd>
+              {card.addressLines[0]}<br />{card.addressLines[1]}<br />{
+                card.addressLines[2]
+              }
+            </dd>
+          </div>
+          <div class="card-detail">
+            <dt>ACCESS</dt>
+            <dd>{card.access}</dd>
+          </div>
+          <div class="card-detail">
+            <dt>MAP</dt>
+            <dd><a href={card.mapUrl} target="_blank" rel="noopener">{card.mapLabel}</a></dd>
+          </div>
+        </dl>
       </div>
 
       <div class="card-carousel">
+        <p class="carousel-heading">ACCESS GUIDE</p>
         <gohan-carousel>
           <div
             class="carousel"
@@ -85,7 +85,7 @@ const logo = content.footer.logo;
                         src={s.src}
                         alt={s.alt}
                         widths={[360, 640, 960, 1200]}
-                        sizes="(max-width: 540px) 100vw, 640px"
+                        sizes="(max-width: 1023px) 79.48vw, 63.57vw"
                         format="webp"
                         quality={80}
                         loading="lazy"
@@ -114,21 +114,5 @@ const logo = content.footer.logo;
         </gohan-carousel>
       </div>
     </div>
-
-    <p class="card-note">
-      {
-        join.map((line, index) => (
-          <Fragment>
-            {index > 0 && <br />}
-            {line.split("|").map((segment, segmentIndex) => (
-              <Fragment>
-                {segmentIndex > 0 && <br class="br-sp" />}
-                {segment}
-              </Fragment>
-            ))}
-          </Fragment>
-        ))
-      }
-    </p>
   </div>
 </section>

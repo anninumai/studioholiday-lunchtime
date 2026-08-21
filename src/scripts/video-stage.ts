@@ -33,6 +33,7 @@ class VideoStage extends HTMLElement {
     let prepared = false;
     let started = false;
     let revealStarted = false;
+    let cueLastTime = 0;
     const visibilityTarget = this.closest<HTMLElement>(".noren-hero") ?? video;
     const isVisible = (): boolean => {
       const rect = visibilityTarget.getBoundingClientRect();
@@ -70,6 +71,8 @@ class VideoStage extends HTMLElement {
       if (!revealStarted) {
         revealStarted = true;
         video.currentTime = 0;
+        // The restart is not a loop wrap; the cue tracker must follow it.
+        cueLastTime = 0;
       }
       resume();
       if (!video.paused) window.removeEventListener("scroll", onScroll);
@@ -112,6 +115,26 @@ class VideoStage extends HTMLElement {
     };
     document.addEventListener("visibilitychange", onVisibilityChange);
     this.#cleanups.push(() => document.removeEventListener("visibilitychange", onVisibilityChange));
+
+    // Post-loop signal: the video loops, so `ended` never fires — detect the
+    // first visible playthrough by the wrap-around (currentTime jumping back
+    // near the end) and announce it for the pink-surge scroll cue.
+    const onTimeUpdate = (): void => {
+      const t = video.currentTime;
+      if (!revealStarted) {
+        cueLastTime = t;
+        return;
+      }
+      const nearEnd = cueLastTime > Math.max(1, video.duration - 1.5);
+      if (t < cueLastTime && nearEnd) {
+        video.removeEventListener("timeupdate", onTimeUpdate);
+        window.dispatchEvent(new CustomEvent("hero-video-looped"));
+        return;
+      }
+      cueLastTime = t;
+    };
+    video.addEventListener("timeupdate", onTimeUpdate);
+    this.#cleanups.push(() => video.removeEventListener("timeupdate", onTimeUpdate));
   }
 
   disconnectedCallback(): void {
@@ -120,7 +143,7 @@ class VideoStage extends HTMLElement {
 
   /** Show the instruction at the page top and hide it while scrolling below. */
   #setupScrollHint(): void {
-    const hint = this.querySelector<HTMLElement>(".scroll-hint");
+    const hint = this.querySelector<HTMLElement>(".scroll-hint--top");
     if (!hint) return;
 
     const update = (): void => {

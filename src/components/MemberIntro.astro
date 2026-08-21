@@ -1,0 +1,70 @@
+---
+import { Image } from "astro:assets";
+import { content } from "../data/content";
+
+// Three layers: .member-cushion is the white ground the sheet's rounded top
+// corners cut into (the white card sits directly above); .member-cushion__sheet
+// carries the lighter green; .member-feature is the inner card that holds the
+// portrait, the titles and the profile.
+// The guidance copy (content.join) sits ABOVE that card, on the bare sheet. In
+// it, "|" is the MOBILE-ONLY break documented in content.ts, so it reads as two
+// lines from 768px up and folds to four below it. The profile (member.bio) is
+// one line per array entry at every size.
+const { member, join } = content;
+---
+
+<section class="member-cushion">
+  <div class="member-cushion__sheet">
+    <p class="member-lead">
+      {
+        join.map((line, lineIndex) => (
+          <Fragment>
+            {lineIndex > 0 && <br />}
+            {line.split("|").map((segment, segmentIndex) => (
+              <Fragment>
+                {segmentIndex > 0 && <br class="br-sp" />}
+                {segment}
+              </Fragment>
+            ))}
+          </Fragment>
+        ))
+      }
+    </p>
+
+    <section class="member-feature appear" aria-labelledby="member-name">
+      <div class="member-feature__portrait-stage">
+        <Image
+          class="member-feature__portrait"
+          src={member.imageSrc}
+          alt={member.imageAlt}
+          widths={[230, 460, 690]}
+          sizes="clamp(170px, 16vw, 230px)"
+          format="webp"
+          quality={80}
+          loading="lazy"
+          decoding="async"
+        />
+      </div>
+
+      <div class="member-feature__details">
+        <div class="member-feature__info">
+          <span class="member-feature__eyebrow">FOOD CREATOR</span>
+          <p class="member-feature__subrole">{member.subrole}</p>
+        </div>
+        <div class="member-feature__name-block">
+          <h2 class="member-feature__name" id="member-name">{member.name}</h2>
+        </div>
+        <p class="member-feature__bio">
+          {
+            member.bio.map((line, index) => (
+              <Fragment>
+                {index > 0 && <br />}
+                {line}
+              </Fragment>
+            ))
+          }
+        </p>
+      </div>
+    </section>
+  </div>
+</section>

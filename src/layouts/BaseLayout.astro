@@ -1,6 +1,8 @@
 ---
 import { getImage } from "astro:assets";
-import pinkCanvas from "../assets/site/msg/pink-canvas-bg-v2.webp";
+// v3-fine: v2 mirror-tiled 2×2 at half scale — same dimensions, grain twice
+// as fine (the huge .message renders it via `cover`, so grain scale matters).
+import pinkCanvas from "../assets/site/msg/pink-canvas-bg-v3-fine.webp";
 import bgPatternSource from "../assets/site/studio/bg_pattern.webp";
 import greenCanvas from "../assets/site/textures/green-canvas-bg-v2.webp";
 import { content } from "../data/content";
@@ -71,6 +73,16 @@ const bgVars = `:root{
     }
     <script is:inline>
       document.documentElement.classList.add("js");
+      // のれん登場「歩み寄る」: only when the page opens at the top. Stamped
+      // here (pre-paint) so the seated TOP view never flashes before the zoom.
+      if (window.scrollY < 100) {
+        document.documentElement.classList.add("noren-entrance");
+        // Scroll restoration can land deep after this runs — cancel it then.
+        requestAnimationFrame(() => {
+          if (window.scrollY >= 100)
+            document.documentElement.classList.remove("noren-entrance");
+        });
+      }
     </script>
     <title>{title}</title>
     <meta name="description" content={description} />

@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>みんなでごはん会｜コンタクト直下 メンバー紹介比較</title>
+    <link rel="stylesheet" href="/fonts/zen-local.css" />
+    <style>
+      :root { --green:#0d6a41; --ink:#4f745e; --pink:#efa0ba; --paper:#fffefa; }
+      * { box-sizing:border-box; }
+      body { margin:0; background:#eff2eb; color:#214b35; font-family:"Zen Maru Gothic", sans-serif; letter-spacing:.08em; }
+      .intro { width:min(940px, calc(100% - 40px)); margin:48px auto 40px; }
+      h1 { margin:0 0 12px; color:var(--green); font-size:clamp(22px,4vw,31px); letter-spacing:.13em; }
+      .intro p { max-width:650px; margin:0; font-size:13px; line-height:1.9; }
+      .sources { margin-top:18px; padding:13px 16px; border-left:3px solid var(--pink); background:#fff9fb; font-size:11px; line-height:1.8; }
+      .sources a { color:inherit; text-underline-offset:3px; }
+      .option { width:min(940px, calc(100% - 40px)); margin:0 auto 62px; }
+      .option-head { display:flex; align-items:baseline; gap:14px; margin:0 0 12px; }
+      h2 { margin:0; font-size:19px; letter-spacing:.12em; }
+      .option-head p { margin:0; font-size:11px; color:#648171; }
+      .site-slice { overflow:hidden; position:relative; background-color:var(--green); background-image:url('/assets/textures/green-canvas-bg-v2.webp'); background-size:cover; }
+      /* Current contact-card proportions, reduced only for comparing three patterns at once. */
+      .contact { width:min(88%, 790px); margin:0 auto; padding:38px 42px 30px; background:var(--paper); border-radius:29px; box-shadow:0 12px 24px #00311b22; }
+      .contact-logo { display:block; width:134px; margin:0 auto 21px; }
+      .contact-grid { display:grid; grid-template-columns:1fr 1fr; gap:25px; font-size:12px; line-height:1.75; }
+      .contact-grid p { margin:0 0 8px; }
+      .route { height:84px; border-radius:8px; background:url('/assets/studio/access-building.webp') center/cover; }
+      .host { color:white; }
+      .eyebrow { display:block; font-size:9px; font-weight:700; letter-spacing:.19em; opacity:.7; }
+      .name { margin:3px 0 0; font-size:16px; font-weight:700; }
+      .role { margin:2px 0 0; font-size:10px; opacity:.78; }
+      .portrait { background:url('/assets/studio/gathering-v2.webp') 78% 37% / cover; border:3px solid var(--paper); box-shadow:0 5px 13px #00331c45; }
+      .bubble { position:relative; display:inline-block; color:var(--green); background:var(--paper); font-size:11px; font-weight:700; line-height:1.45; box-shadow:0 3px 12px #00331c2d; }
+      .bubble::after { content:""; position:absolute; width:10px; height:10px; background:var(--paper); transform:rotate(45deg); }
+      .next-photo { width:min(70%, 540px); height:105px; margin:24px auto 0; background:url('/assets/photo/holiday-base.png') center 42% / cover; border-radius:90px 90px 0 0; opacity:.75; }
+      /* A — minimal: card closes, then a single quiet signature row. */
+      .a .site-slice { padding:44px 0 0; }
+      .a .host { display:flex; align-items:center; width:min(70%, 520px); margin:22px auto 0; gap:11px; }
+      .a .portrait { width:55px; height:55px; flex:0 0 auto; border-radius:50%; }
+      .a .bubble { margin-left:auto; padding:7px 11px; border-radius:13px; white-space:nowrap; }
+      .a .bubble::after { left:-4px; top:50%; margin-top:-5px; }
+      /* B — recommended: a modest portrait that uses the handmade pink accent already on the page. */
+      .b .site-slice { padding:44px 0 0; }
+      .b .host { position:relative; width:min(72%, 540px); min-height:151px; margin:24px auto 0; padding:25px 0 0 148px; }
+      .b .portrait { position:absolute; top:0; left:0; width:130px; height:130px; border-radius:48% 52% 46% 54% / 55% 47% 53% 45%; transform:rotate(-4deg); }
+      .b .host::before { content:""; position:absolute; top:5px; left:4px; width:121px; height:121px; border:1px dashed var(--pink); border-radius:50%; transform:rotate(12deg); }
+      .b .bubble { margin-top:12px; padding:9px 13px; border:1px solid #f4bed0; border-radius:17px; }
+      .b .bubble::after { top:-6px; left:18px; border-top:1px solid #f4bed0; border-left:1px solid #f4bed0; }
+      /* C — friendly: the host appears to lean out from the bottom of the card. */
+      .c .site-slice { padding:44px 0 0; }
+      .c .host-wrap { position:relative; width:min(88%, 790px); margin:0 auto; padding-bottom:59px; }
+      .c .host { position:absolute; z-index:2; right:26px; bottom:0; display:flex; align-items:end; gap:10px; }
+      .c .portrait { width:84px; height:84px; border-radius:50% 50% 45% 45%; }
+      .c .bubble { margin-bottom:31px; padding:8px 11px; border-radius:15px 15px 2px; }
+      .c .bubble::after { right:10px; bottom:-5px; }
+      .c .host .host-copy { position:absolute; right:0; bottom:-38px; min-width:195px; text-align:right; }
+      .c .host .name { font-size:13px; }
+      .c .host .role { font-size:9px; }
+      .caption { margin:10px 0 0; color:#557362; font-size:12px; line-height:1.75; }
+      @media (max-width:600px) {
+        .intro, .option { width:calc(100% - 28px); }
+        .intro { margin-top:30px; }
+        .option-head { display:block; }
+        .option-head p { margin-top:4px; }
+        .contact { width:90%; padding:29px 24px 24px; border-radius:24px; }
+        .contact-grid { grid-template-columns:1fr; gap:8px; }
+        .route { height:70px; }
+        .a .host { width:82%; flex-wrap:wrap; }
+        .a .bubble { margin:0 0 0 66px; }
+        .b .host { width:83%; min-height:168px; padding:106px 0 0; }
+        .b .portrait { width:100px; height:100px; }
+        .b .host::before { width:94px; height:94px; }
+        .c .host { right:15px; }
+        .c .host-wrap { width:90%; }
+        .next-photo { width:88%; }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="intro">
+      <h1>コンタクトの、その下に。</h1>
+      <p>現在の白い開催情報カードの直後に、イベントを引っ張る一人を小さく添える比較です。どの案も、次のごはんの写真より主張しすぎない大きさにしています。</p>
+      <aside class="sources">参考にした方向性：顔が見えることで安心感をつくる<a href="https://wakutas.co.jp/blog/8717" target="_blank" rel="noreferrer">料理教室サイトの紹介例</a>と、人物を世界観に溶かす<a href="https://monopo.co.jp/work/soda-communications-inc-corporate-website/" target="_blank" rel="noreferrer">Soda! Communications / monopo</a>。吹き出しは既存サイトの白い丸角表現と同じ温度に寄せています。</aside>
+    </header>
+
+    <section class="option a">
+      <div class="option-head"><h2>A. 余白に署名する</h2><p>最も控えめ。情報カードの余韻を保つ。</p></div>
+      <div class="site-slice">
+        <div class="contact"><img class="contact-logo" src="/assets/studio/footer_logo.webp" alt="みんなでごはん会" /><div class="contact-grid"><div><p>🕘 毎週木曜日 12:00–13:00頃</p><p>📍 JR新大久保駅直結</p><p>STUDIO HOLIDAYメンバーに<br />お声がけください。</p></div><div class="route"></div></div></div>
+        <div class="host"><div class="portrait" role="img" aria-label="運営メンバーの顔写真（仮）"></div><div><span class="eyebrow">FOOD CREATOR</span><p class="name">山田 はな</p><p class="role">みんなでごはん会のごはん担当</p></div><span class="bubble">おいしいよ！</span></div>
+        <div class="next-photo"></div>
+      </div>
+      <p class="caption">情報を増やさず、「誰がつくっているか」だけをそっと残す案。</p>
+    </section>
+
+    <section class="option b">
+      <div class="option-head"><h2>B. 小さなポートレート <span style="color:#d66f92;font-size:11px">おすすめ</span></h2><p>手づくり感を少しだけ足す。</p></div>
+      <div class="site-slice">
+        <div class="contact"><img class="contact-logo" src="/assets/studio/footer_logo.webp" alt="みんなでごはん会" /><div class="contact-grid"><div><p>🕘 毎週木曜日 12:00–13:00頃</p><p>📍 JR新大久保駅直結</p><p>STUDIO HOLIDAYメンバーに<br />お声がけください。</p></div><div class="route"></div></div></div>
+        <div class="host"><div class="portrait" role="img" aria-label="運営メンバーの顔写真（仮）"></div><span class="eyebrow">THIS EVENT IS MADE BY</span><p class="name">山田 はな</p><p class="role">フードクリエイター</p><span class="bubble">あったかいうちに、どうぞ！</span></div>
+        <div class="next-photo"></div>
+      </div>
+      <p class="caption">写真に淡いピンクの点線だけを添える、親しみと控えめさのバランス案。</p>
+    </section>
+
+    <section class="option c">
+      <div class="option-head"><h2>C. カードに寄り添う案内役</h2><p>最後に話しかけるような遊び心。</p></div>
+      <div class="site-slice">
+        <div class="host-wrap"><div class="contact"><img class="contact-logo" src="/assets/studio/footer_logo.webp" alt="みんなでごはん会" /><div class="contact-grid"><div><p>🕘 毎週木曜日 12:00–13:00頃</p><p>📍 JR新大久保駅直結</p><p>STUDIO HOLIDAYメンバーに<br />お声がけください。</p></div><div class="route"></div></div></div><div class="host"><span class="bubble">ごはん、<br />つくってます！</span><div class="portrait" role="img" aria-label="運営メンバーの顔写真（仮）"></div><div class="host-copy"><span class="eyebrow">FOOD CREATOR</span><p class="name">山田 はな</p><p class="role">みんなでごはん会のごはん担当</p></div></div></div>
+        <div class="next-photo"></div>
+      </div>
+      <p class="caption">最も表情が出る案。カードへの重なりがあるぶん、少しだけ賑やかです。</p>
+    </section>
+  </body>
+</html>
