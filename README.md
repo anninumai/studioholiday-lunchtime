@@ -46,6 +46,27 @@ _legacy/               # 移植元の手組みモック（参照専用・ビル�
 studio-source/          # STUDIO 公開版の抽出物（DESIGN-SPEC.md / 生 CSS・HTML、参照専用）
 ```
 
+## デプロイ
+
+### GitHub Pages（現行）
+
+`main` に push すると `.github/workflows/deploy.yml` が走る。プロジェクトサイトなのでサブパス配信で、ワークフロー内で `BASE_PATH=/studioholiday-lunchtime` と `SITE_URL` を渡している。
+
+### 独自ドメイン / Xserver など Apache 系
+
+**組み替えは不要。** `base` は `process.env.BASE_PATH ?? "/"`（`astro.config.ts`）なので、`BASE_PATH` を渡さずにビルドすればドメイン直下用のルート相対パスで出力される。
+
+```bash
+SITE_URL=https://example.com bun run build   # BASE_PATH は渡さない
+# dist/ の中身をまるごと public_html/ へアップロード（dist ディレクトリ自体ではなく中身）
+```
+
+`SITE_URL` は canonical と OG の絶対URLに使う。省略すると canonical が出力されず、og:image が相対パスになる。
+
+`public/.htaccess` を同梱してある（GitHub Pages は無視するので両対応）。`/_astro/` はファイル名にコンテンツハッシュが入るので1年 immutable、ハッシュの付かない `/assets/` `/fonts/` は1週間、HTML は毎回再検証。mod_deflate も有効化する。
+
+`/archives/main-before-zabuton/` は参照が全て相対パスなので、置き場所が変わってもそのまま開ける。
+
 ## 保存版 / バックアップ
 
 座布団レイアウトへ再構成する前のメインページを、そのまま開ける静的コピーとして保存してある。
