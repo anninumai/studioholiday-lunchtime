@@ -39,9 +39,38 @@ public/
   assets/studio/       # 動画・提案資料など、固定URLで参照する公開アセット
   fonts/               # Zen Maru Gothic ページ専用サブセット（500 / 700）
   favicon.svg
+  archives/            # 変更前デザインの静的保存版（下記「保存版 / バックアップ」）
+scripts/archive-main.sh # 保存版 + 復元用 tar.gz の生成
+backups/               # 復元用ソース tar.gz
 _legacy/               # 移植元の手組みモック（参照専用・ビルド対象外）
 studio-source/          # STUDIO 公開版の抽出物（DESIGN-SPEC.md / 生 CSS・HTML、参照専用）
 ```
+
+## 保存版 / バックアップ
+
+座布団レイアウトへ再構成する前のメインページを、そのまま開ける静的コピーとして保存してある。
+
+| | |
+| --- | --- |
+| 閲覧 URL | `/archives/main-before-zabuton/`（GitHub Pages 上は `/studioholiday-lunchtime/archives/main-before-zabuton/`） |
+| 実体 | `public/archives/main-before-zabuton/` |
+| 復元用ソース | `backups/main-before-zabuton-source.tar.gz` |
+| 生成コマンド | `bash scripts/archive-main.sh` |
+
+**保存版に入っているもの** — `index.html`（CSS は `inlineStylesheets:"always"` により全量インライン）、`_astro/` の JS チャンクと最適化済み画像、`assets/`（のれん SVG・テクスチャ・イントロ動画 mp4）、`fonts/`、`favicon.svg`。単体で完結しており、外部リクエストは発生しない。
+
+参照はすべて `./` 始まりの相対パスに正規化してあるので、ローカル (`base=/`) でも Pages (`base=/studioholiday-lunchtime/`) でも同じように開ける。`scripts/archive-main.sh` はセンチネル base (`/__ARCHIVE_BASE__/`) でビルドしてから `index.html` を相対化し、`<meta name="robots" content="noindex,nofollow">` を挿入する（保存版が検索結果で本番と競合しないように）。比較案の `/proposal-layout/` と `public/proposals/` は保存版の対象外。
+
+**現行ファイルは削除・移動していない。** 保存版はあくまで複製。
+
+**復元手順**
+
+```bash
+mkdir /tmp/restore && tar xzf backups/main-before-zabuton-source.tar.gz -C /tmp/restore
+cd /tmp/restore && bun install && bun run dev
+```
+
+`scripts/archive-main.sh` は「今の作業ツリー」を写す。撮り直す場合は対象のコミットをチェックアウトしてから実行すること。
 
 ## 主な演出
 

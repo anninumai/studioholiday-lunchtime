@@ -1,0 +1,15 @@
+@font-face {
+  font-family: "Zen Maru Gothic";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(./zen-maru-500-subset.woff2) format("woff2");
+}
+
+@font-face {
+  font-family: "Zen Maru Gothic";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(./zen-maru-700-subset.woff2) format("woff2");
+}
