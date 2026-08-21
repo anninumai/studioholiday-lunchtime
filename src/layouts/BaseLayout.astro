@@ -9,7 +9,15 @@ import { content } from "../data/content";
 import { withBase } from "../lib/withBase";
 import "../styles/global.css";
 
-const { title, description } = content.meta;
+// Internal comparison pages pass their own title and opt out of indexing, so
+// they neither duplicate the homepage's <title> nor get crawled as near-copies.
+interface Props {
+  title?: string;
+  noindex?: boolean;
+}
+const { title: titleOverride, noindex = false } = Astro.props;
+const { title: defaultTitle, description } = content.meta;
+const title = titleOverride ?? defaultTitle;
 const [
   hero,
   norenLogo,
@@ -86,8 +94,8 @@ const bgVars = `:root{
     </script>
     <title>{title}</title>
     <meta name="description" content={description} />
-    <meta name="robots" content="index, follow" />
-    {canonical && <link rel="canonical" href={canonical} />}
+    <meta name="robots" content={noindex ? "noindex, nofollow" : "index, follow"} />
+    {!noindex && canonical && <link rel="canonical" href={canonical} />}
 
     {/* Open Graph */}
     <meta property="og:type" content="website" />
