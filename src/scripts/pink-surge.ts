@@ -14,6 +14,7 @@ const cue = document.querySelector<HTMLElement>(".pink-cue");
 const hero = document.querySelector<HTMLElement>(".noren-hero");
 const pin = hero?.querySelector<HTMLElement>(".noren-pin");
 const message = document.querySelector<HTMLElement>(".message");
+const photo = message?.querySelector<HTMLElement>(".msg-photo");
 
 // The mound only makes sense on the enhanced 300vh pinned hero. Desktop gets
 // that under @supports scroll-timeline; mobile gets the pin from a plain
@@ -22,9 +23,16 @@ const enhanced =
   window.matchMedia("(prefers-reduced-motion: no-preference)").matches &&
   (CSS.supports("animation-timeline: scroll()") || window.matchMedia("(max-width: 767px)").matches);
 
-if (cue && hero && pin && message && enhanced) {
+if (cue && hero && pin && message && photo && enhanced) {
   const GROW_START = 1.2; // ×pinH — just past the auto-glide's 1.1 landing
-  const GROW_END = 0.97; // ×releaseY — fully pink slightly before release
+  const REVEAL_EPS = 8; // px of slack so t reaches exactly 1 at the landing
+  /* The takeover used to finish at 0.97 × releaseY — a position on the HERO's
+   * timeline, unrelated to where the poster sits. Since .message is pulled up
+   * over the hero by 140vh, that landed the scroll 96–188px BELOW the top of the
+   * greeting photo: while the photo's top was on screen the mound was still
+   * clipping it, and by the time the clip lifted the top had already scrolled
+   * past. There was no scroll position where the top of the poster could be
+   * seen. It now finishes where the poster's top comes into view instead. */
   const CUE_ZONE = 0.9; // ×pinH — cue only over the open curtain
   const TARGET = 1.25; // ×pinH — peak/skirt overshoot at t = 1
   const SKIRT_EXP = 1.7; // skirts lag the peak (the surface-tension look)
@@ -36,6 +44,7 @@ if (cue && hero && pin && message && enhanced) {
 
   let pinH = 0;
   let releaseY = 0;
+  let landing = 0; // scroll position the takeover completes at, and glides to
   let cuePeak = 0;
   let cueSkirt = 0;
   let loopDone = false;
@@ -47,6 +56,16 @@ if (cue && hero && pin && message && enhanced) {
   const measure = (): void => {
     pinH = pin.offsetHeight;
     releaseY = hero.offsetHeight - pinH;
+    // Land where the top of the poster is just inside the viewport. The gap
+    // above it is a fraction of .message's own padding-top, so the pink always
+    // reaches past the viewport top (no sliver of hero above it) whether that
+    // padding is 240px or 48px.
+    const messageTop = message.getBoundingClientRect().top + window.scrollY;
+    const photoTop = photo.getBoundingClientRect().top + window.scrollY;
+    const posterOffset = Math.max(0, photoTop - messageTop);
+    landing = Math.min(releaseY, photoTop - Math.min(48, posterOffset * 0.4));
+    // Never collapse onto the growth start, which would divide by ~zero below.
+    landing = Math.max(Math.round(landing), Math.round(GROW_START * pinH) + 1);
     cuePeak = Math.min(Math.max(0.2 * pinH, 120), 190); // mirrors the CSS clamp
     cueSkirt = cuePeak * 0.32;
     cue.style.setProperty("--surge-cue-peak", `${cuePeak}px`);
@@ -74,7 +93,10 @@ if (cue && hero && pin && message && enhanced) {
     frame = 0;
     const y = window.scrollY;
     const startY = GROW_START * pinH;
-    const t = Math.min(1, Math.max(0, (y - startY) / (GROW_END * releaseY - startY)));
+    // Complete a few px BEFORE the landing: a wheel or trackpad stops on an
+    // arbitrary integer, and finishing exactly at `landing` left t at 0.999 —
+    // enough to keep .is-revealed off, so the poster sat there invisible.
+    const t = Math.min(1, Math.max(0, (y - startY) / Math.max(1, landing - REVEAL_EPS - startY)));
 
     // Fully pink → the greeting content fades in right here; receding hides it.
     message.classList.toggle("is-revealed", t >= 1);
@@ -172,14 +194,14 @@ if (cue && hero && pin && message && enhanced) {
       const y = instance.scroll;
       const down = y > lastY;
       lastY = y;
-      if (!down || y >= releaseY) {
+      if (!down || y >= landing) {
         gliding = false;
         return;
       }
       if (y < GROW_START * pinH + GLIDE_TRIGGER * pinH || gliding) return;
-      if (instance.targetScroll >= releaseY) return; // already headed past on their own
+      if (instance.targetScroll >= landing) return; // already headed past on their own
       gliding = true;
-      instance.scrollTo(releaseY, { duration: GLIDE_S, easing: easeOutCubic });
+      instance.scrollTo(landing, { duration: GLIDE_S, easing: easeOutCubic });
     });
   }
 }
