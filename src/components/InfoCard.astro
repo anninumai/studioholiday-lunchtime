@@ -90,6 +90,7 @@ const { card, carousel } = content;
                         quality={80}
                         loading="lazy"
                         decoding="async"
+                        draggable={false}
                       />
                       <p class="cap">{s.caption}</p>
                     </div>
@@ -97,7 +98,8 @@ const { card, carousel } = content;
                 }
               </div>
             </div>
-            <div class="nav" aria-label="スライドを選択">
+            <p class="carousel-status sr-only" role="status" aria-live="polite"></p>
+            <div class="nav" role="group" aria-label="スライドを選択">
               {
                 carousel.map((_, index) => (
                   <button
